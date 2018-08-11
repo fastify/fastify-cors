@@ -1,0 +1,2 @@
+# fastify-cors
+Fastify CORS
