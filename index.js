@@ -12,7 +12,8 @@ function fastifyCors (fastify, opts, next) {
     methods,
     maxAge,
     preflightContinue,
-    optionsSuccessStatus
+    optionsSuccessStatus,
+    preflight
   } = Object.assign({
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -21,16 +22,18 @@ function fastifyCors (fastify, opts, next) {
     credentials: false,
     exposedHeaders: null,
     allowedHeaders: null,
-    maxAge: null
+    maxAge: null,
+    preflight: true
   }, opts)
 
   const isOriginFalsy = !origin
   const isOriginString = typeof origin === 'string'
   const isOriginFunction = typeof origin === 'function'
 
-  fastify.options('*', (req, reply) => reply.send())
+  if (preflight === true) {
+    fastify.options('*', (req, reply) => reply.send())
+  }
   fastify.addHook('preHandler', preHandler)
-
   function preHandler (req, reply, next) {
     if (isOriginFalsy) return next()
 
@@ -49,7 +52,7 @@ function fastifyCors (fastify, opts, next) {
         )
       }
 
-      if (req.raw.method === 'OPTIONS') {
+      if (req.raw.method === 'OPTIONS' && preflight === true) {
         // preflight
         reply.header(
           'Access-Control-Allow-Methods',

@@ -490,3 +490,45 @@ test('Allow only request from a specifc origin', t => {
     }, res.headers)
   })
 })
+
+test('Disable preflight', t => {
+  t.plan(7)
+
+  const fastify = Fastify()
+  fastify.register(cors, { preflight: false })
+
+  fastify.get('/', (req, reply) => {
+    reply.send('ok')
+  })
+
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/hello'
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.strictEqual(res.statusCode, 404)
+    t.deepEqual({
+      'access-control-allow-origin': '*',
+      'content-length': '60',
+      'content-type': 'application/json',
+      connection: 'keep-alive'
+    }, res.headers)
+  })
+
+  fastify.inject({
+    method: 'GET',
+    url: '/'
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.strictEqual(res.statusCode, 200)
+    t.strictEqual(res.payload, 'ok')
+    t.deepEqual({
+      'access-control-allow-origin': '*',
+      'content-length': '2',
+      'content-type': 'text/plain; charset=utf-8',
+      connection: 'keep-alive'
+    }, res.headers)
+  })
+})

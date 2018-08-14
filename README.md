@@ -37,6 +37,7 @@ You can use it as is without passing any option, or you can configure it as expl
 * `maxAge`: Configures the **Access-Control-Max-Age** CORS header. Set to an integer to pass the header, otherwise it is omitted.
 * `preflightContinue`: Pass the CORS preflight response to the route handler (default: `false`).
 * `optionsSuccessStatus`: Provides a status code to use for successful `OPTIONS` requests, since some legacy browsers (IE11, various SmartTVs) choke on `204`.
+* `preflight`: if needed you can entirely disable preflight by passing `false` here (default: `true`).
 
 ## Acknowledgements
 
