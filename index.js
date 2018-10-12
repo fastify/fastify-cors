@@ -95,7 +95,7 @@ function fastifyCors (fastify, opts, next) {
   function configureOrigin (req, reply, callback) {
     var reqOrigin = req.headers.origin
     if (isOriginFunction) {
-      var result = origin(reqOrigin, _onOrigin)
+      var result = origin(reqOrigin, fastify, _onOrigin)
       if (result && typeof result.then === 'function') {
         result.then(res => _onOrigin(null, res), callback)
       }
