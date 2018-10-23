@@ -234,11 +234,12 @@ test('Should add cors headers (custom values)', t => {
 })
 
 test('Dynamic origin resolution (valid origin)', t => {
-  t.plan(5)
+  t.plan(6)
 
   const fastify = Fastify()
-  const origin = (header, cb) => {
+  const origin = function (header, cb) {
     t.strictEqual(header, 'example.com')
+    t.deepEqual(this, fastify)
     cb(null, true)
   }
   fastify.register(cors, { origin })
