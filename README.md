@@ -4,6 +4,8 @@
 
 `fastify-cors` enables the use of [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) in a Fastify application.
 
+Supports Fastify versions `^1.x`
+
 ## Install
 ```
 npm i fastify-cors
