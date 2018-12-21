@@ -33,8 +33,8 @@ function fastifyCors (fastify, opts, next) {
   if (preflight === true) {
     fastify.options('*', (req, reply) => reply.send())
   }
-  fastify.addHook('preHandler', preHandler)
-  function preHandler (req, reply, next) {
+  fastify.addHook('preValidation', preValidation)
+  function preValidation (req, reply, next) {
     if (isOriginFalsy) return next()
 
     configureOrigin(req, reply, (err, origin) => {
@@ -166,6 +166,6 @@ function vary (reply, field) {
 }
 
 module.exports = fp(fastifyCors, {
-  fastify: '^1.0.0',
+  fastify: '>=2.x',
   name: 'fastify-cors'
 })
