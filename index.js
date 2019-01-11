@@ -33,8 +33,8 @@ function fastifyCors (fastify, opts, next) {
   if (preflight === true) {
     fastify.options('*', (req, reply) => reply.send())
   }
-  fastify.addHook('preValidation', preValidation)
-  function preValidation (req, reply, next) {
+  fastify.addHook('onRequest', onRequest)
+  function onRequest (req, reply, next) {
     if (isOriginFalsy) return next()
 
     configureOrigin(req, reply, (err, origin) => {
