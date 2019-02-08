@@ -6,6 +6,13 @@ node_js:
   - "10"
   - "11"
 
+os:
+  - linux
+  - windows
+
+script:
+  - npm run test
+
 notifications:
   email:
     on_success: never

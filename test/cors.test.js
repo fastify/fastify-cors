@@ -2,7 +2,7 @@
 
 const { test } = require('tap')
 const Fastify = require('fastify')
-const cors = require('./index')
+const cors = require('../index')
 
 test('Should shortcircuits preflight requests', t => {
   t.plan(4)
