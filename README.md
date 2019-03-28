@@ -17,7 +17,9 @@ Require `fastify-cors` and register it as any other plugin, it will add a `preHa
 ```js
 const fastify = require('fastify')()
 
-fastify.register(require('fastify-cors'), { options })
+fastify.register(require('fastify-cors'), { 
+  // put your options here
+})
 
 fastify.get('/', (req, reply) => {
   reply.send({ hello: 'world' })
