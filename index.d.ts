@@ -6,11 +6,13 @@ import fastify = require('fastify');
 
 type originCallback = (err: Error, allow: boolean) => void;
 
+type originFunction = (origin: string, callback: originCallback) => void;
+
 declare const fastifyCors: fastify.Plugin<Server, IncomingMessage, ServerResponse, {
     /**
      * Configures the Access-Control-Allow-Origin CORS header.
      */
-    origin?: string | boolean | RegExp | string[] | RegExp[] | originCallback;
+    origin?: string | boolean | RegExp | string[] | RegExp[] | originFunction;
     /**
      * Configures the Access-Control-Allow-Credentials CORS header.
      * Set to true to pass the header, otherwise it is omitted.
