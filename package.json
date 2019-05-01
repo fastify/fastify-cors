@@ -1,6 +1,6 @@
 {
   "name": "fastify-cors",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "Fastify CORS",
   "main": "index.js",
   "types": "index.d.ts",
