@@ -76,8 +76,12 @@ app.register(fastifyCors, {
 })
 
 app.register(fastifyCors, {
-  origin: (err: Error, allow: boolean) => {
-    throw err
+  origin: (origin: string, cb: Function) => {
+    if (/localhost/.test(origin)) {
+      cb(null, true)
+      return
+    }
+    cb(new Error(), false)
   },
   allowedHeaders: ['authorization', 'content-type'],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
