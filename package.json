@@ -7,7 +7,8 @@
   "scripts": {
     "lint": "npm run lint:standard && npm run lint:typescript",
     "lint:standard": "standard",
-    "lint:typescript": "standard --parser typescript-eslint-parser --plugin typescript test/types/*.ts",
+    "lint:fix": "standard --fix",
+    "lint:typescript": "standard --parser @typescript-eslint/parser --plugin @typescript-eslint/eslint-plugin test/types/*.ts",
     "unit": "tap test/*.test.js",
     "typescript": "tsc --project ./test/types/tsconfig.json",
     "test": "npm run lint && npm run unit && npm run typescript",
@@ -31,14 +32,14 @@
   },
   "homepage": "https://github.com/fastify/fastify-cors#readme",
   "devDependencies": {
-    "@types/node": "^11.9.0",
+    "@types/node": "^12.6.3",
+    "@typescript-eslint/eslint-plugin": "^1.12.0",
+    "@typescript-eslint/parser": "^1.12.0",
     "cors": "^2.8.5",
-    "eslint-plugin-typescript": "^0.14.0",
     "fastify": "^2.0.0",
-    "standard": "^12.0.1",
+    "standard": "^13.0.2",
     "tap": "^12.6.5",
-    "typescript": "^3.3.1",
-    "typescript-eslint-parser": "^22.0.0"
+    "typescript": "^3.5.3"
   },
   "dependencies": {
     "fastify-plugin": "^1.5.0",
