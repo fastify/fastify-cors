@@ -22,13 +22,11 @@ test('Should shortcircuits preflight requests', t => {
     delete res.headers.date
     t.strictEqual(res.statusCode, 204)
     t.strictEqual(res.payload, '')
-    t.deepEqual({
+    t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers',
-      'content-length': '0',
-      connection: 'keep-alive'
-    }, res.headers)
+      vary: 'Access-Control-Request-Headers'
+    })
   })
 })
 
@@ -50,13 +48,11 @@ test('Should shortcircuits preflight requests with custom status code', t => {
     delete res.headers.date
     t.strictEqual(res.statusCode, 200)
     t.strictEqual(res.payload, '')
-    t.deepEqual({
+    t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers',
-      'content-length': '0',
-      connection: 'keep-alive'
-    }, res.headers)
+      vary: 'Access-Control-Request-Headers'
+    })
   })
 })
 
@@ -78,14 +74,11 @@ test('Should not shortcircuits preflight requests with preflightContinue', t => 
     delete res.headers.date
     t.strictEqual(res.statusCode, 200)
     t.strictEqual(res.payload, 'ok')
-    t.deepEqual({
+    t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers',
-      'content-length': '2',
-      'content-type': 'text/plain; charset=utf-8',
-      connection: 'keep-alive'
-    }, res.headers)
+      vary: 'Access-Control-Request-Headers'
+    })
   })
 })
 
@@ -103,13 +96,11 @@ test('Should create a options wildcard', t => {
     delete res.headers.date
     t.strictEqual(res.statusCode, 204)
     t.strictEqual(res.payload, '')
-    t.deepEqual({
+    t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers',
-      'content-length': '0',
-      connection: 'keep-alive'
-    }, res.headers)
+      vary: 'Access-Control-Request-Headers'
+    })
   })
 })
 
@@ -138,13 +129,11 @@ test('Should create a options wildcard (with prefix)', t => {
     delete res.headers.date
     t.strictEqual(res.statusCode, 204)
     t.strictEqual(res.payload, '')
-    t.deepEqual({
+    t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers',
-      'content-length': '0',
-      connection: 'keep-alive'
-    }, res.headers)
+      vary: 'Access-Control-Request-Headers'
+    })
   })
 })
 
@@ -166,12 +155,9 @@ test('Should add cors headers', t => {
     delete res.headers.date
     t.strictEqual(res.statusCode, 200)
     t.strictEqual(res.payload, 'ok')
-    t.deepEqual({
-      'access-control-allow-origin': '*',
-      'content-length': '2',
-      'content-type': 'text/plain; charset=utf-8',
-      connection: 'keep-alive'
-    }, res.headers)
+    t.match(res.headers, {
+      'access-control-allow-origin': '*'
+    })
   })
 })
 
@@ -200,17 +186,15 @@ test('Should add cors headers (custom values)', t => {
     delete res.headers.date
     t.strictEqual(res.statusCode, 204)
     t.strictEqual(res.payload, '')
-    t.deepEqual({
+    t.match(res.headers, {
       'access-control-allow-origin': 'example.com',
       vary: 'Origin',
       'access-control-allow-credentials': 'true',
       'access-control-expose-headers': 'foo, bar',
       'access-control-allow-methods': 'GET',
       'access-control-allow-headers': 'baz, woo',
-      'access-control-max-age': '123',
-      'content-length': '0',
-      connection: 'keep-alive'
-    }, res.headers)
+      'access-control-max-age': '123'
+    })
   })
 
   fastify.inject({
@@ -221,15 +205,12 @@ test('Should add cors headers (custom values)', t => {
     delete res.headers.date
     t.strictEqual(res.statusCode, 200)
     t.strictEqual(res.payload, 'ok')
-    t.deepEqual({
+    t.match(res.headers, {
       'access-control-allow-origin': 'example.com',
       vary: 'Origin',
       'access-control-allow-credentials': 'true',
-      'access-control-expose-headers': 'foo, bar',
-      'content-length': '2',
-      'content-type': 'text/plain; charset=utf-8',
-      connection: 'keep-alive'
-    }, res.headers)
+      'access-control-expose-headers': 'foo, bar'
+    })
   })
 })
 
@@ -257,13 +238,10 @@ test('Dynamic origin resolution (valid origin)', t => {
     delete res.headers.date
     t.strictEqual(res.statusCode, 200)
     t.strictEqual(res.payload, 'ok')
-    t.deepEqual({
+    t.match(res.headers, {
       'access-control-allow-origin': 'example.com',
-      vary: 'Origin',
-      'content-length': '2',
-      'content-type': 'text/plain; charset=utf-8',
-      connection: 'keep-alive'
-    }, res.headers)
+      vary: 'Origin'
+    })
   })
 })
 
@@ -290,11 +268,11 @@ test('Dynamic origin resolution (not valid origin)', t => {
     delete res.headers.date
     t.strictEqual(res.statusCode, 200)
     t.strictEqual(res.payload, 'ok')
-    t.deepEqual({
+    t.deepEqual(res.headers, {
       'content-length': '2',
       'content-type': 'text/plain; charset=utf-8',
       connection: 'keep-alive'
-    }, res.headers)
+    })
   })
 })
 
@@ -347,13 +325,10 @@ test('Dynamic origin resolution (valid origin - promises)', t => {
     delete res.headers.date
     t.strictEqual(res.statusCode, 200)
     t.strictEqual(res.payload, 'ok')
-    t.deepEqual({
+    t.match(res.headers, {
       'access-control-allow-origin': 'example.com',
-      vary: 'Origin',
-      'content-length': '2',
-      'content-type': 'text/plain; charset=utf-8',
-      connection: 'keep-alive'
-    }, res.headers)
+      vary: 'Origin'
+    })
   })
 })
 
@@ -382,11 +357,11 @@ test('Dynamic origin resolution (not valid origin - promises)', t => {
     delete res.headers.date
     t.strictEqual(res.statusCode, 200)
     t.strictEqual(res.payload, 'ok')
-    t.deepEqual({
+    t.deepEqual(res.headers, {
       'content-length': '2',
       'content-type': 'text/plain; charset=utf-8',
       connection: 'keep-alive'
-    }, res.headers)
+    })
   })
 })
 
@@ -441,10 +416,10 @@ test('Should not add cors headers when origin is false', t => {
     delete res.headers.date
     t.strictEqual(res.statusCode, 200)
     t.strictEqual(res.payload, '')
-    t.deepEqual({
+    t.deepEqual(res.headers, {
       'content-length': '0',
       connection: 'keep-alive'
-    }, res.headers)
+    })
   })
 
   fastify.inject({
@@ -455,11 +430,11 @@ test('Should not add cors headers when origin is false', t => {
     delete res.headers.date
     t.strictEqual(res.statusCode, 200)
     t.strictEqual(res.payload, 'ok')
-    t.deepEqual({
+    t.deepEqual(res.headers, {
       'content-length': '2',
       'content-type': 'text/plain; charset=utf-8',
       connection: 'keep-alive'
-    }, res.headers)
+    })
   })
 })
 
@@ -482,13 +457,10 @@ test('Allow only request from a specifc origin', t => {
     delete res.headers.date
     t.strictEqual(res.statusCode, 200)
     t.strictEqual(res.payload, 'ok')
-    t.deepEqual({
+    t.match(res.headers, {
       'access-control-allow-origin': 'other.io',
-      vary: 'Origin',
-      'content-length': '2',
-      'content-type': 'text/plain; charset=utf-8',
-      connection: 'keep-alive'
-    }, res.headers)
+      vary: 'Origin'
+    })
   })
 })
 
@@ -509,12 +481,9 @@ test('Disable preflight', t => {
     t.error(err)
     delete res.headers.date
     t.strictEqual(res.statusCode, 404)
-    t.deepEqual({
-      'access-control-allow-origin': '*',
-      'content-length': '60',
-      'content-type': 'application/json; charset=utf-8',
-      connection: 'keep-alive'
-    }, res.headers)
+    t.match(res.headers, {
+      'access-control-allow-origin': '*'
+    })
   })
 
   fastify.inject({
@@ -525,11 +494,8 @@ test('Disable preflight', t => {
     delete res.headers.date
     t.strictEqual(res.statusCode, 200)
     t.strictEqual(res.payload, 'ok')
-    t.deepEqual({
-      'access-control-allow-origin': '*',
-      'content-length': '2',
-      'content-type': 'text/plain; charset=utf-8',
-      connection: 'keep-alive'
-    }, res.headers)
+    t.match(res.headers, {
+      'access-control-allow-origin': '*'
+    })
   })
 })
