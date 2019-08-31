@@ -511,7 +511,7 @@ test('Disable preflight', t => {
     t.strictEqual(res.statusCode, 404)
     t.deepEqual({
       'access-control-allow-origin': '*',
-      'content-length': '60',
+      'content-length': '81',
       'content-type': 'application/json; charset=utf-8',
       connection: 'keep-alive'
     }, res.headers)
