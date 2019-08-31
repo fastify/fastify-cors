@@ -215,8 +215,7 @@ test('Should add cors headers (custom values)', t => {
       vary: 'Origin',
       'access-control-allow-credentials': 'true',
       'access-control-expose-headers': 'foo, bar',
-      'access-control-max-age': '123',
-      'content-length': '0'
+      'content-length': '2'
     })
   })
 })
