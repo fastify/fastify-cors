@@ -197,7 +197,8 @@ test('Should add cors headers (custom values)', t => {
       'access-control-expose-headers': 'foo, bar',
       'access-control-allow-methods': 'GET',
       'access-control-allow-headers': 'baz, woo',
-      'access-control-max-age': '123'
+      'access-control-max-age': '123',
+      'content-length': '0'
     })
   })
 
