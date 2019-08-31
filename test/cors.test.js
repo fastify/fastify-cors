@@ -25,7 +25,8 @@ test('Should shortcircuits preflight requests', t => {
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers'
+      vary: 'Access-Control-Request-Headers',
+      'content-length': '0'
     })
   })
 })
@@ -51,7 +52,8 @@ test('Should shortcircuits preflight requests with custom status code', t => {
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers'
+      vary: 'Access-Control-Request-Headers',
+      'content-length': '0'
     })
   })
 })
@@ -99,7 +101,8 @@ test('Should create a options wildcard', t => {
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers'
+      vary: 'Access-Control-Request-Headers',
+      'content-length': '0'
     })
   })
 })
@@ -132,7 +135,8 @@ test('Should create a options wildcard (with prefix)', t => {
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers'
+      vary: 'Access-Control-Request-Headers',
+      'content-length': '0'
     })
   })
 })
@@ -210,6 +214,8 @@ test('Should add cors headers (custom values)', t => {
       vary: 'Origin',
       'access-control-allow-credentials': 'true',
       'access-control-expose-headers': 'foo, bar'
+      'access-control-max-age': '123',
+      'content-length': '0'
     })
   })
 })
