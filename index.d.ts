@@ -56,6 +56,10 @@ declare const fastifyCors: fastify.Plugin<Server, IncomingMessage, ServerRespons
      * Pass the CORS preflight response to the route handler (default: false).
      */
     preflight?: boolean;
+    /**
+     * Hide options route from the documentation built using fastify-swagger (default: true).
+     */
+    hideOptionsRoute?: boolean;
 }>
 
 export = fastifyCors;

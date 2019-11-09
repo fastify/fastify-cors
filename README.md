@@ -43,6 +43,7 @@ You can use it as is without passing any option, or you can configure it as expl
 * `preflightContinue`: Pass the CORS preflight response to the route handler (default: `false`).
 * `optionsSuccessStatus`: Provides a status code to use for successful `OPTIONS` requests, since some legacy browsers (IE11, various SmartTVs) choke on `204`.
 * `preflight`: if needed you can entirely disable preflight by passing `false` here (default: `true`).
+* `hideOptionsRoute`: hide options route from the documentation built using [fastify-swagger](https://github.com/fastify/fastify-swagger) (default: `true`).
 
 ## Acknowledgements
 

@@ -505,3 +505,20 @@ test('Disable preflight', t => {
     })
   })
 })
+
+test('show options route', t => {
+  t.plan(2)
+
+  const fastify = Fastify()
+  fastify.register(cors, { hideOptionsRoute: false })
+
+  fastify.addHook('onRoute', (route) => {
+    if (route.method === 'OPTIONS' && route.url === '*') {
+      t.strictEqual(route.schema.hide, false)
+    }
+  })
+
+  fastify.ready(err => {
+    t.error(err)
+  })
+})
