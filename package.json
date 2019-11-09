@@ -34,15 +34,15 @@
   "devDependencies": {
     "@types/node": "^12.6.3",
     "@typescript-eslint/eslint-plugin": "^2.0.0",
-    "@typescript-eslint/parser": "^1.12.0",
+    "@typescript-eslint/parser": "^2.0.0",
     "cors": "^2.8.5",
-    "fastify": "^2.0.0",
-    "standard": "^13.0.2",
+    "fastify": "^2.8.0",
+    "standard": "^14.0.2",
     "tap": "^12.6.5",
     "typescript": "^3.5.3"
   },
   "dependencies": {
-    "fastify-plugin": "^1.5.0",
+    "fastify-plugin": "^1.6.0",
     "vary": "^1.1.2"
   },
   "greenkeeper": {

@@ -13,7 +13,8 @@ function fastifyCors (fastify, opts, next) {
     maxAge,
     preflightContinue,
     optionsSuccessStatus,
-    preflight
+    preflight,
+    hideOptionsRoute
   } = Object.assign({
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -23,7 +24,8 @@ function fastifyCors (fastify, opts, next) {
     exposedHeaders: null,
     allowedHeaders: null,
     maxAge: null,
-    preflight: true
+    preflight: true,
+    hideOptionsRoute: true
   }, opts)
 
   const isOriginFalsy = !origin
@@ -31,7 +33,7 @@ function fastifyCors (fastify, opts, next) {
   const isOriginFunction = typeof origin === 'function'
 
   if (preflight === true) {
-    fastify.options('*', (req, reply) => reply.send())
+    fastify.options('*', { schema: { hide: hideOptionsRoute } }, (req, reply) => reply.send())
   }
   fastify.addHook('onRequest', onRequest)
   function onRequest (req, reply, next) {
