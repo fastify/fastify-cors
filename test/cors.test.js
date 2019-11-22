@@ -25,7 +25,7 @@ test('Should shortcircuits preflight requests', t => {
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers',
+      vary: 'Origin, Access-Control-Request-Headers',
       'content-length': '0'
     })
   })
@@ -52,7 +52,7 @@ test('Should shortcircuits preflight requests with custom status code', t => {
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers',
+      vary: 'Origin, Access-Control-Request-Headers',
       'content-length': '0'
     })
   })
@@ -79,7 +79,7 @@ test('Should not shortcircuits preflight requests with preflightContinue', t => 
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers'
+      vary: 'Origin, Access-Control-Request-Headers'
     })
   })
 })
@@ -101,7 +101,7 @@ test('Should create a options wildcard', t => {
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers',
+      vary: 'Origin, Access-Control-Request-Headers',
       'content-length': '0'
     })
   })
@@ -135,7 +135,7 @@ test('Should create a options wildcard (with prefix)', t => {
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers',
+      vary: 'Origin, Access-Control-Request-Headers',
       'content-length': '0'
     })
   })
@@ -277,7 +277,8 @@ test('Dynamic origin resolution (not valid origin)', t => {
     t.deepEqual(res.headers, {
       'content-length': '2',
       'content-type': 'text/plain; charset=utf-8',
-      connection: 'keep-alive'
+      connection: 'keep-alive',
+      vary: 'Origin'
     })
   })
 })
@@ -366,7 +367,8 @@ test('Dynamic origin resolution (not valid origin - promises)', t => {
     t.deepEqual(res.headers, {
       'content-length': '2',
       'content-type': 'text/plain; charset=utf-8',
-      connection: 'keep-alive'
+      connection: 'keep-alive',
+      vary: 'Origin'
     })
   })
 })
@@ -397,7 +399,7 @@ test('Dynamic origin resolution (errored - promises)', t => {
   })
 })
 
-test('Should not add cors headers when origin is false', t => {
+test('Should not add cors headers other than `vary` when origin is false', t => {
   t.plan(8)
 
   const fastify = Fastify()
@@ -424,7 +426,8 @@ test('Should not add cors headers when origin is false', t => {
     t.strictEqual(res.payload, '')
     t.deepEqual(res.headers, {
       'content-length': '0',
-      connection: 'keep-alive'
+      connection: 'keep-alive',
+      vary: 'Origin'
     })
   })
 
@@ -439,7 +442,8 @@ test('Should not add cors headers when origin is false', t => {
     t.deepEqual(res.headers, {
       'content-length': '2',
       'content-type': 'text/plain; charset=utf-8',
-      connection: 'keep-alive'
+      connection: 'keep-alive',
+      vary: 'Origin'
     })
   })
 })
@@ -520,5 +524,42 @@ test('show options route', t => {
 
   fastify.ready(err => {
     t.error(err)
+  })
+})
+
+test('Should always add vary header to `Origin` by default', t => {
+  t.plan(8)
+
+  const fastify = Fastify()
+  fastify.register(cors)
+
+  fastify.get('/', (req, reply) => {
+    reply.send('ok')
+  })
+
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/'
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.strictEqual(res.statusCode, 204)
+    t.strictEqual(res.payload, '')
+    t.match(res.headers, {
+      vary: 'Origin'
+    })
+  })
+
+  fastify.inject({
+    method: 'GET',
+    url: '/'
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.strictEqual(res.statusCode, 200)
+    t.strictEqual(res.payload, 'ok')
+    t.match(res.headers, {
+      vary: 'Origin'
+    })
   })
 })

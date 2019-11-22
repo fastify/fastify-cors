@@ -37,6 +37,10 @@ function fastifyCors (fastify, opts, next) {
   }
   fastify.addHook('onRequest', onRequest)
   function onRequest (req, reply, next) {
+    // Always set Vary header
+    // https://github.com/rs/cors/issues/10
+    vary(reply, 'Origin')
+
     if (isOriginFalsy) return next()
 
     configureOrigin(req, reply, (err, origin) => {
@@ -120,14 +124,12 @@ function fastifyCors (fastify, opts, next) {
       } else if (isOriginString) {
         // fixed origin
         reply.header('Access-Control-Allow-Origin', origin)
-        vary(reply, 'Origin')
       } else {
         // reflect origin
         reply.header(
           'Access-Control-Allow-Origin',
           isOriginAllowed(reqOrigin, origin) ? reqOrigin : false
         )
-        vary(reply, 'Origin')
       }
 
       callback(null, origin)
