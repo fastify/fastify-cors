@@ -8,11 +8,17 @@ type originCallback = (err: Error, allow: boolean) => void;
 
 type originFunction = (origin: string, callback: originCallback) => void;
 
+type originType = string | boolean | RegExp;
+
+type ValueOrArray<T> = T | ArrayOfValueOrArray<T>;
+
+interface ArrayOfValueOrArray<T> extends Array<ValueOrArray<T>> {}
+
 declare const fastifyCors: fastify.Plugin<Server, IncomingMessage, ServerResponse, {
     /**
      * Configures the Access-Control-Allow-Origin CORS header.
      */
-    origin?: string | boolean | RegExp | string[] | RegExp[] | originFunction;
+    origin?: ValueOrArray<originType> | originFunction;
     /**
      * Configures the Access-Control-Allow-Credentials CORS header.
      * Set to true to pass the header, otherwise it is omitted.
@@ -60,6 +66,6 @@ declare const fastifyCors: fastify.Plugin<Server, IncomingMessage, ServerRespons
      * Hide options route from the documentation built using fastify-swagger (default: true).
      */
     hideOptionsRoute?: boolean;
-}>
+}>;
 
 export = fastifyCors;
