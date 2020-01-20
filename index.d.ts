@@ -4,9 +4,9 @@ import { Server, IncomingMessage, ServerResponse } from 'http'
 
 import fastify = require('fastify');
 
-type originCallback = (err: Error, allow: boolean) => void;
+type originCallback = (err?: Error, allow?: boolean) => void;
 
-type originFunction = (origin: string, callback: originCallback) => void;
+type originFunction = (origin: string | undefined, callback: originCallback) => void;
 
 type originType = string | boolean | RegExp;
 
