@@ -76,8 +76,8 @@ app.register(fastifyCors, {
 })
 
 app.register(fastifyCors, {
-  origin: (origin: string, cb: Function) => {
-    if (/localhost/.test(origin)) {
+  origin: (origin: string, cb: (err: Error | null, allow: boolean) => void) => {
+    if (/localhost/.test(origin) || typeof origin === 'undefined') {
       cb(null, true)
       return
     }
