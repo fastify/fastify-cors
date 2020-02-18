@@ -4,7 +4,7 @@ import { Server, IncomingMessage, ServerResponse } from 'http'
 
 import fastify = require('fastify');
 
-type originCallback = (err: Error, allow: boolean) => void;
+type originCallback = (err: Error | null, allow: boolean) => void;
 
 type originFunction = (origin: string, callback: originCallback) => void;
 
