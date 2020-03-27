@@ -1,7 +1,7 @@
 // Definitions by: Jannik Keye <https://github.com/jannikkeye>
 
 import { Server, IncomingMessage, ServerResponse } from 'http'
-import { Http2Server, Http2ServerRequest, Http2ServerResponse } from 'http2'
+import { Http2SecureServer, Http2Server, Http2ServerRequest, Http2ServerResponse } from 'http2'
 
 import fastify = require('fastify');
 
@@ -16,7 +16,7 @@ type ValueOrArray<T> = T | ArrayOfValueOrArray<T>;
 interface ArrayOfValueOrArray<T> extends Array<ValueOrArray<T>> {}
 
 declare const fastifyCors: fastify.Plugin<
-    Server | Http2Server,
+    Server | Http2Server | Http2SecureServer,
     IncomingMessage | Http2ServerRequest,
     ServerResponse | Http2ServerResponse,
     {
