@@ -2,7 +2,7 @@
 
 const { test } = require('tap')
 const Fastify = require('fastify')
-const cors = require('../index')
+const cors = require('../')
 
 test('Should shortcircuits preflight requests', t => {
   t.plan(4)
@@ -510,17 +510,17 @@ test('Disable preflight', t => {
   })
 })
 
-test('show options route', t => {
+test('show options route', { only: true }, t => {
   t.plan(2)
 
   const fastify = Fastify()
-  fastify.register(cors, { hideOptionsRoute: false })
 
   fastify.addHook('onRoute', (route) => {
     if (route.method === 'OPTIONS' && route.url === '*') {
       t.strictEqual(route.schema.hide, false)
     }
   })
+  fastify.register(cors, { hideOptionsRoute: false })
 
   fastify.ready(err => {
     t.error(err)
