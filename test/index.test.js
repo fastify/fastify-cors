@@ -510,7 +510,7 @@ test('Disable preflight', t => {
   })
 })
 
-test('show options route', { only: true }, t => {
+test('show options route', t => {
   t.plan(2)
 
   const fastify = Fastify()

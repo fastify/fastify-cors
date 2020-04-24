@@ -170,6 +170,6 @@ function vary (reply, field) {
 }
 
 module.exports = fp(fastifyCors, {
-  fastify: '>=3.0.0-alpha.1',
+  fastify: '>=3',
   name: 'fastify-cors'
 })
