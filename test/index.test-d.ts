@@ -1,7 +1,7 @@
-import * as Fastify from 'fastify'
-import * as fastifyCors from '../..'
+import fastify from 'fastify'
+import fastifyCors from '..'
 
-const app = Fastify()
+const app = fastify()
 
 app.register(fastifyCors)
 
@@ -95,7 +95,7 @@ app.register(fastifyCors, {
   preflight: false
 })
 
-const appHttp2 = Fastify({ http2: true })
+const appHttp2 = fastify({ http2: true })
 
 appHttp2.register(fastifyCors)
 

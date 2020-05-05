@@ -1,6 +1,6 @@
 # fastify-cors
 
-[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](http://standardjs.com/)  [![Build Status](https://travis-ci.org/fastify/fastify-cors.svg?branch=master)](https://travis-ci.org/fastify/fastify-cors) [![Greenkeeper badge](https://badges.greenkeeper.io/fastify/fastify-cors.svg)](https://greenkeeper.io/)
+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](http://standardjs.com/)  ![CI workflow](https://github.com/fastify/fastify-cors/workflows/CI%20workflow/badge.svg)
 
 `fastify-cors` enables the use of [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) in a Fastify application.
 

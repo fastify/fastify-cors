@@ -10,7 +10,7 @@
     "lint:fix": "standard --fix",
     "lint:typescript": "standard --parser @typescript-eslint/parser --plugin @typescript-eslint/eslint-plugin test/types/*.ts",
     "unit": "tap test/*.test.js",
-    "typescript": "tsc --project ./test/types/tsconfig.json",
+    "typescript": "tsd",
     "test": "npm run lint && npm run unit && npm run typescript",
     "coverage": "tap --cov --coverage-report=html test"
   },
@@ -36,18 +36,17 @@
     "@typescript-eslint/eslint-plugin": "^2.10.0",
     "@typescript-eslint/parser": "^2.0.0",
     "cors": "^2.8.5",
-    "fastify": "^2.8.0",
+    "fastify": "^3.0.0-rc.1",
     "standard": "^14.0.2",
     "tap": "^12.6.5",
-    "typescript": "^3.5.3"
+    "typescript": "^3.5.3",
+    "tsd": "^0.11.0"
   },
   "dependencies": {
-    "fastify-plugin": "^1.6.0",
+    "fastify-plugin": "^2.0.0",
     "vary": "^1.1.2"
   },
-  "greenkeeper": {
-    "ignore": [
-      "tap"
-    ]
+  "tsd": {
+    "directory": "test"
   }
 }
