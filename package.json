@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/fastify/fastify-cors#readme",
   "devDependencies": {
-    "@types/node": "^13.13.4",
+    "@types/node": "^14.0.1",
     "@typescript-eslint/eslint-plugin": "^2.10.0",
     "@typescript-eslint/parser": "^2.0.0",
     "cors": "^2.8.5",
