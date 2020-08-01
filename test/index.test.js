@@ -31,6 +31,35 @@ test('Should shortcircuits preflight requests', t => {
   })
 })
 
+test('Should add access-control-allow-headers to response if preflight req has access-control-request-headers', t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+  fastify.register(cors)
+
+  fastify.options('/', (req, reply) => {
+    t.fail('we should not be here')
+  })
+
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/',
+    headers: { 'access-control-request-headers': 'x-requested-with' }
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.strictEqual(res.statusCode, 204)
+    t.strictEqual(res.payload, '')
+    t.match(res.headers, {
+      'access-control-allow-origin': '*',
+      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      'access-control-allow-headers': 'x-requested-with',
+      vary: 'Origin, Access-Control-Request-Headers',
+      'content-length': '0'
+    })
+  })
+})
+
 test('Should shortcircuits preflight requests with custom status code', t => {
   t.plan(4)
 
