@@ -477,7 +477,7 @@ test('Should not add cors headers other than `vary` when origin is false', t => 
   })
 })
 
-test('Allow only request from a specifc origin', t => {
+test('Allow only request from a specific origin', t => {
   t.plan(4)
 
   const fastify = Fastify()
@@ -498,6 +498,73 @@ test('Allow only request from a specifc origin', t => {
     t.strictEqual(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-allow-origin': 'other.io',
+      vary: 'Origin'
+    })
+  })
+})
+
+test('Allow only request from multiple specific origin', t => {
+  t.plan(8)
+
+  const fastify = Fastify()
+  fastify.register(cors, { origin: ['other.io', 'example.com'] })
+
+  fastify.get('/', (req, reply) => {
+    reply.send('ok')
+  })
+
+  fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: { origin: 'other.io' }
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.strictEqual(res.statusCode, 200)
+    t.strictEqual(res.payload, 'ok')
+    t.match(res.headers, {
+      'access-control-allow-origin': 'other.io',
+      vary: 'Origin'
+    })
+  })
+
+  fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: { origin: 'foo.com' }
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.strictEqual(res.statusCode, 200)
+    t.strictEqual(res.payload, 'ok')
+    t.match(res.headers, {
+      'access-control-allow-origin': false,
+      vary: 'Origin'
+    })
+  })
+})
+
+test('Allow only request from a specific origin using regex', t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+  fastify.register(cors, { origin: new RegExp(/^(example|other)\.com/) })
+
+  fastify.get('/', (req, reply) => {
+    reply.send('ok')
+  })
+
+  fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: { origin: 'example.com' }
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.strictEqual(res.statusCode, 200)
+    t.strictEqual(res.payload, 'ok')
+    t.match(res.headers, {
+      'access-control-allow-origin': 'example.com',
       vary: 'Origin'
     })
   })
