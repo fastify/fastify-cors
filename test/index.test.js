@@ -659,3 +659,95 @@ test('Should always add vary header to `Origin` by default', t => {
     })
   })
 })
+
+test('Should always add vary header to `Origin` by default (vary is array)', t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+
+  // Mock getHeader function
+  fastify.decorateReply('getHeader', (name) => ['foo', 'bar'])
+
+  fastify.register(cors)
+
+  fastify.get('/', (req, reply) => {
+    reply.send('ok')
+  })
+
+  fastify.inject({
+    method: 'GET',
+    url: '/'
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.strictEqual(res.statusCode, 200)
+    t.strictEqual(res.payload, 'ok')
+    t.match(res.headers, {
+      vary: 'foo, bar, Origin'
+    })
+  })
+})
+
+test('Allow only request from with specific methods', t => {
+  t.plan(3)
+
+  const fastify = Fastify()
+  fastify.register(cors, { methods: ['GET', 'POST'] })
+
+  fastify.options('/', (req, reply) => {
+    reply.send('ok')
+  })
+
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/'
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.strictEqual(res.statusCode, 204)
+    t.match(res.headers, {
+      'access-control-allow-methods': 'GET, POST',
+      vary: 'Origin'
+    })
+  })
+})
+
+test('Allow only request from with specific headers', t => {
+  t.plan(7)
+
+  const fastify = Fastify()
+  fastify.register(cors, {
+    allowedHeaders: 'foo',
+    exposedHeaders: 'bar'
+  })
+
+  fastify.get('/', (req, reply) => {
+    reply.send('ok')
+  })
+
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/'
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.strictEqual(res.statusCode, 204)
+    t.match(res.headers, {
+      'access-control-allow-headers': 'foo',
+      vary: 'Origin'
+    })
+  })
+
+  fastify.inject({
+    method: 'GET',
+    url: '/'
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.strictEqual(res.statusCode, 200)
+    t.strictEqual(res.payload, 'ok')
+    t.match(res.headers, {
+      'access-control-expose-headers': 'bar'
+    })
+  })
+})

@@ -173,3 +173,5 @@ module.exports = fp(fastifyCors, {
   fastify: '3.x',
   name: 'fastify-cors'
 })
+
+module.exports.vary = vary
