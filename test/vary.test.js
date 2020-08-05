@@ -1,7 +1,7 @@
 'use strict'
 
 const { test } = require('tap')
-const vary = require('..').vary
+const vary = require('../vary')
 
 test('Should not set reply header if none is passed', t => {
   t.plan(1)

@@ -1,7 +1,7 @@
 'use strict'
 
 const fp = require('fastify-plugin')
-const append = require('vary').append
+const vary = require('./vary')
 
 function fastifyCors (fastify, opts, next) {
   const {
@@ -156,22 +156,7 @@ function fastifyCors (fastify, opts, next) {
   next()
 }
 
-// https://github.com/fastify/fastify-sensible/blob/master/lib/vary.js
-function vary (reply, field) {
-  var value = reply.getHeader('Vary') || ''
-  var header = Array.isArray(value)
-    ? value.join(', ')
-    : String(value)
-
-  // set new header
-  if ((value = append(header, field))) {
-    reply.header('Vary', value)
-  }
-}
-
 module.exports = fp(fastifyCors, {
   fastify: '3.x',
   name: 'fastify-cors'
 })
-
-module.exports.vary = vary
