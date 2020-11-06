@@ -41,7 +41,7 @@ function fastifyCors (fastify, opts, next) {
       }
 
       if (strictPreflight === true && (!req.headers.origin || !req.headers['access-control-request-method'])) {
-        reply.status(400).send('Invalid preflight request')
+        reply.status(400).type('text/html').send('Invalid preflight request')
         return
       }
 
