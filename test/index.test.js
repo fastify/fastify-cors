@@ -10,7 +10,7 @@ test('Should shortcircuits preflight requests', t => {
   const fastify = Fastify()
   fastify.register(cors)
 
-  fastify.options('/', (req, reply) => {
+  fastify.get('/', (req, reply) => {
     t.fail('we should not be here')
   })
 
@@ -37,7 +37,7 @@ test('Should add access-control-allow-headers to response if preflight req has a
   const fastify = Fastify()
   fastify.register(cors)
 
-  fastify.options('/', (req, reply) => {
+  fastify.get('/', (req, reply) => {
     t.fail('we should not be here')
   })
 
@@ -66,7 +66,7 @@ test('Should shortcircuits preflight requests with custom status code', t => {
   const fastify = Fastify()
   fastify.register(cors, { optionsSuccessStatus: 200 })
 
-  fastify.options('/', (req, reply) => {
+  fastify.get('/', (req, reply) => {
     t.fail('we should not be here')
   })
 
@@ -87,7 +87,7 @@ test('Should shortcircuits preflight requests with custom status code', t => {
   })
 })
 
-test('Should not shortcircuits preflight requests with preflightContinue', t => {
+test('Should be able to override preflight response with a route', t => {
   t.plan(4)
 
   const fastify = Fastify()
@@ -694,7 +694,7 @@ test('Allow only request from with specific methods', t => {
   const fastify = Fastify()
   fastify.register(cors, { methods: ['GET', 'POST'] })
 
-  fastify.options('/', (req, reply) => {
+  fastify.get('/', (req, reply) => {
     reply.send('ok')
   })
 
@@ -760,7 +760,7 @@ test('Should reply with 400 error to OPTIONS requests missing origin header when
     strictPreflight: true
   })
 
-  fastify.options('/', (req, reply) => {
+  fastify.get('/', (req, reply) => {
     t.fail('we should not be here')
     reply.send('ok')
   })
@@ -786,7 +786,7 @@ test('Should reply with 400 to OPTIONS requests when missing Access-Control-Requ
     strictPreflight: true
   })
 
-  fastify.options('/', (req, reply) => {
+  fastify.get('/', (req, reply) => {
     t.fail('we should not be here')
     reply.send('ok')
   })
@@ -810,7 +810,7 @@ test('Should shortcircuit preflight requests with origin and access control meth
   const fastify = Fastify()
   fastify.register(cors, { strictPreflight: true })
 
-  fastify.options('/', (req, reply) => {
+  fastify.get('/', (req, reply) => {
     t.fail('we should not be here')
   })
 

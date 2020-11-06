@@ -11,7 +11,6 @@ function fastifyCors (fastify, opts, next) {
     allowedHeaders,
     methods,
     maxAge,
-    preflightContinue,
     optionsSuccessStatus,
     preflight,
     hideOptionsRoute,
@@ -35,7 +34,25 @@ function fastifyCors (fastify, opts, next) {
   const isOriginFunction = typeof origin === 'function'
 
   if (preflight === true) {
-    fastify.options('*', { schema: { hide: hideOptionsRoute } }, (req, reply) => reply.send())
+    fastify.options('*', { schema: { hide: hideOptionsRoute } }, (req, reply) => {
+      if (origin === false) {
+        reply.send()
+        return
+      }
+
+      if (strictPreflight === true && (!req.headers.origin || !req.headers['access-control-request-method'])) {
+        reply.status(400).send('Invalid preflight request')
+        return
+      }
+
+      // Normal preflight response
+      // Safari (and potentially other browsers) need content-length 0,
+      // for 204 or they just hang waiting for a body
+      reply
+        .code(optionsSuccessStatus)
+        .header('Content-Length', '0')
+        .send()
+    })
   }
   fastify.addHook('onRequest', onRequest)
   function onRequest (req, reply, next) {
@@ -60,13 +77,8 @@ function fastifyCors (fastify, opts, next) {
         )
       }
 
-      if (req.raw.method === 'OPTIONS' && preflight === true) {
-        // preflight
-        if (strictPreflight === true && (!req.headers.origin || !req.headers['access-control-request-method'])) {
-          reply.status(400).send('Invalid preflight request')
-          return
-        }
-
+      // Handle preflight headers (if strict mode is enabled, then the valid preflight headers must exit)
+      if (req.raw.method === 'OPTIONS' && preflight === true && (strictPreflight === false || (req.headers.origin && req.headers['access-control-request-method']))) {
         reply.header(
           'Access-Control-Allow-Methods',
           Array.isArray(methods) ? methods.join(', ') : methods
@@ -88,20 +100,8 @@ function fastifyCors (fastify, opts, next) {
         if (maxAge !== null) {
           reply.header('Access-Control-Max-Age', String(maxAge))
         }
-
-        if (preflightContinue) {
-          next()
-        } else {
-          // Safari (and potentially other browsers) need content-length 0,
-          // for 204 or they just hang waiting for a body
-          reply
-            .code(optionsSuccessStatus)
-            .header('Content-Length', '0')
-            .send()
-        }
-      } else {
-        next()
       }
+      next()
     })
   }
 
