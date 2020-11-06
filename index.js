@@ -14,7 +14,8 @@ function fastifyCors (fastify, opts, next) {
     preflightContinue,
     optionsSuccessStatus,
     preflight,
-    hideOptionsRoute
+    hideOptionsRoute,
+    strictPreflight
   } = Object.assign({
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -25,7 +26,8 @@ function fastifyCors (fastify, opts, next) {
     allowedHeaders: null,
     maxAge: null,
     preflight: true,
-    hideOptionsRoute: true
+    hideOptionsRoute: true,
+    strictPreflight: false
   }, opts)
 
   const isOriginFalsy = !origin
@@ -60,6 +62,11 @@ function fastifyCors (fastify, opts, next) {
 
       if (req.raw.method === 'OPTIONS' && preflight === true) {
         // preflight
+        if (strictPreflight === true && (!req.headers.origin || !req.headers['access-control-request-method'])) {
+          reply.status(400).send('Invalid preflight request')
+          return
+        }
+
         reply.header(
           'Access-Control-Allow-Methods',
           Array.isArray(methods) ? methods.join(', ') : methods

@@ -751,3 +751,86 @@ test('Allow only request from with specific headers', t => {
     })
   })
 })
+
+test('Should reply with 400 error to OPTIONS requests missing origin header when strictPreflight is enabled', t => {
+  t.plan(3)
+
+  const fastify = Fastify()
+  fastify.register(cors, {
+    strictPreflight: true
+  })
+
+  fastify.options('/', (req, reply) => {
+    t.fail('we should not be here')
+    reply.send('ok')
+  })
+
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/',
+    headers: {
+      'access-control-request-method': 'example.com'
+    }
+  }, (err, res) => {
+    t.error(err)
+    t.strictEqual(res.statusCode, 400)
+    t.strictEqual(res.payload, 'Invalid preflight request')
+  })
+})
+
+test('Should reply with 400 to OPTIONS requests when missing Access-Control-Request-Method header when strictPreflight is enabled', t => {
+  t.plan(3)
+
+  const fastify = Fastify()
+  fastify.register(cors, {
+    strictPreflight: true
+  })
+
+  fastify.options('/', (req, reply) => {
+    t.fail('we should not be here')
+    reply.send('ok')
+  })
+
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/',
+    headers: {
+      origin: 'example.com'
+    }
+  }, (err, res) => {
+    t.error(err)
+    t.strictEqual(res.statusCode, 400)
+    t.strictEqual(res.payload, 'Invalid preflight request')
+  })
+})
+
+test('Should shortcircuit preflight requests with origin and access control method headers when strictPreflight is enabled', t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+  fastify.register(cors, { strictPreflight: true })
+
+  fastify.options('/', (req, reply) => {
+    t.fail('we should not be here')
+  })
+
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/',
+    headers: {
+      'access-control-request-method': 'example.com',
+      origin: 'example.com'
+    }
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.strictEqual(res.statusCode, 204)
+    t.strictEqual(res.payload, '')
+    t.match(res.headers, {
+      'access-control-allow-origin': '*',
+      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      vary: 'Origin, Access-Control-Request-Headers',
+      'content-length': '0'
+    })
+  })
+})
