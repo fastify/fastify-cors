@@ -51,10 +51,28 @@ You can use it as is without passing any option, or you can configure it as expl
 * `exposedHeaders`: Configures the **Access-Control-Expose-Headers** CORS header. Expects a comma-delimited string (ex: `'Content-Range,X-Content-Range'`) or an array (ex: `['Content-Range', 'X-Content-Range']`). If not specified, no custom headers are exposed.
 * `credentials`: Configures the **Access-Control-Allow-Credentials** CORS header. Set to `true` to pass the header, otherwise it is omitted.
 * `maxAge`: Configures the **Access-Control-Max-Age** CORS header. In seconds. Set to an integer to pass the header, otherwise it is omitted.
-* `preflightContinue`: Pass the CORS preflight response to the route handler (default: `false`).
 * `optionsSuccessStatus`: Provides a status code to use for successful `OPTIONS` requests, since some legacy browsers (IE11, various SmartTVs) choke on `204`.
 * `preflight`: if needed you can entirely disable preflight by passing `false` here (default: `true`).
+* `strictPreflight`: Enforces strict requirement of the CORS preflight request headers (**Access-Control-Request-Method** and **Origin**) as defined by the [W3C CORS specification](https://www.w3.org/TR/2020/SPSD-cors-20200602/#resource-preflight-requests). Preflight requests without the minimal headers will result in 400 errors when setting this to `true` (default: `false`).
 * `hideOptionsRoute`: hide options route from the documentation built using [fastify-swagger](https://github.com/fastify/fastify-swagger) (default: `true`).
+
+### Preflight Requests
+
+When preflight is enabled (`preflight` option is `true`), a `*` wildcard `OPTIONS` route is added to the fastify instance. The response behavior can be overridden for individual routes by adding `OPTIONS` routes to the fastify instance (`*` wildcard routes are always lowest priority).
+
+This is an important difference between fastify-cors and the [express cors](https://github.com/expressjs/cors#configuration-options) middleware `preflightContinue` option.
+
+```js
+const fastify = require('fastify')()
+
+// Fastify-cors handles CORS preflight OPTIONS requests
+fastify.register(require('fastify-cors'))
+
+// Except for OPTIONS /not-preflight
+fastify.options('/not-preflight', (req, reply) => {
+  reply.send({hello: 'world'})
+})
+```
 
 ## Acknowledgements
 
