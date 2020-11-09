@@ -10,10 +10,6 @@ test('Should shortcircuits preflight requests', t => {
   const fastify = Fastify()
   fastify.register(cors)
 
-  fastify.get('/', (req, reply) => {
-    t.fail('we should not be here')
-  })
-
   fastify.inject({
     method: 'OPTIONS',
     url: '/'
@@ -36,10 +32,6 @@ test('Should add access-control-allow-headers to response if preflight req has a
 
   const fastify = Fastify()
   fastify.register(cors)
-
-  fastify.get('/', (req, reply) => {
-    t.fail('we should not be here')
-  })
 
   fastify.inject({
     method: 'OPTIONS',
@@ -65,10 +57,6 @@ test('Should shortcircuits preflight requests with custom status code', t => {
 
   const fastify = Fastify()
   fastify.register(cors, { optionsSuccessStatus: 200 })
-
-  fastify.get('/', (req, reply) => {
-    t.fail('we should not be here')
-  })
 
   fastify.inject({
     method: 'OPTIONS',
@@ -106,9 +94,9 @@ test('Should be able to override preflight response with a route', t => {
     t.strictEqual(res.statusCode, 200)
     t.strictEqual(res.payload, 'ok')
     t.match(res.headers, {
+      // Only the base cors headers and no preflight headers
       'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Origin, Access-Control-Request-Headers'
+      vary: 'Origin'
     })
   })
 })
@@ -428,7 +416,7 @@ test('Dynamic origin resolution (errored - promises)', t => {
   })
 })
 
-test('Should not add cors headers other than `vary` when origin is false', t => {
+test('Should reply 404 without cors headers other than `vary` when origin is false', t => {
   t.plan(8)
 
   const fastify = Fastify()
@@ -451,10 +439,11 @@ test('Should not add cors headers other than `vary` when origin is false', t => 
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, '')
+    t.strictEqual(res.statusCode, 404)
+    t.strictEqual(res.payload, 'Not Found')
     t.deepEqual(res.headers, {
-      'content-length': '0',
+      'content-length': '9',
+      'content-type': 'text/plain',
       connection: 'keep-alive',
       vary: 'Origin'
     })
@@ -694,10 +683,6 @@ test('Allow only request from with specific methods', t => {
   const fastify = Fastify()
   fastify.register(cors, { methods: ['GET', 'POST'] })
 
-  fastify.get('/', (req, reply) => {
-    reply.send('ok')
-  })
-
   fastify.inject({
     method: 'OPTIONS',
     url: '/'
@@ -774,7 +759,7 @@ test('Should reply with 400 error to OPTIONS requests missing origin header when
   }, (err, res) => {
     t.error(err)
     t.strictEqual(res.statusCode, 400)
-    t.strictEqual(res.payload, 'Invalid preflight request')
+    t.strictEqual(res.payload, 'Invalid Preflight Request')
   })
 })
 
@@ -800,7 +785,7 @@ test('Should reply with 400 to OPTIONS requests when missing Access-Control-Requ
   }, (err, res) => {
     t.error(err)
     t.strictEqual(res.statusCode, 400)
-    t.strictEqual(res.payload, 'Invalid preflight request')
+    t.strictEqual(res.payload, 'Invalid Preflight Request')
   })
 })
 

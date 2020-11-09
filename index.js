@@ -36,16 +36,39 @@ function fastifyCors (fastify, opts, next) {
   if (preflight === true) {
     fastify.options('*', { schema: { hide: hideOptionsRoute } }, (req, reply) => {
       if (origin === false) {
-        reply.send()
+        reply.code(404).type('text/plain').send('Not Found')
         return
       }
 
+      // Strict mode enforces the required headers for preflight
       if (strictPreflight === true && (!req.headers.origin || !req.headers['access-control-request-method'])) {
-        reply.status(400).type('text/html').send('Invalid preflight request')
+        reply.status(400).type('text/plain').send('Invalid Preflight Request')
         return
       }
 
-      // Normal preflight response
+      // Handle preflight headers (if strict mode is enabled, then the valid preflight headers must exit)
+      reply.header(
+        'Access-Control-Allow-Methods',
+        Array.isArray(methods) ? methods.join(', ') : methods
+      )
+
+      if (allowedHeaders === null) {
+        vary(reply, 'Access-Control-Request-Headers')
+        var reqAllowedHeaders = req.headers['access-control-request-headers']
+        if (reqAllowedHeaders !== undefined) {
+          reply.header('Access-Control-Allow-Headers', reqAllowedHeaders)
+        }
+      } else {
+        reply.header(
+          'Access-Control-Allow-Headers',
+          Array.isArray(allowedHeaders) ? allowedHeaders.join(', ') : allowedHeaders
+        )
+      }
+
+      if (maxAge !== null) {
+        reply.header('Access-Control-Max-Age', String(maxAge))
+      }
+
       // Safari (and potentially other browsers) need content-length 0,
       // for 204 or they just hang waiting for a body
       reply
@@ -77,30 +100,6 @@ function fastifyCors (fastify, opts, next) {
         )
       }
 
-      // Handle preflight headers (if strict mode is enabled, then the valid preflight headers must exit)
-      if (req.raw.method === 'OPTIONS' && preflight === true && (strictPreflight === false || (req.headers.origin && req.headers['access-control-request-method']))) {
-        reply.header(
-          'Access-Control-Allow-Methods',
-          Array.isArray(methods) ? methods.join(', ') : methods
-        )
-
-        if (allowedHeaders === null) {
-          vary(reply, 'Access-Control-Request-Headers')
-          var reqAllowedHeaders = req.headers['access-control-request-headers']
-          if (reqAllowedHeaders !== undefined) {
-            reply.header('Access-Control-Allow-Headers', reqAllowedHeaders)
-          }
-        } else {
-          reply.header(
-            'Access-Control-Allow-Headers',
-            Array.isArray(allowedHeaders) ? allowedHeaders.join(', ') : allowedHeaders
-          )
-        }
-
-        if (maxAge !== null) {
-          reply.header('Access-Control-Max-Age', String(maxAge))
-        }
-      }
       next()
     })
   }
