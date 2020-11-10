@@ -745,11 +745,6 @@ test('Should reply with 400 error to OPTIONS requests missing origin header when
     strictPreflight: true
   })
 
-  fastify.get('/', (req, reply) => {
-    t.fail('we should not be here')
-    reply.send('ok')
-  })
-
   fastify.inject({
     method: 'OPTIONS',
     url: '/',
@@ -771,11 +766,6 @@ test('Should reply with 400 to OPTIONS requests when missing Access-Control-Requ
     strictPreflight: true
   })
 
-  fastify.get('/', (req, reply) => {
-    t.fail('we should not be here')
-    reply.send('ok')
-  })
-
   fastify.inject({
     method: 'OPTIONS',
     url: '/',
@@ -794,10 +784,6 @@ test('Should shortcircuit preflight requests with origin and access control meth
 
   const fastify = Fastify()
   fastify.register(cors, { strictPreflight: true })
-
-  fastify.get('/', (req, reply) => {
-    t.fail('we should not be here')
-  })
 
   fastify.inject({
     method: 'OPTIONS',

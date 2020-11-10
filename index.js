@@ -35,7 +35,8 @@ function fastifyCors (fastify, opts, next) {
 
   if (preflight === true) {
     fastify.options('*', { schema: { hide: hideOptionsRoute } }, (req, reply) => {
-      if (origin === false) {
+      // Do not handle preflight requests if the origin was not allowed
+      if (!req.corsOriginAllowed) {
         reply.code(404).type('text/plain').send('Not Found')
         return
       }
@@ -46,7 +47,7 @@ function fastifyCors (fastify, opts, next) {
         return
       }
 
-      // Handle preflight headers (if strict mode is enabled, then the valid preflight headers must exit)
+      // Handle preflight headers
       reply.header(
         'Access-Control-Allow-Methods',
         Array.isArray(methods) ? methods.join(', ') : methods
@@ -77,16 +78,25 @@ function fastifyCors (fastify, opts, next) {
         .send()
     })
   }
+
+  fastify.decorateRequest('corsOriginAllowed', undefined)
+
   fastify.addHook('onRequest', onRequest)
   function onRequest (req, reply, next) {
     // Always set Vary header
     // https://github.com/rs/cors/issues/10
     vary(reply, 'Origin')
 
-    if (isOriginFalsy) return next()
+    if (isOriginFalsy) {
+      req.corsOriginAllowed = false
+      return next()
+    }
 
     configureOrigin(req, reply, (err, origin) => {
       if (err !== null) return next(err)
+
+      req.corsOriginAllowed = origin
+
       if (origin === false) return next()
 
       if (credentials) {
