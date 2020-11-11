@@ -47,7 +47,11 @@ test('Should add cors headers (custom values)', t => {
 
   fastify.inject({
     method: 'OPTIONS',
-    url: '/'
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
@@ -442,7 +446,7 @@ test('Disable preflight', t => {
 })
 
 test('Should always add vary header to `Origin` by default', t => {
-  t.plan(8)
+  t.plan(12)
 
   const fastify = Fastify()
   fastify.register(cors)
@@ -451,9 +455,28 @@ test('Should always add vary header to `Origin` by default', t => {
     reply.send('ok')
   })
 
+  // Invalid Preflight
   fastify.inject({
     method: 'OPTIONS',
     url: '/'
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.strictEqual(res.statusCode, 400)
+    t.strictEqual(res.payload, 'Invalid Preflight Request')
+    t.match(res.headers, {
+      vary: 'Origin'
+    })
+  })
+
+  // Valid Preflight
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
@@ -464,6 +487,7 @@ test('Should always add vary header to `Origin` by default', t => {
     })
   })
 
+  // Other Route
   fastify.inject({
     method: 'GET',
     url: '/'
@@ -521,7 +545,11 @@ test('Allow only request from with specific headers', t => {
 
   fastify.inject({
     method: 'OPTIONS',
-    url: '/'
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
   }, (err, res) => {
     t.error(err)
     delete res.headers.date

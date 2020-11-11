@@ -26,7 +26,7 @@ function fastifyCors (fastify, opts, next) {
     maxAge: null,
     preflight: true,
     hideOptionsRoute: true,
-    strictPreflight: false
+    strictPreflight: true
   }, opts)
 
   const isOriginFalsy = !origin
