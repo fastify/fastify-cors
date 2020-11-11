@@ -1,5 +1,5 @@
 import fastify from 'fastify'
-import fastifyCors, {OriginFunction} from '..'
+import fastifyCors, { OriginFunction } from '..'
 
 const app = fastify()
 
@@ -12,9 +12,9 @@ app.register(fastifyCors, {
   credentials: true,
   exposedHeaders: 'authorization',
   maxAge: 13000,
-  preflightContinue: false,
   optionsSuccessStatus: 200,
-  preflight: false
+  preflight: false,
+  strictPreflight: false
 })
 
 app.register(fastifyCors, {
@@ -24,9 +24,9 @@ app.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
-  preflightContinue: false,
   optionsSuccessStatus: 200,
-  preflight: false
+  preflight: false,
+  strictPreflight: false
 })
 
 app.register(fastifyCors, {
@@ -36,9 +36,9 @@ app.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
-  preflightContinue: false,
   optionsSuccessStatus: 200,
-  preflight: false
+  preflight: false,
+  strictPreflight: false
 })
 
 app.register(fastifyCors, {
@@ -48,9 +48,9 @@ app.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
-  preflightContinue: false,
   optionsSuccessStatus: 200,
-  preflight: false
+  preflight: false,
+  strictPreflight: false
 })
 
 app.register(fastifyCors, {
@@ -60,9 +60,9 @@ app.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
-  preflightContinue: false,
   optionsSuccessStatus: 200,
-  preflight: false
+  preflight: false,
+  strictPreflight: false
 })
 
 app.register(fastifyCors, {
@@ -72,9 +72,9 @@ app.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
-  preflightContinue: false,
   optionsSuccessStatus: 200,
-  preflight: false
+  preflight: false,
+  strictPreflight: false
 })
 
 const corsDelegate: OriginFunction = (origin, cb) => {
@@ -92,9 +92,9 @@ app.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
-  preflightContinue: false,
   optionsSuccessStatus: 200,
-  preflight: false
+  preflight: false,
+  strictPreflight: false
 })
 
 const appHttp2 = fastify({ http2: true })
@@ -108,9 +108,9 @@ appHttp2.register(fastifyCors, {
   credentials: true,
   exposedHeaders: 'authorization',
   maxAge: 13000,
-  preflightContinue: false,
   optionsSuccessStatus: 200,
-  preflight: false
+  preflight: false,
+  strictPreflight: false
 })
 
 appHttp2.register(fastifyCors, {
@@ -120,9 +120,9 @@ appHttp2.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
-  preflightContinue: false,
   optionsSuccessStatus: 200,
-  preflight: false
+  preflight: false,
+  strictPreflight: false
 })
 
 appHttp2.register(fastifyCors, {
@@ -132,9 +132,9 @@ appHttp2.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
-  preflightContinue: false,
   optionsSuccessStatus: 200,
-  preflight: false
+  preflight: false,
+  strictPreflight: false
 })
 
 appHttp2.register(fastifyCors, {
@@ -144,9 +144,9 @@ appHttp2.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
-  preflightContinue: false,
   optionsSuccessStatus: 200,
-  preflight: false
+  preflight: false,
+  strictPreflight: false
 })
 
 appHttp2.register(fastifyCors, {
@@ -156,9 +156,9 @@ appHttp2.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
-  preflightContinue: false,
   optionsSuccessStatus: 200,
-  preflight: false
+  preflight: false,
+  strictPreflight: false
 })
 
 appHttp2.register(fastifyCors, {
@@ -168,9 +168,9 @@ appHttp2.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
-  preflightContinue: false,
   optionsSuccessStatus: 200,
-  preflight: false
+  preflight: false,
+  strictPreflight: false
 })
 
 appHttp2.register(fastifyCors, {
@@ -186,7 +186,7 @@ appHttp2.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
-  preflightContinue: false,
   optionsSuccessStatus: 200,
-  preflight: false
+  preflight: false,
+  strictPreflight: false
 })
