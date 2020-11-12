@@ -44,10 +44,6 @@ export interface FastifyCorsOptions {
      */
     maxAge?: number;
     /**
-     * Pass the CORS preflight response to the route handler (default: false).
-     */
-    preflightContinue?: boolean;
-    /**
      * Provides a status code to use for successful OPTIONS requests,
      * since some legacy browsers (IE11, various SmartTVs) choke on 204.
      */
@@ -56,6 +52,11 @@ export interface FastifyCorsOptions {
      * Pass the CORS preflight response to the route handler (default: false).
      */
     preflight?: boolean;
+    /**
+     * Enforces strict requirement of the CORS preflight request headers (Access-Control-Request-Method and Origin).
+     * Preflight requests without the required headers will result in 400 errors when set to `true` (default: `true`). 
+     */
+    strictPreflight?: boolean;
     /**
      * Hide options route from the documentation built using fastify-swagger (default: true).
      */

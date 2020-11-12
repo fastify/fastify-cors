@@ -11,10 +11,10 @@ function fastifyCors (fastify, opts, next) {
     allowedHeaders,
     methods,
     maxAge,
-    preflightContinue,
     optionsSuccessStatus,
     preflight,
-    hideOptionsRoute
+    hideOptionsRoute,
+    strictPreflight
   } = Object.assign({
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -25,7 +25,8 @@ function fastifyCors (fastify, opts, next) {
     allowedHeaders: null,
     maxAge: null,
     preflight: true,
-    hideOptionsRoute: true
+    hideOptionsRoute: true,
+    strictPreflight: true
   }, opts)
 
   const isOriginFalsy = !origin
@@ -33,18 +34,69 @@ function fastifyCors (fastify, opts, next) {
   const isOriginFunction = typeof origin === 'function'
 
   if (preflight === true) {
-    fastify.options('*', { schema: { hide: hideOptionsRoute } }, (req, reply) => reply.send())
+    fastify.options('*', { schema: { hide: hideOptionsRoute } }, (req, reply) => {
+      // Do not handle preflight requests if the origin was not allowed
+      if (!req.corsOriginAllowed) {
+        reply.code(404).type('text/plain').send('Not Found')
+        return
+      }
+
+      // Strict mode enforces the required headers for preflight
+      if (strictPreflight === true && (!req.headers.origin || !req.headers['access-control-request-method'])) {
+        reply.status(400).type('text/plain').send('Invalid Preflight Request')
+        return
+      }
+
+      // Handle preflight headers
+      reply.header(
+        'Access-Control-Allow-Methods',
+        Array.isArray(methods) ? methods.join(', ') : methods
+      )
+
+      if (allowedHeaders === null) {
+        vary(reply, 'Access-Control-Request-Headers')
+        var reqAllowedHeaders = req.headers['access-control-request-headers']
+        if (reqAllowedHeaders !== undefined) {
+          reply.header('Access-Control-Allow-Headers', reqAllowedHeaders)
+        }
+      } else {
+        reply.header(
+          'Access-Control-Allow-Headers',
+          Array.isArray(allowedHeaders) ? allowedHeaders.join(', ') : allowedHeaders
+        )
+      }
+
+      if (maxAge !== null) {
+        reply.header('Access-Control-Max-Age', String(maxAge))
+      }
+
+      // Safari (and potentially other browsers) need content-length 0,
+      // for 204 or they just hang waiting for a body
+      reply
+        .code(optionsSuccessStatus)
+        .header('Content-Length', '0')
+        .send()
+    })
   }
+
+  fastify.decorateRequest('corsOriginAllowed', undefined)
+
   fastify.addHook('onRequest', onRequest)
   function onRequest (req, reply, next) {
     // Always set Vary header
     // https://github.com/rs/cors/issues/10
     vary(reply, 'Origin')
 
-    if (isOriginFalsy) return next()
+    if (isOriginFalsy) {
+      req.corsOriginAllowed = false
+      return next()
+    }
 
     configureOrigin(req, reply, (err, origin) => {
       if (err !== null) return next(err)
+
+      req.corsOriginAllowed = origin
+
       if (origin === false) return next()
 
       if (credentials) {
@@ -58,43 +110,7 @@ function fastifyCors (fastify, opts, next) {
         )
       }
 
-      if (req.raw.method === 'OPTIONS' && preflight === true) {
-        // preflight
-        reply.header(
-          'Access-Control-Allow-Methods',
-          Array.isArray(methods) ? methods.join(', ') : methods
-        )
-
-        if (allowedHeaders === null) {
-          vary(reply, 'Access-Control-Request-Headers')
-          var reqAllowedHeaders = req.headers['access-control-request-headers']
-          if (reqAllowedHeaders !== undefined) {
-            reply.header('Access-Control-Allow-Headers', reqAllowedHeaders)
-          }
-        } else {
-          reply.header(
-            'Access-Control-Allow-Headers',
-            Array.isArray(allowedHeaders) ? allowedHeaders.join(', ') : allowedHeaders
-          )
-        }
-
-        if (maxAge !== null) {
-          reply.header('Access-Control-Max-Age', String(maxAge))
-        }
-
-        if (preflightContinue) {
-          next()
-        } else {
-          // Safari (and potentially other browsers) need content-length 0,
-          // for 204 or they just hang waiting for a body
-          reply
-            .code(optionsSuccessStatus)
-            .header('Content-Length', '0')
-            .send()
-        }
-      } else {
-        next()
-      }
+      next()
     })
   }
 
