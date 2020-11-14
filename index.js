@@ -55,7 +55,7 @@ function fastifyCors (fastify, opts, next) {
 
       if (allowedHeaders === null) {
         vary(reply, 'Access-Control-Request-Headers')
-        var reqAllowedHeaders = req.headers['access-control-request-headers']
+        const reqAllowedHeaders = req.headers['access-control-request-headers']
         if (reqAllowedHeaders !== undefined) {
           reply.header('Access-Control-Allow-Headers', reqAllowedHeaders)
         }
@@ -115,9 +115,9 @@ function fastifyCors (fastify, opts, next) {
   }
 
   function configureOrigin (req, reply, callback) {
-    var reqOrigin = req.headers.origin
+    const reqOrigin = req.headers.origin
     if (isOriginFunction) {
-      var result = origin.call(fastify, reqOrigin, _onOrigin)
+      const result = origin.call(fastify, reqOrigin, _onOrigin)
       if (result && typeof result.then === 'function') {
         result.then(res => _onOrigin(null, res), callback)
       }
@@ -154,7 +154,7 @@ function fastifyCors (fastify, opts, next) {
 
   function isOriginAllowed (reqOrigin, origin) {
     if (Array.isArray(origin)) {
-      for (var i = 0; i < origin.length; ++i) {
+      for (let i = 0; i < origin.length; ++i) {
         if (isOriginAllowed(reqOrigin, origin[i])) {
           return true
         }
