@@ -83,7 +83,7 @@ const corsDelegate: OriginFunction = (origin, cb) => {
     return
   }
   cb(new Error(), false)
-};
+}
 
 app.register(fastifyCors, {
   origin: corsDelegate,
