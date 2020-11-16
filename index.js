@@ -127,19 +127,11 @@ function fastifyCors (fastify, opts, next) {
   }
 
   async function resolveOriginWrapper (req, cb) {
-    try {
-      const result = origin.call(fastify, req.headers.origin, cb)
+    const result = origin.call(fastify, req.headers.origin, cb)
 
-      // Allow for promises
-      if (result && typeof result.then === 'function') {
-        try {
-          return cb(null, await result)
-        } catch (error) {
-          return cb(error)
-        }
-      }
-    } catch (error) {
-      cb(error)
+    // Allow for promises
+    if (result && typeof result.then === 'function') {
+      result.then(res => cb(null, res), cb)
     }
   }
 }
