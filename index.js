@@ -126,7 +126,7 @@ function fastifyCors (fastify, opts, next) {
       .send()
   }
 
-  async function resolveOriginWrapper (req, cb) {
+  function resolveOriginWrapper (req, cb) {
     const result = origin.call(fastify, req.headers.origin, cb)
 
     // Allow for promises
