@@ -3,6 +3,20 @@
 const fp = require('fastify-plugin')
 const vary = require('./vary')
 
+const defaultOptions = {
+  origin: '*',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+  credentials: false,
+  exposedHeaders: null,
+  allowedHeaders: null,
+  maxAge: null,
+  preflight: true,
+  hideOptionsRoute: true,
+  strictPreflight: true
+}
+
 function fastifyCors (fastify, opts, next) {
   const {
     origin,
@@ -15,19 +29,7 @@ function fastifyCors (fastify, opts, next) {
     preflight,
     hideOptionsRoute,
     strictPreflight
-  } = Object.assign({
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-    credentials: false,
-    exposedHeaders: null,
-    allowedHeaders: null,
-    maxAge: null,
-    preflight: true,
-    hideOptionsRoute: true,
-    strictPreflight: true
-  }, opts)
+  } = Object.assign({}, defaultOptions, opts)
 
   const resolveOriginOption = typeof origin === 'function' ? resolveOriginWrapper : (_, cb) => cb(null, origin)
 
