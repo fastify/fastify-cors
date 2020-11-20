@@ -56,11 +56,6 @@ function fastifyCors (fastify, opts, next) {
         return next()
       }
 
-      // Falsy values are invalid
-      if (!resolvedOriginOption) {
-        return next(new Error('Invalid CORS origin option'))
-      }
-
       // Enable preflight
       req.corsOriginAllowed = true
 
@@ -137,7 +132,7 @@ function fastifyCors (fastify, opts, next) {
 }
 
 function getAccessControlAllowOriginHeader (reqOrigin, originOption) {
-  if (originOption === '*') {
+  if (!originOption || originOption === '*') {
     // allow any origin
     return '*'
   }
