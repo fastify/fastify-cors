@@ -31,7 +31,7 @@ function fastifyCors (fastify, opts, next) {
 
   const resolveOriginOption = typeof origin === 'function' ? resolveOriginWrapper : (_, cb) => cb(null, origin)
 
-  fastify.decorateRequest('corsOriginAllowed', undefined)
+  fastify.decorateRequest('corsPreflightEnabled', undefined)
   fastify.addHook('onRequest', onRequest)
 
   if (preflight === true) {
@@ -50,14 +50,12 @@ function fastifyCors (fastify, opts, next) {
         return next(error)
       }
 
+      req.corsPreflightEnabled = resolvedOriginOption
+
       // Disable CORS and preflight if false
       if (resolvedOriginOption === false) {
-        req.corsOriginAllowed = false
         return next()
       }
-
-      // Enable preflight
-      req.corsOriginAllowed = true
 
       reply.header('Access-Control-Allow-Origin',
         getAccessControlAllowOriginHeader(req.headers.origin, resolvedOriginOption))
@@ -79,7 +77,7 @@ function fastifyCors (fastify, opts, next) {
 
   function preflightHandler (req, reply) {
     // Do not handle preflight requests if the origin was not allowed
-    if (!req.corsOriginAllowed) {
+    if (!req.corsPreflightEnabled) {
       reply.code(404).type('text/plain').send('Not Found')
       return
     }
