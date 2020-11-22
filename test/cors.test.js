@@ -160,10 +160,6 @@ test('Dynamic origin resolution (errored)', t => {
   }
   fastify.register(cors, { origin })
 
-  fastify.get('/', (req, reply) => {
-    reply.send('ok')
-  })
-
   fastify.inject({
     method: 'GET',
     url: '/',
@@ -251,10 +247,6 @@ test('Dynamic origin resolution (errored - promises)', t => {
     })
   }
   fastify.register(cors, { origin })
-
-  fastify.get('/', (req, reply) => {
-    reply.send('ok')
-  })
 
   fastify.inject({
     method: 'GET',

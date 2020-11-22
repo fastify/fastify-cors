@@ -3,6 +3,20 @@
 const fp = require('fastify-plugin')
 const vary = require('./vary')
 
+const defaultOptions = {
+  origin: '*',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+  credentials: false,
+  exposedHeaders: null,
+  allowedHeaders: null,
+  maxAge: null,
+  preflight: true,
+  hideOptionsRoute: true,
+  strictPreflight: true
+}
+
 function fastifyCors (fastify, opts, next) {
   const {
     origin,
@@ -15,89 +29,38 @@ function fastifyCors (fastify, opts, next) {
     preflight,
     hideOptionsRoute,
     strictPreflight
-  } = Object.assign({
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-    credentials: false,
-    exposedHeaders: null,
-    allowedHeaders: null,
-    maxAge: null,
-    preflight: true,
-    hideOptionsRoute: true,
-    strictPreflight: true
-  }, opts)
+  } = Object.assign({}, defaultOptions, opts)
 
-  const isOriginFalsy = !origin
-  const isOriginString = typeof origin === 'string'
-  const isOriginFunction = typeof origin === 'function'
+  const resolveOriginOption = typeof origin === 'function' ? resolveOriginWrapper : (_, cb) => cb(null, origin)
+
+  fastify.decorateRequest('corsPreflightEnabled', undefined)
+  fastify.addHook('onRequest', onRequest)
 
   if (preflight === true) {
-    fastify.options('*', { schema: { hide: hideOptionsRoute } }, (req, reply) => {
-      // Do not handle preflight requests if the origin was not allowed
-      if (!req.corsOriginAllowed) {
-        reply.code(404).type('text/plain').send('Not Found')
-        return
-      }
-
-      // Strict mode enforces the required headers for preflight
-      if (strictPreflight === true && (!req.headers.origin || !req.headers['access-control-request-method'])) {
-        reply.status(400).type('text/plain').send('Invalid Preflight Request')
-        return
-      }
-
-      // Handle preflight headers
-      reply.header(
-        'Access-Control-Allow-Methods',
-        Array.isArray(methods) ? methods.join(', ') : methods
-      )
-
-      if (allowedHeaders === null) {
-        vary(reply, 'Access-Control-Request-Headers')
-        const reqAllowedHeaders = req.headers['access-control-request-headers']
-        if (reqAllowedHeaders !== undefined) {
-          reply.header('Access-Control-Allow-Headers', reqAllowedHeaders)
-        }
-      } else {
-        reply.header(
-          'Access-Control-Allow-Headers',
-          Array.isArray(allowedHeaders) ? allowedHeaders.join(', ') : allowedHeaders
-        )
-      }
-
-      if (maxAge !== null) {
-        reply.header('Access-Control-Max-Age', String(maxAge))
-      }
-
-      // Safari (and potentially other browsers) need content-length 0,
-      // for 204 or they just hang waiting for a body
-      reply
-        .code(optionsSuccessStatus)
-        .header('Content-Length', '0')
-        .send()
-    })
+    fastify.options('*', { schema: { hide: hideOptionsRoute } }, preflightHandler)
   }
 
-  fastify.decorateRequest('corsOriginAllowed', undefined)
+  next()
 
-  fastify.addHook('onRequest', onRequest)
   function onRequest (req, reply, next) {
     // Always set Vary header
     // https://github.com/rs/cors/issues/10
     vary(reply, 'Origin')
 
-    if (isOriginFalsy) {
-      req.corsOriginAllowed = false
-      return next()
-    }
+    resolveOriginOption(req, (error, resolvedOriginOption) => {
+      if (error !== null) {
+        return next(error)
+      }
 
-    configureOrigin(req, reply, (err, origin) => {
-      if (err !== null) return next(err)
+      req.corsPreflightEnabled = resolvedOriginOption
 
-      req.corsOriginAllowed = origin
+      // Disable CORS and preflight if false
+      if (resolvedOriginOption === false) {
+        return next()
+      }
 
-      if (origin === false) return next()
+      reply.header('Access-Control-Allow-Origin',
+        getAccessControlAllowOriginHeader(req.headers.origin, resolvedOriginOption))
 
       if (credentials) {
         reply.header('Access-Control-Allow-Credentials', 'true')
@@ -110,66 +73,94 @@ function fastifyCors (fastify, opts, next) {
         )
       }
 
-      next()
+      return next()
     })
   }
 
-  function configureOrigin (req, reply, callback) {
-    const reqOrigin = req.headers.origin
-    if (isOriginFunction) {
-      const result = origin.call(fastify, reqOrigin, _onOrigin)
-      if (result && typeof result.then === 'function') {
-        result.then(res => _onOrigin(null, res), callback)
+  function preflightHandler (req, reply) {
+    // Do not handle preflight requests if the origin was not allowed
+    if (!req.corsPreflightEnabled) {
+      reply.code(404).type('text/plain').send('Not Found')
+      return
+    }
+
+    // Strict mode enforces the required headers for preflight
+    if (strictPreflight === true && (!req.headers.origin || !req.headers['access-control-request-method'])) {
+      reply.status(400).type('text/plain').send('Invalid Preflight Request')
+      return
+    }
+
+    // Handle preflight headers
+    reply.header(
+      'Access-Control-Allow-Methods',
+      Array.isArray(methods) ? methods.join(', ') : methods
+    )
+
+    if (allowedHeaders === null) {
+      vary(reply, 'Access-Control-Request-Headers')
+      const reqAllowedHeaders = req.headers['access-control-request-headers']
+      if (reqAllowedHeaders !== undefined) {
+        reply.header('Access-Control-Allow-Headers', reqAllowedHeaders)
       }
     } else {
-      _configureOrigin(origin)
+      reply.header(
+        'Access-Control-Allow-Headers',
+        Array.isArray(allowedHeaders) ? allowedHeaders.join(', ') : allowedHeaders
+      )
     }
 
-    function _onOrigin (err, origin) {
-      if (err !== null || origin === false) {
-        return callback(err, origin)
-      }
-
-      _configureOrigin(origin)
+    if (maxAge !== null) {
+      reply.header('Access-Control-Max-Age', String(maxAge))
     }
 
-    function _configureOrigin (origin) {
-      if (!origin || origin === '*') {
-        // allow any origin
-        reply.header('Access-Control-Allow-Origin', '*')
-      } else if (isOriginString) {
-        // fixed origin
-        reply.header('Access-Control-Allow-Origin', origin)
-      } else {
-        // reflect origin
-        reply.header(
-          'Access-Control-Allow-Origin',
-          isOriginAllowed(reqOrigin, origin) ? reqOrigin : false
-        )
-      }
-
-      callback(null, origin)
-    }
+    // Safari (and potentially other browsers) need content-length 0,
+    // for 204 or they just hang waiting for a body
+    reply
+      .code(optionsSuccessStatus)
+      .header('Content-Length', '0')
+      .send()
   }
 
-  function isOriginAllowed (reqOrigin, origin) {
-    if (Array.isArray(origin)) {
-      for (let i = 0; i < origin.length; ++i) {
-        if (isOriginAllowed(reqOrigin, origin[i])) {
-          return true
-        }
-      }
-      return false
-    } else if (typeof origin === 'string') {
-      return reqOrigin === origin
-    } else if (origin instanceof RegExp) {
-      return origin.test(reqOrigin)
-    } else {
-      return !!origin
+  function resolveOriginWrapper (req, cb) {
+    const result = origin.call(fastify, req.headers.origin, cb)
+
+    // Allow for promises
+    if (result && typeof result.then === 'function') {
+      result.then(res => cb(null, res), cb)
     }
   }
+}
 
-  next()
+function getAccessControlAllowOriginHeader (reqOrigin, originOption) {
+  if (!originOption || originOption === '*') {
+    // allow any origin
+    return '*'
+  }
+
+  if (typeof originOption === 'string') {
+    // fixed origin
+    return originOption
+  }
+
+  // reflect origin
+  return isRequestOriginAllowed(reqOrigin, originOption) ? reqOrigin : false
+}
+
+function isRequestOriginAllowed (reqOrigin, allowedOrigin) {
+  if (Array.isArray(allowedOrigin)) {
+    for (let i = 0; i < allowedOrigin.length; ++i) {
+      if (isRequestOriginAllowed(reqOrigin, allowedOrigin[i])) {
+        return true
+      }
+    }
+    return false
+  } else if (typeof allowedOrigin === 'string') {
+    return reqOrigin === allowedOrigin
+  } else if (allowedOrigin instanceof RegExp) {
+    return allowedOrigin.test(reqOrigin)
+  } else {
+    return !!allowedOrigin
+  }
 }
 
 module.exports = fp(fastifyCors, {
