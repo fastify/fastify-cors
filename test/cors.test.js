@@ -328,6 +328,30 @@ test('Should reply 404 without cors headers other than `vary` when origin is fal
   })
 })
 
+test('Server error if origin option is falsy but not false', t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+  fastify.register(cors, { origin: '' })
+
+  fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: { origin: 'example.com' }
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.strictEqual(res.statusCode, 500)
+    t.deepEqual(res.json(), { statusCode: 500, error: 'Internal Server Error', message: 'Invalid CORS origin option' })
+    t.deepEqual(res.headers, {
+      'content-length': '89',
+      'content-type': 'application/json; charset=utf-8',
+      connection: 'keep-alive',
+      vary: 'Origin'
+    })
+  })
+})
+
 test('Allow only request from a specific origin', t => {
   t.plan(4)
 
