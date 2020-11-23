@@ -170,6 +170,26 @@ test('Dynamic origin resolution (errored)', t => {
   })
 })
 
+test('Dynamic origin resolution (invalid result)', t => {
+  t.plan(3)
+
+  const fastify = Fastify()
+  const origin = (header, cb) => {
+    t.strictEqual(header, 'example.com')
+    cb(null, undefined)
+  }
+  fastify.register(cors, { origin })
+
+  fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: { origin: 'example.com' }
+  }, (err, res) => {
+    t.error(err)
+    t.strictEqual(res.statusCode, 500)
+  })
+})
+
 test('Dynamic origin resolution (valid origin - promises)', t => {
   t.plan(5)
 
