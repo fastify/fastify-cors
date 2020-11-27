@@ -12,6 +12,7 @@ app.register(fastifyCors, {
   credentials: true,
   exposedHeaders: 'authorization',
   maxAge: 13000,
+  preflightContinue: false,
   optionsSuccessStatus: 200,
   preflight: false,
   strictPreflight: false
@@ -24,6 +25,7 @@ app.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
+  preflightContinue: false,
   optionsSuccessStatus: 200,
   preflight: false,
   strictPreflight: false
@@ -36,6 +38,7 @@ app.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
+  preflightContinue: false,
   optionsSuccessStatus: 200,
   preflight: false,
   strictPreflight: false
@@ -48,6 +51,7 @@ app.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
+  preflightContinue: false,
   optionsSuccessStatus: 200,
   preflight: false,
   strictPreflight: false
@@ -60,6 +64,7 @@ app.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
+  preflightContinue: false,
   optionsSuccessStatus: 200,
   preflight: false,
   strictPreflight: false
@@ -72,6 +77,7 @@ app.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
+  preflightContinue: false,
   optionsSuccessStatus: 200,
   preflight: false,
   strictPreflight: false
@@ -108,6 +114,7 @@ appHttp2.register(fastifyCors, {
   credentials: true,
   exposedHeaders: 'authorization',
   maxAge: 13000,
+  preflightContinue: false,
   optionsSuccessStatus: 200,
   preflight: false,
   strictPreflight: false
@@ -120,6 +127,7 @@ appHttp2.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
+  preflightContinue: false,
   optionsSuccessStatus: 200,
   preflight: false,
   strictPreflight: false
@@ -132,6 +140,7 @@ appHttp2.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
+  preflightContinue: false,
   optionsSuccessStatus: 200,
   preflight: false,
   strictPreflight: false
@@ -144,6 +153,7 @@ appHttp2.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
+  preflightContinue: false,
   optionsSuccessStatus: 200,
   preflight: false,
   strictPreflight: false
@@ -156,6 +166,7 @@ appHttp2.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
+  preflightContinue: false,
   optionsSuccessStatus: 200,
   preflight: false,
   strictPreflight: false
@@ -168,6 +179,7 @@ appHttp2.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
+  preflightContinue: false,
   optionsSuccessStatus: 200,
   preflight: false,
   strictPreflight: false
@@ -186,6 +198,7 @@ appHttp2.register(fastifyCors, {
   credentials: true,
   exposedHeaders: ['authorization'],
   maxAge: 13000,
+  preflightContinue: false,
   optionsSuccessStatus: 200,
   preflight: false,
   strictPreflight: false

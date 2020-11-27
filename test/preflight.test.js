@@ -100,7 +100,11 @@ test('Should be able to override preflight response with a route', t => {
 
   fastify.inject({
     method: 'OPTIONS',
-    url: '/'
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
@@ -280,6 +284,62 @@ test('Should reply to all preflight requests when strictPreflight is disabled', 
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
       vary: 'Origin, Access-Control-Request-Headers',
       'content-length': '0'
+    })
+  })
+})
+
+test('Default empty 200 response with preflightContinue on OPTIONS routes', t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+  fastify.register(cors, { preflightContinue: true })
+
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/doesnotexist',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.strictEqual(res.statusCode, 200)
+    t.strictEqual(res.payload, '')
+    t.match(res.headers, {
+      'access-control-allow-origin': '*',
+      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      vary: 'Origin, Access-Control-Request-Headers'
+    })
+  })
+})
+
+test('Can override preflight response with preflightContinue', t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+  fastify.register(cors, { preflightContinue: true })
+
+  fastify.options('/', (req, reply) => {
+    reply.send('ok')
+  })
+
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.strictEqual(res.statusCode, 200)
+    t.strictEqual(res.payload, 'ok')
+    t.match(res.headers, {
+      'access-control-allow-origin': '*',
+      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      vary: 'Origin, Access-Control-Request-Headers'
     })
   })
 })

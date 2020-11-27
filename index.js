@@ -28,16 +28,31 @@ function fastifyCors (fastify, opts, next) {
     optionsSuccessStatus,
     preflight,
     hideOptionsRoute,
-    strictPreflight
+    strictPreflight,
+    preflightContinue
   } = Object.assign({}, defaultOptions, opts)
 
   const resolveOriginOption = typeof origin === 'function' ? resolveOriginWrapper : (_, cb) => cb(null, origin)
 
-  fastify.decorateRequest('corsPreflightEnabled', undefined)
+  fastify.decorateRequest('corsPreflightEnabled', false)
   fastify.addHook('onRequest', onRequest)
 
   if (preflight === true) {
-    fastify.options('*', { schema: { hide: hideOptionsRoute } }, preflightHandler)
+    // The preflight reply must occur in the hook. This allows fastify-cors to reply to
+    // preflight requests BEFORE possible authentication plugins. If the preflight reply
+    // occurred in the this handler, other plugins may deny the request since the browser will
+    // remove most headers (such as the Authentication header).
+    //
+    // This route simply enables fastify to accept preflight requests.
+    fastify.options('*', { schema: { hide: hideOptionsRoute } }, (req, reply) => {
+      if (!req.corsPreflightEnabled) {
+        // Do not handle preflight requests if the origin option disabled CORS
+        reply.code(404).type('text/plain').send('Not Found')
+        return
+      }
+
+      reply.send()
+    })
   }
 
   next()
@@ -54,7 +69,6 @@ function fastifyCors (fastify, opts, next) {
 
       // Disable CORS and preflight if false
       if (resolvedOriginOption === false) {
-        req.corsPreflightEnabled = false
         return next()
       }
 
@@ -63,41 +77,52 @@ function fastifyCors (fastify, opts, next) {
         return next(new Error('Invalid CORS origin option'))
       }
 
-      // Enable preflight
-      req.corsPreflightEnabled = true
+      addCorsHeaders(req, reply, resolvedOriginOption)
 
-      reply.header('Access-Control-Allow-Origin',
-        getAccessControlAllowOriginHeader(req.headers.origin, resolvedOriginOption))
+      if (req.raw.method === 'OPTIONS' && preflight === true) {
+        req.corsPreflightEnabled = true
 
-      if (credentials) {
-        reply.header('Access-Control-Allow-Credentials', 'true')
-      }
+        // Strict mode enforces the required headers for preflight
+        if (strictPreflight === true && (!req.headers.origin || !req.headers['access-control-request-method'])) {
+          reply.status(400).type('text/plain').send('Invalid Preflight Request')
+          return
+        }
 
-      if (exposedHeaders !== null) {
-        reply.header(
-          'Access-Control-Expose-Headers',
-          Array.isArray(exposedHeaders) ? exposedHeaders.join(', ') : exposedHeaders
-        )
+        addPreflightHeaders(req, reply)
+
+        if (!preflightContinue) {
+          // Do not call the hook callback and terminate the request
+          // Safari (and potentially other browsers) need content-length 0,
+          // for 204 or they just hang waiting for a body
+          reply
+            .code(optionsSuccessStatus)
+            .header('Content-Length', '0')
+            .send()
+          return
+        }
       }
 
       return next()
     })
   }
 
-  function preflightHandler (req, reply) {
-    // Do not handle preflight requests if the origin option disabled CORS
-    if (!req.corsPreflightEnabled) {
-      reply.code(404).type('text/plain').send('Not Found')
-      return
+  function addCorsHeaders (req, reply, originOption) {
+    reply.header('Access-Control-Allow-Origin',
+      getAccessControlAllowOriginHeader(req.headers.origin, originOption))
+
+    if (credentials) {
+      reply.header('Access-Control-Allow-Credentials', 'true')
     }
 
-    // Strict mode enforces the required headers for preflight
-    if (strictPreflight === true && (!req.headers.origin || !req.headers['access-control-request-method'])) {
-      reply.status(400).type('text/plain').send('Invalid Preflight Request')
-      return
+    if (exposedHeaders !== null) {
+      reply.header(
+        'Access-Control-Expose-Headers',
+        Array.isArray(exposedHeaders) ? exposedHeaders.join(', ') : exposedHeaders
+      )
     }
+  }
 
-    // Handle preflight headers
+  function addPreflightHeaders (req, reply) {
     reply.header(
       'Access-Control-Allow-Methods',
       Array.isArray(methods) ? methods.join(', ') : methods
@@ -119,13 +144,6 @@ function fastifyCors (fastify, opts, next) {
     if (maxAge !== null) {
       reply.header('Access-Control-Max-Age', String(maxAge))
     }
-
-    // Safari (and potentially other browsers) need content-length 0,
-    // for 204 or they just hang waiting for a body
-    reply
-      .code(optionsSuccessStatus)
-      .header('Content-Length', '0')
-      .send()
   }
 
   function resolveOriginWrapper (req, cb) {

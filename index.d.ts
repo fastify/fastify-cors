@@ -44,6 +44,10 @@ export interface FastifyCorsOptions {
      */
     maxAge?: number;
     /**
+     * Pass the CORS preflight response to the route handler (default: false).
+     */
+    preflightContinue?: boolean;
+    /**
      * Provides a status code to use for successful OPTIONS requests,
      * since some legacy browsers (IE11, various SmartTVs) choke on 204.
      */
