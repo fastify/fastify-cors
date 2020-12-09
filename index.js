@@ -40,7 +40,7 @@ function fastifyCors (fastify, opts, next) {
   if (preflight === true) {
     // The preflight reply must occur in the hook. This allows fastify-cors to reply to
     // preflight requests BEFORE possible authentication plugins. If the preflight reply
-    // occurred in the this handler, other plugins may deny the request since the browser will
+    // occurred in this handler, other plugins may deny the request since the browser will
     // remove most headers (such as the Authentication header).
     //
     // This route simply enables fastify to accept preflight requests.
