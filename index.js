@@ -80,13 +80,13 @@ function fastifyCors (fastify, opts, next) {
       addCorsHeaders(req, reply, resolvedOriginOption)
 
       if (req.raw.method === 'OPTIONS' && preflight === true) {
-        req.corsPreflightEnabled = true
-
         // Strict mode enforces the required headers for preflight
         if (strictPreflight === true && (!req.headers.origin || !req.headers['access-control-request-method'])) {
           reply.status(400).type('text/plain').send('Invalid Preflight Request')
           return
         }
+
+        req.corsPreflightEnabled = true
 
         addPreflightHeaders(req, reply)
 
