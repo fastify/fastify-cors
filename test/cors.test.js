@@ -302,10 +302,10 @@ test('Should reply 404 without cors headers other than `vary` when origin is fal
     t.error(err)
     delete res.headers.date
     t.strictEqual(res.statusCode, 404)
-    t.strictEqual(res.payload, 'Not Found')
+    t.strictEqual(res.payload, '{"message":"Route OPTIONS:/ not found","error":"Not Found","statusCode":404}')
     t.deepEqual(res.headers, {
-      'content-length': '9',
-      'content-type': 'text/plain',
+      'content-length': '76',
+      'content-type': 'application/json; charset=utf-8',
       connection: 'keep-alive',
       vary: 'Origin'
     })
