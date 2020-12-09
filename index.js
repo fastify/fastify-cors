@@ -47,7 +47,7 @@ function fastifyCors (fastify, opts, next) {
     fastify.options('*', { schema: { hide: hideOptionsRoute } }, (req, reply) => {
       if (!req.corsPreflightEnabled) {
         // Do not handle preflight requests if the origin option disabled CORS
-        reply.code(404).type('text/plain').send('Not Found')
+        reply.callNotFound()
         return
       }
 
