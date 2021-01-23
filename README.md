@@ -58,6 +58,30 @@ You can use it as is without passing any option, or you can configure it as expl
 * `strictPreflight`: Enforces strict requirement of the CORS preflight request headers (**Access-Control-Request-Method** and **Origin**) as defined by the [W3C CORS specification](https://www.w3.org/TR/2020/SPSD-cors-20200602/#resource-preflight-requests) (the current [fetch living specification](https://fetch.spec.whatwg.org/) does not define server behavior for missing headers). Preflight requests without the required headers will result in 400 errors when set to `true` (default: `true`).
 * `hideOptionsRoute`: hide options route from the documentation built using [fastify-swagger](https://github.com/fastify/fastify-swagger) (default: `true`).
 
+### Configuring CORS Asynchronously
+
+```js
+const fastify = require('fastify')()
+
+fastify.register(require('fastify-cors'), (instance) => { (req, cb) => {
+  let corsOptions;
+  // do not include CORS headers for requests from localhost
+  if (/localhost/.test(origin)) {
+    corsOptions = { origin: false }
+  } else {
+    corsOptions = { origin: true }
+  }
+  callback(null, corsOptions) // callback expects two parameters: error and options
+  }
+})
+
+fastify.get('/', (req, reply) => {
+  reply.send({ hello: 'world' })
+})
+
+fastify.listen(3000)
+```
+
 ## Acknowledgements
 
 The code is a port for Fastify of [`expressjs/cors`](https://github.com/expressjs/cors).
