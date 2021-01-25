@@ -1,5 +1,10 @@
 import fastify from 'fastify'
-import fastifyCors, { OriginFunction } from '..'
+import fastifyCors, {
+  FastifyCorsOptionsDelegate,
+  FastifyCorsOptionsDelegatePromise,
+  FastifyPluginOptionsDelegate,
+  OriginFunction
+} from '..'
 
 const app = fastify()
 
@@ -203,3 +208,49 @@ appHttp2.register(fastifyCors, {
   preflight: false,
   strictPreflight: false
 })
+
+appHttp2.register(fastifyCors, (): FastifyCorsOptionsDelegate => (req, cb) => {
+  cb(null, {
+    origin: [/\*/, /something/],
+    allowedHeaders: ['authorization', 'content-type'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true,
+    exposedHeaders: ['authorization'],
+    maxAge: 13000,
+    preflightContinue: false,
+    optionsSuccessStatus: 200,
+    preflight: false,
+    strictPreflight: false
+  })
+})
+
+appHttp2.register(fastifyCors, (): FastifyCorsOptionsDelegatePromise => (req) => {
+  return Promise.resolve({
+    origin: [/\*/, /something/],
+    allowedHeaders: ['authorization', 'content-type'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true,
+    exposedHeaders: ['authorization'],
+    maxAge: 13000,
+    preflightContinue: false,
+    optionsSuccessStatus: 200,
+    preflight: false,
+    strictPreflight: false
+  })
+})
+
+const delegate: FastifyPluginOptionsDelegate<FastifyCorsOptionsDelegatePromise> = () => async (req) => {
+  return {
+    origin: [/\*/, /something/],
+    allowedHeaders: ['authorization', 'content-type'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true,
+    exposedHeaders: ['authorization'],
+    maxAge: 13000,
+    preflightContinue: false,
+    optionsSuccessStatus: 200,
+    preflight: false,
+    strictPreflight: false
+  }
+}
+appHttp2.register(fastifyCors, delegate)
