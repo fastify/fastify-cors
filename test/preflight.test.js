@@ -20,8 +20,8 @@ test('Should reply to preflight requests', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 204)
-    t.strictEqual(res.payload, '')
+    t.equal(res.statusCode, 204)
+    t.equal(res.payload, '')
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -49,8 +49,8 @@ test('Should add access-control-allow-headers to response if preflight req has a
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 204)
-    t.strictEqual(res.payload, '')
+    t.equal(res.statusCode, 204)
+    t.equal(res.payload, '')
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -77,8 +77,8 @@ test('Should reply to preflight requests with custom status code', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, '')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, '')
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -108,8 +108,8 @@ test('Should be able to override preflight response with a route', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
     t.match(res.headers, {
       // Only the base cors headers and no preflight headers
       'access-control-allow-origin': '*',
@@ -134,8 +134,8 @@ test('Should reply to all options requests', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 204)
-    t.strictEqual(res.payload, '')
+    t.equal(res.statusCode, 204)
+    t.equal(res.payload, '')
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -159,7 +159,7 @@ test('Should support a prefix for preflight requests', t => {
     url: '/hello'
   }, (err, res) => {
     t.error(err)
-    t.strictEqual(res.statusCode, 404)
+    t.equal(res.statusCode, 404)
   })
 
   fastify.inject({
@@ -172,8 +172,8 @@ test('Should support a prefix for preflight requests', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 204)
-    t.strictEqual(res.payload, '')
+    t.equal(res.statusCode, 204)
+    t.equal(res.payload, '')
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -190,7 +190,7 @@ test('show options route', t => {
 
   fastify.addHook('onRoute', (route) => {
     if (route.method === 'OPTIONS' && route.url === '*') {
-      t.strictEqual(route.schema.hide, false)
+      t.equal(route.schema.hide, false)
     }
   })
   fastify.register(cors, { hideOptionsRoute: false })
@@ -216,7 +216,7 @@ test('Allow only request from with specific methods', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 204)
+    t.equal(res.statusCode, 204)
     t.match(res.headers, {
       'access-control-allow-methods': 'GET, POST',
       vary: 'Origin'
@@ -238,8 +238,8 @@ test('Should reply with 400 error to OPTIONS requests missing origin header when
     }
   }, (err, res) => {
     t.error(err)
-    t.strictEqual(res.statusCode, 400)
-    t.strictEqual(res.payload, 'Invalid Preflight Request')
+    t.equal(res.statusCode, 400)
+    t.equal(res.payload, 'Invalid Preflight Request')
   })
 })
 
@@ -259,8 +259,8 @@ test('Should reply with 400 to OPTIONS requests when missing Access-Control-Requ
     }
   }, (err, res) => {
     t.error(err)
-    t.strictEqual(res.statusCode, 400)
-    t.strictEqual(res.payload, 'Invalid Preflight Request')
+    t.equal(res.statusCode, 400)
+    t.equal(res.payload, 'Invalid Preflight Request')
   })
 })
 
@@ -277,8 +277,8 @@ test('Should reply to all preflight requests when strictPreflight is disabled', 
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 204)
-    t.strictEqual(res.payload, '')
+    t.equal(res.statusCode, 204)
+    t.equal(res.payload, '')
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -304,8 +304,8 @@ test('Default empty 200 response with preflightContinue on OPTIONS routes', t =>
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, '')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, '')
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -334,8 +334,8 @@ test('Can override preflight response with preflightContinue', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',

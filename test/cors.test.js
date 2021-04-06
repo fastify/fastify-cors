@@ -20,8 +20,8 @@ test('Should add cors headers', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-allow-origin': '*'
     })
@@ -55,8 +55,8 @@ test('Should add cors headers (custom values)', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 204)
-    t.strictEqual(res.payload, '')
+    t.equal(res.statusCode, 204)
+    t.equal(res.payload, '')
     t.match(res.headers, {
       'access-control-allow-origin': 'example.com',
       vary: 'Origin',
@@ -75,8 +75,8 @@ test('Should add cors headers (custom values)', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-allow-origin': 'example.com',
       vary: 'Origin',
@@ -129,8 +129,8 @@ test('Should support dynamic config (callback)', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-allow-origin': 'example.com',
       vary: 'Origin',
@@ -150,8 +150,8 @@ test('Should support dynamic config (callback)', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 204)
-    t.strictEqual(res.payload, '')
+    t.equal(res.statusCode, 204)
+    t.equal(res.payload, '')
     t.match(res.headers, {
       'access-control-allow-origin': 'sample.com',
       vary: 'Origin',
@@ -173,7 +173,7 @@ test('Should support dynamic config (callback)', t => {
     }
   }, (err, res) => {
     t.error(err)
-    t.strictEqual(res.statusCode, 500)
+    t.equal(res.statusCode, 500)
   })
 })
 
@@ -219,8 +219,8 @@ test('Should support dynamic config (Promise)', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-allow-origin': 'example.com',
       vary: 'Origin',
@@ -240,8 +240,8 @@ test('Should support dynamic config (Promise)', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 204)
-    t.strictEqual(res.payload, '')
+    t.equal(res.statusCode, 204)
+    t.equal(res.payload, '')
     t.match(res.headers, {
       'access-control-allow-origin': 'sample.com',
       vary: 'Origin',
@@ -263,7 +263,7 @@ test('Should support dynamic config (Promise)', t => {
     }
   }, (err, res) => {
     t.error(err)
-    t.strictEqual(res.statusCode, 500)
+    t.equal(res.statusCode, 500)
   })
 })
 
@@ -286,7 +286,7 @@ test('Should support dynamic config. (Invalid function)', t => {
     }
   }, (err, res) => {
     t.error(err)
-    t.strictEqual(res.statusCode, 500)
+    t.equal(res.statusCode, 500)
   })
 })
 
@@ -295,8 +295,8 @@ test('Dynamic origin resolution (valid origin)', t => {
 
   const fastify = Fastify()
   const origin = function (header, cb) {
-    t.strictEqual(header, 'example.com')
-    t.deepEqual(this, fastify)
+    t.equal(header, 'example.com')
+    t.same(this, fastify)
     cb(null, true)
   }
   fastify.register(cors, { origin })
@@ -312,8 +312,8 @@ test('Dynamic origin resolution (valid origin)', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-allow-origin': 'example.com',
       vary: 'Origin'
@@ -326,7 +326,7 @@ test('Dynamic origin resolution (not valid origin)', t => {
 
   const fastify = Fastify()
   const origin = (header, cb) => {
-    t.strictEqual(header, 'example.com')
+    t.equal(header, 'example.com')
     cb(null, false)
   }
   fastify.register(cors, { origin })
@@ -342,9 +342,9 @@ test('Dynamic origin resolution (not valid origin)', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
-    t.deepEqual(res.headers, {
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
+    t.same(res.headers, {
       'content-length': '2',
       'content-type': 'text/plain; charset=utf-8',
       connection: 'keep-alive',
@@ -358,7 +358,7 @@ test('Dynamic origin resolution (errored)', t => {
 
   const fastify = Fastify()
   const origin = (header, cb) => {
-    t.strictEqual(header, 'example.com')
+    t.equal(header, 'example.com')
     cb(new Error('ouch'))
   }
   fastify.register(cors, { origin })
@@ -369,7 +369,7 @@ test('Dynamic origin resolution (errored)', t => {
     headers: { origin: 'example.com' }
   }, (err, res) => {
     t.error(err)
-    t.strictEqual(res.statusCode, 500)
+    t.equal(res.statusCode, 500)
   })
 })
 
@@ -378,7 +378,7 @@ test('Dynamic origin resolution (invalid result)', t => {
 
   const fastify = Fastify()
   const origin = (header, cb) => {
-    t.strictEqual(header, 'example.com')
+    t.equal(header, 'example.com')
     cb(null, undefined)
   }
   fastify.register(cors, { origin })
@@ -389,7 +389,7 @@ test('Dynamic origin resolution (invalid result)', t => {
     headers: { origin: 'example.com' }
   }, (err, res) => {
     t.error(err)
-    t.strictEqual(res.statusCode, 500)
+    t.equal(res.statusCode, 500)
   })
 })
 
@@ -399,7 +399,7 @@ test('Dynamic origin resolution (valid origin - promises)', t => {
   const fastify = Fastify()
   const origin = (header, cb) => {
     return new Promise((resolve, reject) => {
-      t.strictEqual(header, 'example.com')
+      t.equal(header, 'example.com')
       resolve(true)
     })
   }
@@ -416,8 +416,8 @@ test('Dynamic origin resolution (valid origin - promises)', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-allow-origin': 'example.com',
       vary: 'Origin'
@@ -431,7 +431,7 @@ test('Dynamic origin resolution (not valid origin - promises)', t => {
   const fastify = Fastify()
   const origin = (header, cb) => {
     return new Promise((resolve, reject) => {
-      t.strictEqual(header, 'example.com')
+      t.equal(header, 'example.com')
       resolve(false)
     })
   }
@@ -448,9 +448,9 @@ test('Dynamic origin resolution (not valid origin - promises)', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
-    t.deepEqual(res.headers, {
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
+    t.same(res.headers, {
       'content-length': '2',
       'content-type': 'text/plain; charset=utf-8',
       connection: 'keep-alive',
@@ -465,7 +465,7 @@ test('Dynamic origin resolution (errored - promises)', t => {
   const fastify = Fastify()
   const origin = (header, cb) => {
     return new Promise((resolve, reject) => {
-      t.strictEqual(header, 'example.com')
+      t.equal(header, 'example.com')
       reject(new Error('ouch'))
     })
   }
@@ -477,7 +477,7 @@ test('Dynamic origin resolution (errored - promises)', t => {
     headers: { origin: 'example.com' }
   }, (err, res) => {
     t.error(err)
-    t.strictEqual(res.statusCode, 500)
+    t.equal(res.statusCode, 500)
   })
 })
 
@@ -504,9 +504,9 @@ test('Should reply 404 without cors headers other than `vary` when origin is fal
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 404)
-    t.strictEqual(res.payload, '{"message":"Route OPTIONS:/ not found","error":"Not Found","statusCode":404}')
-    t.deepEqual(res.headers, {
+    t.equal(res.statusCode, 404)
+    t.equal(res.payload, '{"message":"Route OPTIONS:/ not found","error":"Not Found","statusCode":404}')
+    t.same(res.headers, {
       'content-length': '76',
       'content-type': 'application/json; charset=utf-8',
       connection: 'keep-alive',
@@ -520,9 +520,9 @@ test('Should reply 404 without cors headers other than `vary` when origin is fal
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
-    t.deepEqual(res.headers, {
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
+    t.same(res.headers, {
       'content-length': '2',
       'content-type': 'text/plain; charset=utf-8',
       connection: 'keep-alive',
@@ -544,9 +544,9 @@ test('Server error if origin option is falsy but not false', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 500)
-    t.deepEqual(res.json(), { statusCode: 500, error: 'Internal Server Error', message: 'Invalid CORS origin option' })
-    t.deepEqual(res.headers, {
+    t.equal(res.statusCode, 500)
+    t.same(res.json(), { statusCode: 500, error: 'Internal Server Error', message: 'Invalid CORS origin option' })
+    t.same(res.headers, {
       'content-length': '89',
       'content-type': 'application/json; charset=utf-8',
       connection: 'keep-alive',
@@ -572,8 +572,8 @@ test('Allow only request from a specific origin', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-allow-origin': 'other.io',
       vary: 'Origin'
@@ -598,8 +598,8 @@ test('Allow only request from multiple specific origin', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-allow-origin': 'other.io',
       vary: 'Origin'
@@ -613,8 +613,8 @@ test('Allow only request from multiple specific origin', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-allow-origin': false,
       vary: 'Origin'
@@ -639,8 +639,8 @@ test('Allow only request from a specific origin using regex', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-allow-origin': 'example.com',
       vary: 'Origin'
@@ -664,7 +664,7 @@ test('Disable preflight', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 404)
+    t.equal(res.statusCode, 404)
     t.match(res.headers, {
       'access-control-allow-origin': '*'
     })
@@ -676,8 +676,8 @@ test('Disable preflight', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-allow-origin': '*'
     })
@@ -701,8 +701,8 @@ test('Should always add vary header to `Origin` by default', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 400)
-    t.strictEqual(res.payload, 'Invalid Preflight Request')
+    t.equal(res.statusCode, 400)
+    t.equal(res.payload, 'Invalid Preflight Request')
     t.match(res.headers, {
       vary: 'Origin'
     })
@@ -719,8 +719,8 @@ test('Should always add vary header to `Origin` by default', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 204)
-    t.strictEqual(res.payload, '')
+    t.equal(res.statusCode, 204)
+    t.equal(res.payload, '')
     t.match(res.headers, {
       vary: 'Origin'
     })
@@ -733,8 +733,8 @@ test('Should always add vary header to `Origin` by default', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
     t.match(res.headers, {
       vary: 'Origin'
     })
@@ -761,8 +761,8 @@ test('Should always add vary header to `Origin` by default (vary is array)', t =
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
     t.match(res.headers, {
       vary: 'foo, bar, Origin'
     })
@@ -792,7 +792,7 @@ test('Allow only request from with specific headers', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 204)
+    t.equal(res.statusCode, 204)
     t.match(res.headers, {
       'access-control-allow-headers': 'foo',
       vary: 'Origin'
@@ -805,8 +805,8 @@ test('Allow only request from with specific headers', t => {
   }, (err, res) => {
     t.error(err)
     delete res.headers.date
-    t.strictEqual(res.statusCode, 200)
-    t.strictEqual(res.payload, 'ok')
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-expose-headers': 'bar'
     })

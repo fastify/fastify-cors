@@ -13,7 +13,7 @@
     "test": "npm run lint && npm run unit && npm run typescript",
     "test:ci": "npm run lint && tap test/*.test.js --coverage-report=lcovonly && npm run typescript",
     "typescript": "tsd",
-    "unit": "tap --100 test/*.test.js"
+    "unit": "tap test/*.test.js"
   },
   "keywords": [
     "fastify",
@@ -39,7 +39,7 @@
     "cors": "^2.8.5",
     "fastify": "^3.8.0",
     "standard": "^16.0.2",
-    "tap": "^14.11.0",
+    "tap": "^15.0.2",
     "tsd": "^0.14.0",
     "typescript": "^4.0.2"
   },
