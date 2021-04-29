@@ -582,7 +582,7 @@ test('Allow only request from a specific origin', t => {
 })
 
 test('Allow only request from multiple specific origin', t => {
-  t.plan(8)
+  t.plan(9)
 
   const fastify = Fastify()
   fastify.register(cors, { origin: ['other.io', 'example.com'] })
@@ -616,9 +616,9 @@ test('Allow only request from multiple specific origin', t => {
     t.equal(res.statusCode, 200)
     t.equal(res.payload, 'ok')
     t.match(res.headers, {
-      'access-control-allow-origin': false,
       vary: 'Origin'
     })
+    t.equal(res.headers['access-control-allow-origin'], undefined)
   })
 })
 

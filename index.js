@@ -129,8 +129,13 @@ function onRequest (fastify, options, req, reply, next) {
 }
 
 function addCorsHeaders (req, reply, originOption, corsOptions) {
-  reply.header('Access-Control-Allow-Origin',
-    getAccessControlAllowOriginHeader(req.headers.origin, originOption))
+  const origin = getAccessControlAllowOriginHeader(req.headers.origin, originOption)
+  // In the case of origin not allowed the header is not
+  // written in the response.
+  // https://github.com/fastify/fastify-cors/issues/127
+  if (origin) {
+    reply.header('Access-Control-Allow-Origin', origin)
+  }
 
   if (corsOptions.credentials) {
     reply.header('Access-Control-Allow-Credentials', 'true')
