@@ -88,7 +88,7 @@ test('Should add cors headers (custom values)', t => {
 })
 
 test('Should support dynamic config (callback)', t => {
-  t.plan(10)
+  t.plan(16)
 
   const configs = [{
     origin: 'example.com',
@@ -109,6 +109,10 @@ test('Should support dynamic config (callback)', t => {
   const fastify = Fastify()
   let requestId = 0
   const configDelegation = function (req, cb) {
+    // request should have id
+    t.ok(req.id)
+    // request should not have send
+    t.notOk(req.send)
     const config = configs[requestId]
     requestId++
     if (config) {
@@ -178,7 +182,7 @@ test('Should support dynamic config (callback)', t => {
 })
 
 test('Should support dynamic config (Promise)', t => {
-  t.plan(10)
+  t.plan(16)
 
   const configs = [{
     origin: 'example.com',
@@ -199,6 +203,10 @@ test('Should support dynamic config (Promise)', t => {
   const fastify = Fastify()
   let requestId = 0
   const configDelegation = function (req) {
+    // request should have id
+    t.ok(req.id)
+    // request should not have send
+    t.notOk(req.send)
     const config = configs[requestId]
     requestId++
     if (config) {

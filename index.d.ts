@@ -1,6 +1,6 @@
 /// <reference types="node" />
 
-import { FastifyInstance, FastifyPlugin, FastifyRequest } from 'fastify'
+import { FastifyInstance, FastifyPluginCallback, FastifyRequest } from 'fastify';
 
 type OriginCallback = (err: Error | null, allow: boolean) => void;
 export type OriginFunction = (origin: string, callback: OriginCallback) => void;
@@ -74,5 +74,5 @@ export interface FastifyCorsOptionsDelegatePromise { (req: FastifyRequest):  Pro
 export type FastifyCorsOptionsDelegate = FastifyCorsOptionsDelegateCallback | FastifyCorsOptionsDelegatePromise
 export type FastifyPluginOptionsDelegate<T> = (instance: FastifyInstance) => T;
 
-declare const fastifyCors: FastifyPlugin<FastifyCorsOptions | FastifyPluginOptionsDelegate<FastifyCorsOptionsDelegate>>;
+declare const fastifyCors: FastifyPluginCallback<FastifyCorsOptions | FastifyPluginOptionsDelegate<FastifyCorsOptionsDelegate>>;
 export default fastifyCors;
