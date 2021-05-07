@@ -56,7 +56,7 @@ function handleCorsOptionsDelegator (optionsResolver, fastify) {
       return
     } else {
       // handle delegator based on Promise
-      const ret = optionsResolver(reply)
+      const ret = optionsResolver(req)
       if (ret && typeof ret.then === 'function') {
         ret.then(options => Object.assign({}, defaultOptions, options))
           .then(corsOptions => onRequest(fastify, corsOptions, req, reply, next)).catch(next)
