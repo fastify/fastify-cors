@@ -183,6 +183,23 @@ test('Should support a prefix for preflight requests', t => {
   })
 })
 
+test('hide options route by default', t => {
+  t.plan(2)
+
+  const fastify = Fastify()
+
+  fastify.addHook('onRoute', (route) => {
+    if (route.method === 'OPTIONS' && route.url === '*') {
+      t.equal(route.schema.hide, true)
+    }
+  })
+  fastify.register(cors)
+
+  fastify.ready(err => {
+    t.error(err)
+  })
+})
+
 test('show options route', t => {
   t.plan(2)
 

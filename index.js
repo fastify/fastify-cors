@@ -23,7 +23,7 @@ function fastifyCors (fastify, opts, next) {
   if (typeof opts === 'function') {
     handleCorsOptionsDelegator(opts, fastify)
   } else {
-    hideOptionsRoute = opts.hideOptionsRoute
+    if (opts.hideOptionsRoute !== undefined) hideOptionsRoute = opts.hideOptionsRoute
     const corsOptions = Object.assign({}, defaultOptions, opts)
     fastify.addHook('onRequest', (req, reply, next) => {
       onRequest(fastify, corsOptions, req, reply, next)
