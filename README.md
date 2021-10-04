@@ -68,15 +68,19 @@ You can use it as is without passing any option or you can configure it as expla
 ```js
 const fastify = require('fastify')()
 
-fastify.register(require('fastify-cors'), (instance) => (req, callback) => {
-  let corsOptions;
-  // do not include CORS headers for requests from localhost
-  if (/localhost/.test(origin)) {
-    corsOptions = { origin: false }
-  } else {
-    corsOptions = { origin: true }
+fastify.register(require('fastify-cors'), function (instance) {
+
+  return (req, callback) => {
+    let corsOptions;
+    const origin = req.headers.origin
+    // do not include CORS headers for requests from localhost
+    if (/localhost/.test(origin)) {
+      corsOptions = { origin: false }
+    } else {
+      corsOptions = { origin: true }
+    }
+    callback(null, corsOptions) // callback expects two parameters: error and options
   }
-  callback(null, corsOptions) // callback expects two parameters: error and options
 })
 
 fastify.get('/', (req, reply) => {
