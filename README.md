@@ -43,7 +43,8 @@ You can use it as is without passing any option or you can configure it as expla
   - `Function` - set `origin` to a function implementing some custom logic. The function takes the request origin as the first parameter and a callback as a second (which expects the signature `err [Error | null], origin`), where `origin` is a non-function value of the origin option. *Async-await* and promises are supported as well. The Fastify instance is bound to function call and you may access via `this`. For example: 
   ```js
   origin: (origin, cb) => {
-    if(/localhost/.test(origin)){
+    const hostname = new URL(origin).hostname
+    if(hostname === "localhost"){
       //  Request from localhost will pass
       cb(null, true)
       return
@@ -74,7 +75,8 @@ fastify.register(require('fastify-cors'), function (instance) {
     let corsOptions;
     const origin = req.headers.origin
     // do not include CORS headers for requests from localhost
-    if (/localhost/.test(origin)) {
+    const hostname = new URL(origin).hostname
+    if(hostname === "localhost"){
       corsOptions = { origin: false }
     } else {
       corsOptions = { origin: true }
