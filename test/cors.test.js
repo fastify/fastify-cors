@@ -631,29 +631,34 @@ test('Allow only request from multiple specific origin', t => {
 })
 
 test('Allow only request from a specific origin using regex', t => {
-  t.plan(4)
+  t.plan(8)
 
   const fastify = Fastify()
-  fastify.register(cors, { origin: /^(example|other)\.com/ })
+  fastify.register(cors, { origin: /(example|other)\.com/gi })
 
   fastify.get('/', (req, reply) => {
     reply.send('ok')
   })
 
-  fastify.inject({
-    method: 'GET',
-    url: '/',
-    headers: { origin: 'example.com' }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.match(res.headers, {
-      'access-control-allow-origin': 'example.com',
-      vary: 'Origin'
+  // .test was previously used, which caused 2 consecutive requests to return
+  // different results with global (e.g. /g) regexes. Therefore, check this
+  // twice to check consistency
+  for (let i = 0; i < 2; i++) {
+    fastify.inject({
+      method: 'GET',
+      url: '/',
+      headers: { origin: 'https://www.example.com/' }
+    }, (err, res) => {
+      t.error(err)
+      delete res.headers.date
+      t.equal(res.statusCode, 200)
+      t.equal(res.payload, 'ok')
+      t.match(res.headers, {
+        'access-control-allow-origin': 'https://www.example.com/',
+        vary: 'Origin'
+      })
     })
-  })
+  }
 })
 
 test('Disable preflight', t => {

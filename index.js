@@ -210,6 +210,7 @@ function isRequestOriginAllowed (reqOrigin, allowedOrigin) {
   } else if (typeof allowedOrigin === 'string') {
     return reqOrigin === allowedOrigin
   } else if (allowedOrigin instanceof RegExp) {
+    allowedOrigin.lastIndex = 0
     return allowedOrigin.test(reqOrigin)
   } else {
     return !!allowedOrigin
