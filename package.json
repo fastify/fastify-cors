@@ -1,6 +1,6 @@
 {
-  "name": "fastify-cors",
-  "version": "6.0.3",
+  "name": "@fastify/cors",
+  "version": "7.0.0",
   "description": "Fastify CORS",
   "main": "index.js",
   "types": "index.d.ts",
@@ -49,5 +49,8 @@
   },
   "tsd": {
     "directory": "test"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
