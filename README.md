@@ -1,13 +1,13 @@
-# fastify-cors
+# @fastify/cors
 
 ![CI](https://github.com/fastify/fastify-cors/workflows/CI/badge.svg)
-[![NPM version](https://img.shields.io/npm/v/fastify-cors.svg?style=flat)](https://www.npmjs.com/package/fastify-cors)
+[![NPM version](https://img.shields.io/npm/v/@fastify/cors.svg?style=flat)](https://www.npmjs.com/package/@fastify/cors)
 [![Known Vulnerabilities](https://snyk.io/test/github/fastify/fastify-cors/badge.svg)](https://snyk.io/test/github/fastify/fastify-cors)
 [![Coverage Status](https://coveralls.io/repos/github/fastify/fastify-cors/badge.svg?branch=master)](https://coveralls.io/github/fastify/fastify-cors?branch=master)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://standardjs.com/)
 
 
-`fastify-cors` enables the use of [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) in a Fastify application.
+`@fastify/cors` enables the use of [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) in a Fastify application.
 
 Supports Fastify versions `3.x`.
 Please refer to [this branch](https://github.com/fastify/fastify-cors/tree/3.x) and related versions for Fastify `^2.x` compatibility.
@@ -15,15 +15,15 @@ Please refer to [this branch](https://github.com/fastify/fastify-cors/tree/1.x) 
 
 ## Install
 ```
-npm i fastify-cors
+npm i @fastify/cors
 ```
 
 ## Usage
-Require `fastify-cors` and register it as any other plugin, it will add a `preHandler` hook and a [wildcard options route](https://github.com/fastify/fastify/issues/326#issuecomment-411360862).
+Require `@fastify/cors` and register it as any other plugin, it will add a `preHandler` hook and a [wildcard options route](https://github.com/fastify/fastify/issues/326#issuecomment-411360862).
 ```js
 const fastify = require('fastify')()
 
-fastify.register(require('fastify-cors'), { 
+fastify.register(require('@fastify/cors'), { 
   // put your options here
 })
 
@@ -62,14 +62,14 @@ You can use it as is without passing any option or you can configure it as expla
 * `optionsSuccessStatus`: Provides a status code to use for successful `OPTIONS` requests, since some legacy browsers (IE11, various SmartTVs) choke on `204`.
 * `preflight`: if needed you can entirely disable preflight by passing `false` here (default: `true`).
 * `strictPreflight`: Enforces strict requirement of the CORS preflight request headers (**Access-Control-Request-Method** and **Origin**) as defined by the [W3C CORS specification](https://www.w3.org/TR/2020/SPSD-cors-20200602/#resource-preflight-requests) (the current [fetch living specification](https://fetch.spec.whatwg.org/) does not define server behavior for missing headers). Preflight requests without the required headers will result in 400 errors when set to `true` (default: `true`).
-* `hideOptionsRoute`: hide options route from the documentation built using [fastify-swagger](https://github.com/fastify/fastify-swagger) (default: `true`).
+* `hideOptionsRoute`: hide options route from the documentation built using [@fastify/swagger](https://github.com/fastify/fastify-swagger) (default: `true`).
 
 ### Configuring CORS Asynchronously
 
 ```js
 const fastify = require('fastify')()
 
-fastify.register(require('fastify-cors'), function (instance) {
+fastify.register(require('@fastify/cors'), function (instance) {
 
   return (req, callback) => {
     let corsOptions;
