@@ -25,7 +25,7 @@ function fastifyCors (fastify, opts, next) {
   } else {
     if (opts.hideOptionsRoute !== undefined) hideOptionsRoute = opts.hideOptionsRoute
     const corsOptions = Object.assign({}, defaultOptions, opts)
-    fastify.addHook('onRequest', (req, reply, next) => {
+    fastify.addHook('onRequest', function onRequestCors (req, reply, next) {
       onRequest(fastify, corsOptions, req, reply, next)
     })
   }
@@ -50,7 +50,7 @@ function fastifyCors (fastify, opts, next) {
 }
 
 function handleCorsOptionsDelegator (optionsResolver, fastify) {
-  fastify.addHook('onRequest', (req, reply, next) => {
+  fastify.addHook('onRequest', function onRequestCors (req, reply, next) {
     if (optionsResolver.length === 2) {
       handleCorsOptionsCallbackDelegator(optionsResolver, fastify, req, reply, next)
       return
