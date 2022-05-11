@@ -218,6 +218,6 @@ function isRequestOriginAllowed (reqOrigin, allowedOrigin) {
 }
 
 module.exports = fp(fastifyCors, {
-  fastify: '3.x',
-  name: 'fastify-cors'
+  fastify: '4.x',
+  name: '@fastify/cors'
 })
