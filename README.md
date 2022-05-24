@@ -48,7 +48,7 @@ You can use it as is without passing any option or you can configure it as expla
       return
     }
     // Generate an error on other origins, disabling access
-    cb(new Error("Not allowed"))
+    cb(new Error("Not allowed"), false)
   }
   ```
 * `methods`: Configures the **Access-Control-Allow-Methods** CORS header. Expects a comma-delimited string (ex: 'GET,PUT,POST') or an array (ex: `['GET', 'PUT', 'POST']`).
