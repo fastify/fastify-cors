@@ -44,7 +44,7 @@
     "typescript": "^4.0.2"
   },
   "dependencies": {
-    "fastify-plugin": "^3.0.0",
+    "fastify-plugin": "^4.0.0",
     "vary": "^1.1.2"
   },
   "tsd": {
