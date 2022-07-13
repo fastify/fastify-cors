@@ -760,7 +760,7 @@ test('Should always add vary header to `Origin` by default (vary is array)', t =
   const fastify = Fastify()
 
   // Mock getHeader function
-  fastify.decorateReply('getHeader', (name) => ['foo', 'bar'])
+  fastify.decorateReply('getHeader', (name) => 'foo, bar')
 
   fastify.register(cors)
 
