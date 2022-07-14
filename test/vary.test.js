@@ -72,7 +72,7 @@ test('Should concat vary values ignoring whitespace', t => {
 })
 
 test('Should set the field as value for vary if no vary is defined', t => {
-  t.plan(3)
+  t.plan(2)
 
   const replyMock = {
     getHeader (name) {
@@ -85,7 +85,6 @@ test('Should set the field as value for vary if no vary is defined', t => {
   }
 
   vary(replyMock, 'Origin')
-  t.pass()
 })
 
 test('Should ignore the header as value for vary if it is already in vary', t => {
