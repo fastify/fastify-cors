@@ -1,80 +1,62 @@
 'use strict'
 
-const LRUCache = require('mnemonist').LRUCache
-const cache = new LRUCache(1000)
+const LRU = require('tiny-lru')
+const regexCache = new LRU(1000)
 
-function parse (header) {
-  if (Array.isArray(header)) {
-    return header
+/**
+ * RegExp to match field-name in RFC 7230 sec 3.2
+ *
+ * field-name    = token
+ * token         = 1*tchar
+ * tchar         = "!" / "#" / "$" / "%" / "&" / "'" / "*"
+ *               / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~"
+ *               / DIGIT / ALPHA
+ *               ; any VCHAR, except delimiters
+ */
+
+const fieldnameChars = '!#$%&\'*+-.^_`|~0-9A-Za-z'
+const fieldNameRE = new RegExp(`^[${fieldnameChars}]+$`)
+const wildcardRE = fieldRegex('*', '')
+
+function escapeRegex (value) {
+  return value.replace(/[$*+-.^|]/g, '\\$&')
+}
+
+function fieldRegex (field, flags = 'i') {
+  if (fieldNameRE.test(field) === false) {
+    throw new TypeError('field argument contains an invalid header name')
   }
-  const originalHeader = header
-
-  if (!cache.has(originalHeader)) {
-    header = header.trim().toLowerCase()
-    const result = []
-
-    if (header.length === 0) {
-      // pass through
-    } else if (header.indexOf(',') === -1) {
-      result.push(header)
-    } else {
-      const il = header.length
-      let i = 0
-      let pos = 0
-      let char
-
-      // tokenize the header
-      for (i = 0; i < il; ++i) {
-        char = header[i]
-        // when we have whitespace set the pos to the next position
-        if (char === ' ') {
-          pos = i + 1
-        // `,` is the separator of vary-values
-        } else if (char === ',') {
-          // if pos and current position are not the same we have a valid token
-          if (pos !== i) {
-            result.push(header.slice(pos, i))
-          }
-          // reset the positions
-          pos = i + 1
-        }
-      }
-
-      if (pos !== i) {
-        result.push(header.slice(pos, i))
-      }
-    }
-    cache.set(originalHeader, result)
-  }
-
-  return cache.get(originalHeader)
+  const escapedField = escapeRegex(field)
+  return new RegExp(`(^|(.*,))[^${fieldnameChars}]*${escapedField}[^${fieldnameChars}]*(,.*|$)`, flags)
 }
 
 // https://github.com/fastify/fastify-sensible/blob/master/lib/vary.js
 function vary (reply, field) {
-  const header = reply.getHeader('Vary')
+  let header = reply.getHeader('Vary')
 
   if (!header) {
     reply.header('Vary', field)
     return
   }
 
-  if (header === '*') {
+  if (Array.isArray(header)) {
+    header = header.join(', ')
+  }
+
+  if (wildcardRE.test(header)) {
     reply.header('Vary', '*')
     return
   }
 
-  const vals = parse(header)
-
-  if (vals.indexOf('*') !== -1) {
-    reply.header('Vary', '*')
-    return
+  if (!regexCache.has(field)) {
+    regexCache.set(field, fieldRegex(field))
   }
 
-  if (vals.indexOf(field.toLowerCase()) === -1) {
+  if (regexCache.get(field).test(header) === false) {
     reply.header('Vary', header + ', ' + field)
   }
 }
 
+module.exports.escapeRegex = escapeRegex
+module.exports.fieldRegex = fieldRegex
 module.exports.vary = vary
-module.exports.parse = parse

@@ -1,8 +1,9 @@
 'use strict'
 
-const { test } = require('tap')
+const test = require('tap').test
+const fieldRegex = require('../vary').fieldRegex
 const vary = require('../vary').vary
-const parse = require('../vary').parse
+const escapeRegex = require('../vary').escapeRegex
 
 test('Should set * even if we set a specific field', t => {
   t.plan(3)
@@ -121,26 +122,38 @@ test('Should ignore the header as value for vary if it is already in vary', t =>
   t.pass()
 })
 
-test('parse', t => {
-  t.plan(18)
-  t.same(parse(''), [])
-  t.same(parse('a'), ['a'])
-  t.same(parse('a,b'), ['a', 'b'])
-  t.same(parse('  a,b'), ['a', 'b'])
-  t.same(parse('a,b  '), ['a', 'b'])
-  t.same(parse('a,b,c'), ['a', 'b', 'c'])
-  t.same(parse('A,b,c'), ['a', 'b', 'c'])
-  t.same(parse('a,b,c,'), ['a', 'b', 'c'])
-  t.same(parse('a,b,c, '), ['a', 'b', 'c'])
-  t.same(parse(',a,b,c'), ['a', 'b', 'c'])
-  t.same(parse(' ,a,b,c'), ['a', 'b', 'c'])
-  t.same(parse('a,,b,c'), ['a', 'b', 'c'])
-  t.same(parse('a,,,b,,c'), ['a', 'b', 'c'])
-  t.same(parse('a, b,c'), ['a', 'b', 'c'])
-  t.same(parse('a,   b,c'), ['a', 'b', 'c'])
-  t.same(parse('a, , b,c'), ['a', 'b', 'c'])
-  t.same(parse('a,  , b,c'), ['a', 'b', 'c'])
+test('escapeRegex', t => {
+  t.plan(15)
+  t.same(escapeRegex('!'), '!')
+  t.same(escapeRegex('#'), '#')
+  t.same(escapeRegex('$'), '\\$')
+  t.same(escapeRegex('%'), '%')
+  t.same(escapeRegex('&'), '&')
+  t.same(escapeRegex('\''), '\'')
+  t.same(escapeRegex('*'), '\\*')
+  t.same(escapeRegex('+'), '\\+')
+  t.same(escapeRegex('-'), '\\-')
+  t.same(escapeRegex('.'), '\\.')
+  t.same(escapeRegex('^'), '\\^')
+  t.same(escapeRegex('_'), '_')
+  t.same(escapeRegex('`'), '`')
+  t.same(escapeRegex('|'), '\\|')
+  t.same(escapeRegex('~'), '~')
+})
 
-  // one for the cache
-  t.same(parse('A,b,c'), ['a', 'b', 'c'])
+test('fieldRegex', t => {
+  t.plan(13)
+  t.throws(() => fieldRegex('inalid[]'))
+  t.same(fieldRegex('Origin').test('Origin'), true)
+  t.same(fieldRegex('Origin').test('Or igin'), false)
+  t.same(fieldRegex('Origin').test('Origin,'), true)
+  t.same(fieldRegex('Origin').test('Origin, '), true)
+  t.same(fieldRegex('Origin').test(',Origin, '), true)
+  t.same(fieldRegex('Origin').test(',,Origin,, '), true)
+  t.same(fieldRegex('Origin').test(',Origin-Variant, '), false)
+  t.same(fieldRegex('Origin').test(',Origin-Variant, Origin '), true)
+  t.same(fieldRegex('Origin').test(',Origin-Variant, Or igin '), false)
+  t.same(fieldRegex('Origin-Variant').test(',Origin'), false)
+  t.same(fieldRegex('Origin-Variant').test(',Origin - Variant'), false)
+  t.same(fieldRegex('Origin-Variant').test(',Origin-Variant'), true)
 })
