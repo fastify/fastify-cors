@@ -7,8 +7,9 @@ function parse (header) {
   if (Array.isArray(header)) {
     return header
   }
+  const originalHeader = header
 
-  if (!cache.has(header)) {
+  if (!cache.has(originalHeader)) {
     header = header.trim().toLowerCase()
     const result = []
 
@@ -43,10 +44,10 @@ function parse (header) {
         result.push(header.slice(pos, i))
       }
     }
-    cache.set(header, result)
+    cache.set(originalHeader, result)
   }
 
-  return cache.get(header)
+  return cache.get(originalHeader)
 }
 
 // https://github.com/fastify/fastify-sensible/blob/master/lib/vary.js

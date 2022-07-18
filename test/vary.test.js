@@ -142,5 +142,5 @@ test('parse', t => {
   t.same(parse('a,  , b,c'), ['a', 'b', 'c'])
 
   // one for the cache
-  t.same(parse(''), [])
+  t.same(parse('A,b,c'), ['a', 'b', 'c'])
 })
