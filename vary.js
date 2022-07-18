@@ -1,36 +1,56 @@
 'use strict'
 
+const LRUCache = require('mnemonist').LRUCache
+const cache = new LRUCache(1000)
+
 function parse (header) {
-  if (header.indexOf(',') === -1) {
-    return [header.trim()]
+  if (Array.isArray(header)) {
+    return header
   }
 
-  const result = []
+  if (!cache.has(header)) {
+    header = header.trim().toLowerCase()
+    const result = []
 
-  let end = header.length
-  let start = end
-  let char
-  let i
-
-  for (i = end - 1; i >= 0; --i) {
-    char = header[i]
-    if (char === ' ') {
-      (start === end) && (start = end = i)
-    } else if (char === ',') {
-      (start !== end) && result.push(header.slice(start, end))
-      start = end = i
+    if (header.length === 0) {
+      // pass through
+    } else if (header.indexOf(',') === -1) {
+      result.push(header)
     } else {
-      start = i
+      const il = header.length
+      let i = 0
+      let pos = 0
+      let char
+
+      // tokenize the header
+      for (i = 0; i < il; ++i) {
+        char = header[i]
+        // when we have whitespace set the pos to the next position
+        if (char === ' ') {
+          pos = i + 1
+        // `,` is the separator of vary-values
+        } else if (char === ',') {
+          // if pos and current position are not the same we have a valid token
+          if (pos !== i) {
+            result.push(header.slice(pos, i))
+          }
+          // reset the positions
+          pos = i + 1
+        }
+      }
+
+      if (pos !== i) {
+        result.push(header.slice(pos, i))
+      }
     }
+    cache.set(header, result)
   }
 
-  (start !== end) && result.push(header.slice(start, end))
-
-  return result
+  return cache.get(header)
 }
 
 // https://github.com/fastify/fastify-sensible/blob/master/lib/vary.js
-module.exports = function vary (reply, field) {
+function vary (reply, field) {
   const header = reply.getHeader('Vary')
 
   if (!header) {
@@ -43,7 +63,7 @@ module.exports = function vary (reply, field) {
     return
   }
 
-  const vals = (!Array.isArray(header) && parse(header.toLowerCase())) || header
+  const vals = parse(header)
 
   if (vals.indexOf('*') !== -1) {
     reply.header('Vary', '*')
@@ -54,3 +74,6 @@ module.exports = function vary (reply, field) {
     reply.header('Vary', header + ', ' + field)
   }
 }
+
+module.exports.vary = vary
+module.exports.parse = parse

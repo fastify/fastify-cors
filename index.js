@@ -1,7 +1,7 @@
 'use strict'
 
 const fp = require('fastify-plugin')
-const vary = require('./vary')
+const vary = require('./vary').vary
 
 const defaultOptions = {
   origin: '*',

@@ -1,7 +1,8 @@
 'use strict'
 
 const { test } = require('tap')
-const vary = require('../vary')
+const vary = require('../vary').vary
+const parse = require('../vary').parse
 
 test('Should set * even if we set a specific field', t => {
   t.plan(3)
@@ -47,6 +48,23 @@ test('Should concat vary values', t => {
     header (name, value) {
       t.same(name, 'Vary')
       t.same(value, 'Access-Control-Request-Headers, Origin')
+    }
+  }
+
+  vary(replyMock, 'Origin')
+  t.pass()
+})
+
+test('Should concat vary values ignoring consecutive commas', t => {
+  t.plan(3)
+
+  const replyMock = {
+    getHeader (name) {
+      return ' Access-Control-Request-Headers,Access-Control-Request-Method'
+    },
+    header (name, value) {
+      t.same(name, 'Vary')
+      t.same(value, ' Access-Control-Request-Headers,Access-Control-Request-Method, Origin')
     }
   }
 
@@ -101,4 +119,28 @@ test('Should ignore the header as value for vary if it is already in vary', t =>
 
   vary(replyMock, 'Origin')
   t.pass()
+})
+
+test('parse', t => {
+  t.plan(18)
+  t.same(parse(''), [])
+  t.same(parse('a'), ['a'])
+  t.same(parse('a,b'), ['a', 'b'])
+  t.same(parse('  a,b'), ['a', 'b'])
+  t.same(parse('a,b  '), ['a', 'b'])
+  t.same(parse('a,b,c'), ['a', 'b', 'c'])
+  t.same(parse('A,b,c'), ['a', 'b', 'c'])
+  t.same(parse('a,b,c,'), ['a', 'b', 'c'])
+  t.same(parse('a,b,c, '), ['a', 'b', 'c'])
+  t.same(parse(',a,b,c'), ['a', 'b', 'c'])
+  t.same(parse(' ,a,b,c'), ['a', 'b', 'c'])
+  t.same(parse('a,,b,c'), ['a', 'b', 'c'])
+  t.same(parse('a,,,b,,c'), ['a', 'b', 'c'])
+  t.same(parse('a, b,c'), ['a', 'b', 'c'])
+  t.same(parse('a,   b,c'), ['a', 'b', 'c'])
+  t.same(parse('a, , b,c'), ['a', 'b', 'c'])
+  t.same(parse('a,  , b,c'), ['a', 'b', 'c'])
+
+  // one for the cache
+  t.same(parse(''), [])
 })
