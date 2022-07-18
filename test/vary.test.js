@@ -39,6 +39,21 @@ test('Should set * when field contains a *', t => {
   t.pass()
 })
 
+test('Should throw if field name is invalid', t => {
+  t.plan(2)
+
+  const replyMock = {
+    getHeader (name) {
+      return undefined
+    },
+    header (name, value) {
+      t.fail('Should not be here')
+    }
+  }
+
+  t.throws(() => vary(replyMock, 'invalid[]'), 'field argument contains an invalid header name')
+  t.pass()
+})
 test('Should concat vary values', t => {
   t.plan(3)
 
@@ -143,7 +158,7 @@ test('escapeRegex', t => {
 
 test('fieldRegex', t => {
   t.plan(13)
-  t.throws(() => fieldRegex('inalid[]'))
+  t.throws(() => fieldRegex('invalid[]'), 'field argument contains an invalid header name')
   t.same(fieldRegex('Origin').test('Origin'), true)
   t.same(fieldRegex('Origin').test('Or igin'), false)
   t.same(fieldRegex('Origin').test('Origin,'), true)

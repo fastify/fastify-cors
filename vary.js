@@ -35,6 +35,9 @@ function vary (reply, field) {
   let header = reply.getHeader('Vary')
 
   if (!header) {
+    if (fieldNameRE.test(field) === false) {
+      throw new TypeError('field argument contains an invalid header name')
+    }
     reply.header('Vary', field)
     return
   }
