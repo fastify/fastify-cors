@@ -1,16 +1,31 @@
 'use strict'
 
 const test = require('tap').test
-const fieldnameRegex = require('../vary').fieldnameRegex
 const vary = require('../vary').vary
-const escapeRegex = require('../vary').escapeRegex
+const parse = require('../vary').parse
 
 test('Should set * even if we set a specific field', t => {
-  t.plan(3)
+  t.plan(1)
 
   const replyMock = {
     getHeader (name) {
       return '*'
+    },
+    header (name, value) {
+      t.fail('Should not be here')
+    }
+  }
+
+  vary(replyMock, 'Origin')
+  t.pass()
+})
+
+test('Should set * even if we set a specific field', t => {
+  t.plan(2)
+
+  const replyMock = {
+    getHeader (name) {
+      return 'Origin'
     },
     header (name, value) {
       t.same(name, 'Vary')
@@ -18,8 +33,7 @@ test('Should set * even if we set a specific field', t => {
     }
   }
 
-  vary(replyMock, 'Origin')
-  t.pass()
+  vary(replyMock, '*')
 })
 
 test('Should set * when field contains a *', t => {
@@ -189,42 +203,26 @@ test('Should ignore the header as value for vary if it is already in vary', t =>
   t.pass()
 })
 
-test('escapeRegex', t => {
-  t.plan(15)
-  t.same(escapeRegex('!'), '!')
-  t.same(escapeRegex('#'), '#')
-  t.same(escapeRegex('$'), '\\$')
-  t.same(escapeRegex('%'), '%')
-  t.same(escapeRegex('&'), '&')
-  t.same(escapeRegex('\''), '\'')
-  t.same(escapeRegex('*'), '\\*')
-  t.same(escapeRegex('+'), '\\+')
-  t.same(escapeRegex('-'), '\\-')
-  t.same(escapeRegex('.'), '\\.')
-  t.same(escapeRegex('^'), '\\^')
-  t.same(escapeRegex('_'), '_')
-  t.same(escapeRegex('`'), '`')
-  t.same(escapeRegex('|'), '\\|')
-  t.same(escapeRegex('~'), '~')
-})
+test('parse', t => {
+  t.plan(18)
+  t.same(parse(''), [])
+  t.same(parse('a'), ['a'])
+  t.same(parse('a,b'), ['a', 'b'])
+  t.same(parse('  a,b'), ['a', 'b'])
+  t.same(parse('a,b  '), ['a', 'b'])
+  t.same(parse('a,b,c'), ['a', 'b', 'c'])
+  t.same(parse('A,b,c'), ['a', 'b', 'c'])
+  t.same(parse('a,b,c,'), ['a', 'b', 'c'])
+  t.same(parse('a,b,c, '), ['a', 'b', 'c'])
+  t.same(parse(',a,b,c'), ['a', 'b', 'c'])
+  t.same(parse(' ,a,b,c'), ['a', 'b', 'c'])
+  t.same(parse('a,,b,c'), ['a', 'b', 'c'])
+  t.same(parse('a,,,b,,c'), ['a', 'b', 'c'])
+  t.same(parse('a, b,c'), ['a', 'b', 'c'])
+  t.same(parse('a,   b,c'), ['a', 'b', 'c'])
+  t.same(parse('a, , b,c'), ['a', 'b', 'c'])
+  t.same(parse('a,  , b,c'), ['a', 'b', 'c'])
 
-test('fieldnameRegex', t => {
-  t.plan(17)
-  t.throws(() => fieldnameRegex('invalid[]'), TypeError, 'Field contains invalid characters.')
-  t.throws(() => fieldnameRegex('invalid:header'), TypeError, 'Field contains invalid characters.')
-  t.throws(() => fieldnameRegex('invalid header'), TypeError, 'Field contains invalid characters.')
-  t.throws(() => fieldnameRegex('invalid\nheader'), TypeError, 'Field contains invalid characters.')
-  t.throws(() => fieldnameRegex('invalid\u0080header'), TypeError, 'Field contains invalid characters.')
-  t.same(fieldnameRegex('Origin').test('Origin'), true)
-  t.same(fieldnameRegex('Origin').test('Or igin'), false)
-  t.same(fieldnameRegex('Origin').test('Origin,'), true)
-  t.same(fieldnameRegex('Origin').test('Origin, '), true)
-  t.same(fieldnameRegex('Origin').test(',Origin, '), true)
-  t.same(fieldnameRegex('Origin').test(',,Origin,, '), true)
-  t.same(fieldnameRegex('Origin').test(',Origin-Variant, '), false)
-  t.same(fieldnameRegex('Origin').test(',Origin-Variant, Origin '), true)
-  t.same(fieldnameRegex('Origin').test(',Origin-Variant, Or igin '), false)
-  t.same(fieldnameRegex('Origin-Variant').test(',Origin'), false)
-  t.same(fieldnameRegex('Origin-Variant').test(',Origin - Variant'), false)
-  t.same(fieldnameRegex('Origin-Variant').test(',Origin-Variant'), true)
+  // one for the cache
+  t.same(parse('A,b,c'), ['a', 'b', 'c'])
 })
