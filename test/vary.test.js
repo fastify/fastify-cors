@@ -51,9 +51,10 @@ test('Should throw if field name is invalid', t => {
     }
   }
 
-  t.throws(() => vary(replyMock, 'invalid[]'), 'field argument contains an invalid header name')
+  t.throws(() => vary(replyMock, 'invalid[]'), TypeError, 'Field contains invalid characters.')
   t.pass()
 })
+
 test('Should concat vary values', t => {
   t.plan(3)
 
@@ -121,6 +122,57 @@ test('Should set the field as value for vary if no vary is defined', t => {
   vary(replyMock, 'Origin')
 })
 
+test('Should set * as value for vary if vary contains *', t => {
+  t.plan(2)
+
+  const replyMock = {
+    getHeader (name) {
+      return 'Accept,*'
+    },
+    header (name, value) {
+      t.same(name, 'Vary')
+      t.same(value, '*')
+    }
+  }
+
+  vary(replyMock, 'Origin')
+})
+
+test('Should set Accept-Encoding as value for vary if vary is empty string', t => {
+  t.plan(2)
+
+  const replyMock = {
+    getHeader (name) {
+      return ''
+    },
+    header (name, value) {
+      t.same(name, 'Vary')
+      t.same(value, 'Accept-Encoding')
+    }
+  }
+
+  vary(replyMock, 'Accept-Encoding')
+})
+
+test('Should have no issues with values containing dashes', t => {
+  t.plan(2)
+
+  const replyMock = {
+    value: 'Accept-Encoding',
+    getHeader (name) {
+      return this.value
+    },
+    header (name, value) {
+      t.same(name, 'Vary')
+      t.same(value, 'Accept-Encoding, X-Foo')
+      this.value = value
+    }
+  }
+
+  vary(replyMock, 'X-Foo')
+  vary(replyMock, 'X-Foo')
+})
+
 test('Should ignore the header as value for vary if it is already in vary', t => {
   t.plan(1)
 
@@ -157,8 +209,12 @@ test('escapeRegex', t => {
 })
 
 test('fieldRegex', t => {
-  t.plan(13)
-  t.throws(() => fieldRegex('invalid[]'), 'field argument contains an invalid header name')
+  t.plan(17)
+  t.throws(() => fieldRegex('invalid[]'), TypeError, 'Field contains invalid characters.')
+  t.throws(() => fieldRegex('invalid:header'), TypeError, 'Field contains invalid characters.')
+  t.throws(() => fieldRegex('invalid header'), TypeError, 'Field contains invalid characters.')
+  t.throws(() => fieldRegex('invalid\nheader'), TypeError, 'Field contains invalid characters.')
+  t.throws(() => fieldRegex('invalid\u0080header'), TypeError, 'Field contains invalid characters.')
   t.same(fieldRegex('Origin').test('Origin'), true)
   t.same(fieldRegex('Origin').test('Or igin'), false)
   t.same(fieldRegex('Origin').test('Origin,'), true)
