@@ -36,14 +36,12 @@
     "@types/node": "^18.0.0",
     "@typescript-eslint/eslint-plugin": "^5.12.1",
     "@typescript-eslint/parser": "^5.12.1",
-    "benchmark": "^2.1.4",
     "cors": "^2.8.5",
     "fastify": "^4.0.0-rc.2",
     "standard": "^17.0.0",
     "tap": "^16.0.0",
     "tsd": "^0.22.0",
-    "typescript": "^4.0.2",
-    "vary": "^1.1.2"
+    "typescript": "^4.0.2"
   },
   "dependencies": {
     "fastify-plugin": "^4.0.0",
