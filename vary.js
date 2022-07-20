@@ -22,7 +22,7 @@ const regexCache = new LRU(1000)
  */
 
 const tcharRFC7230 = '!#$%&\'*+-.^_`|~0-9A-Za-z'
-const fieldNameRE = new RegExp(`^[${tcharRFC7230}]+$`)
+const fieldnameRE = new RegExp(`^[${tcharRFC7230}]+$`)
 const wildcardRE = fieldRegex('*', '')
 
 function escapeRegex (value) {
@@ -30,21 +30,22 @@ function escapeRegex (value) {
 }
 
 function fieldRegex (field, flags = 'i') {
-  if (fieldNameRE.test(field) === false) {
+  if (fieldnameRE.test(field) === false) {
     throw new TypeError('Field contains invalid characters.')
   }
   const escapedField = escapeRegex(field)
   return new RegExp(`(^|(.*,))[^${tcharRFC7230}]*${escapedField}[^${tcharRFC7230}]*(,.*|$)`, flags)
 }
 
-function vary (reply, field) {
+function vary (reply, fieldname) {
   let header = reply.getHeader('Vary')
 
   if (!header) {
-    if (fieldNameRE.test(field) === false) {
-      throw new TypeError('Field contains invalid characters.')
+    // looking up in the cache is cheaper than validating the fieldname per Regex
+    if (!regexCache.has(fieldname)) {
+      regexCache.set(fieldname, fieldRegex(fieldname))
     }
-    reply.header('Vary', field)
+    reply.header('Vary', fieldname)
     return
   }
 
@@ -57,20 +58,20 @@ function vary (reply, field) {
     return
   }
 
-  if (wildcardRE.test(field) || wildcardRE.test(header)) {
+  if (wildcardRE.test(fieldname) || wildcardRE.test(header)) {
     reply.header('Vary', '*')
     return
   }
 
-  if (!regexCache.has(field)) {
-    regexCache.set(field, fieldRegex(field))
+  if (!regexCache.has(fieldname)) {
+    regexCache.set(fieldname, fieldRegex(fieldname))
   }
 
-  if (regexCache.get(field).test(header) === false) {
-    reply.header('Vary', header + ', ' + field)
+  if (regexCache.get(fieldname).test(header) === false) {
+    reply.header('Vary', header + ', ' + fieldname)
   }
 }
 
 module.exports.escapeRegex = escapeRegex
-module.exports.fieldRegex = fieldRegex
+module.exports.fieldnameRegex = fieldRegex
 module.exports.vary = vary

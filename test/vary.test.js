@@ -1,7 +1,7 @@
 'use strict'
 
 const test = require('tap').test
-const fieldRegex = require('../vary').fieldRegex
+const fieldnameRegex = require('../vary').fieldnameRegex
 const vary = require('../vary').vary
 const escapeRegex = require('../vary').escapeRegex
 
@@ -208,23 +208,23 @@ test('escapeRegex', t => {
   t.same(escapeRegex('~'), '~')
 })
 
-test('fieldRegex', t => {
+test('fieldnameRegex', t => {
   t.plan(17)
-  t.throws(() => fieldRegex('invalid[]'), TypeError, 'Field contains invalid characters.')
-  t.throws(() => fieldRegex('invalid:header'), TypeError, 'Field contains invalid characters.')
-  t.throws(() => fieldRegex('invalid header'), TypeError, 'Field contains invalid characters.')
-  t.throws(() => fieldRegex('invalid\nheader'), TypeError, 'Field contains invalid characters.')
-  t.throws(() => fieldRegex('invalid\u0080header'), TypeError, 'Field contains invalid characters.')
-  t.same(fieldRegex('Origin').test('Origin'), true)
-  t.same(fieldRegex('Origin').test('Or igin'), false)
-  t.same(fieldRegex('Origin').test('Origin,'), true)
-  t.same(fieldRegex('Origin').test('Origin, '), true)
-  t.same(fieldRegex('Origin').test(',Origin, '), true)
-  t.same(fieldRegex('Origin').test(',,Origin,, '), true)
-  t.same(fieldRegex('Origin').test(',Origin-Variant, '), false)
-  t.same(fieldRegex('Origin').test(',Origin-Variant, Origin '), true)
-  t.same(fieldRegex('Origin').test(',Origin-Variant, Or igin '), false)
-  t.same(fieldRegex('Origin-Variant').test(',Origin'), false)
-  t.same(fieldRegex('Origin-Variant').test(',Origin - Variant'), false)
-  t.same(fieldRegex('Origin-Variant').test(',Origin-Variant'), true)
+  t.throws(() => fieldnameRegex('invalid[]'), TypeError, 'Field contains invalid characters.')
+  t.throws(() => fieldnameRegex('invalid:header'), TypeError, 'Field contains invalid characters.')
+  t.throws(() => fieldnameRegex('invalid header'), TypeError, 'Field contains invalid characters.')
+  t.throws(() => fieldnameRegex('invalid\nheader'), TypeError, 'Field contains invalid characters.')
+  t.throws(() => fieldnameRegex('invalid\u0080header'), TypeError, 'Field contains invalid characters.')
+  t.same(fieldnameRegex('Origin').test('Origin'), true)
+  t.same(fieldnameRegex('Origin').test('Or igin'), false)
+  t.same(fieldnameRegex('Origin').test('Origin,'), true)
+  t.same(fieldnameRegex('Origin').test('Origin, '), true)
+  t.same(fieldnameRegex('Origin').test(',Origin, '), true)
+  t.same(fieldnameRegex('Origin').test(',,Origin,, '), true)
+  t.same(fieldnameRegex('Origin').test(',Origin-Variant, '), false)
+  t.same(fieldnameRegex('Origin').test(',Origin-Variant, Origin '), true)
+  t.same(fieldnameRegex('Origin').test(',Origin-Variant, Or igin '), false)
+  t.same(fieldnameRegex('Origin-Variant').test(',Origin'), false)
+  t.same(fieldnameRegex('Origin-Variant').test(',Origin - Variant'), false)
+  t.same(fieldnameRegex('Origin-Variant').test(',Origin-Variant'), true)
 })
