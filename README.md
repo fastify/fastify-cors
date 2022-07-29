@@ -33,7 +33,7 @@ fastify.get('/', (req, reply) => {
   reply.send({ hello: 'world' })
 })
 
-await fastify.listen(3000)
+await fastify.listen({ port: 3000 })
 ```
 You can use it as is without passing any option or you can configure it as explained below.
 ### Options
