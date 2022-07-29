@@ -21,9 +21,10 @@ npm i @fastify/cors
 ## Usage
 Require `@fastify/cors` and register it as any other plugin, it will add a `preHandler` hook and a [wildcard options route](https://github.com/fastify/fastify/issues/326#issuecomment-411360862).
 ```js
-import fastify from 'fastify'
+import Fastify from 'fastify'
 import cors from '@fastify/cors'
 
+const fastify = Fastify()
 await fastify.register(cors, { 
   // put your options here
 })
