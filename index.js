@@ -1,7 +1,10 @@
 'use strict'
 
 const fp = require('fastify-plugin')
-const vary = require('./vary')
+const {
+  addAccessControlRequestHeadersToVaryHeader,
+  addOriginToVaryHeader
+} = require('./vary')
 
 const defaultOptions = {
   origin: '*',
@@ -81,7 +84,7 @@ function handleCorsOptionsCallbackDelegator (optionsResolver, fastify, req, repl
 function onRequest (fastify, options, req, reply, next) {
   // Always set Vary header
   // https://github.com/rs/cors/issues/10
-  vary(reply, 'Origin')
+  addOriginToVaryHeader(reply)
   const resolveOriginOption = typeof options.origin === 'function' ? resolveOriginWrapper(fastify, options.origin) : (_, cb) => cb(null, options.origin)
 
   resolveOriginOption(req, (error, resolvedOriginOption) => {
@@ -156,7 +159,7 @@ function addPreflightHeaders (req, reply, corsOptions) {
   )
 
   if (corsOptions.allowedHeaders === null) {
-    vary(reply, 'Access-Control-Request-Headers')
+    addAccessControlRequestHeadersToVaryHeader(reply)
     const reqAllowedHeaders = req.headers['access-control-request-headers']
     if (reqAllowedHeaders !== undefined) {
       reply.header('Access-Control-Allow-Headers', reqAllowedHeaders)
