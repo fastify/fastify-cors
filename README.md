@@ -94,7 +94,7 @@ fastify.register(async function (fastify) {
   })
 })
 
-fastify.listen(3000)
+fastify.listen({ port: 3000 })
 ```
 
 ## Acknowledgements
