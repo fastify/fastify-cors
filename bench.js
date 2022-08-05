@@ -14,4 +14,4 @@ fastify.register((instance, opts, next) => {
   next()
 })
 
-fastify.listen(3000)
+fastify.listen({ port: 3000 })
