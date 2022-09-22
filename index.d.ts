@@ -75,4 +75,4 @@ export type FastifyCorsOptionsDelegate = FastifyCorsOptionsDelegateCallback | Fa
 export type FastifyPluginOptionsDelegate<T> = (instance: FastifyInstance) => T;
 
 declare const fastifyCors: FastifyPluginCallback<FastifyCorsOptions | FastifyPluginOptionsDelegate<FastifyCorsOptionsDelegate>>;
-export default fastifyCors;
+export = fastifyCors;
