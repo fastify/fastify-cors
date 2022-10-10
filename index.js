@@ -53,11 +53,11 @@ function fastifyCors (fastify, opts, next) {
 }
 
 function handleCorsOptionsDelegator (optionsResolver, fastify) {
-  fastify.addHook('onRequest', function onRequestCors (req, reply, next) {
-    if (optionsResolver.length === 2) {
+  fastify.addHook('onRequest', optionsResolver.length === 2
+    ? function onRequestCors (req, reply, next) {
       handleCorsOptionsCallbackDelegator(optionsResolver, fastify, req, reply, next)
-      return
-    } else {
+    }
+    : function onRequestCors (req, reply, next) {
       // handle delegator based on Promise
       const ret = optionsResolver(req)
       if (ret && typeof ret.then === 'function') {
@@ -65,9 +65,8 @@ function handleCorsOptionsDelegator (optionsResolver, fastify) {
           .then(corsOptions => onRequest(fastify, corsOptions, req, reply, next)).catch(next)
         return
       }
-    }
-    next(new Error('Invalid CORS origin option'))
-  })
+      next(new Error('Invalid CORS origin option'))
+    })
 }
 
 function handleCorsOptionsCallbackDelegator (optionsResolver, fastify, req, reply, next) {
