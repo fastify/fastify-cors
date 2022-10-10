@@ -106,7 +106,10 @@ function onRequest (fastify, options, req, reply, next) {
     if (req.raw.method === 'OPTIONS' && options.preflight === true) {
       // Strict mode enforces the required headers for preflight
       if (options.strictPreflight === true && (!req.headers.origin || !req.headers['access-control-request-method'])) {
-        reply.status(400).type('text/plain').send('Invalid Preflight Request')
+        reply
+          .status(400)
+          .type('text/plain')
+          .send('Invalid Preflight Request')
         return
       }
 
@@ -201,21 +204,21 @@ function getAccessControlAllowOriginHeader (reqOrigin, originOption) {
   return isRequestOriginAllowed(reqOrigin, originOption) ? reqOrigin : false
 }
 
-function isRequestOriginAllowed (reqOrigin, allowedOrigin) {
-  if (Array.isArray(allowedOrigin)) {
-    for (let i = 0; i < allowedOrigin.length; ++i) {
-      if (isRequestOriginAllowed(reqOrigin, allowedOrigin[i])) {
+function isRequestOriginAllowed (reqOrigin, originOption) {
+  if (Array.isArray(originOption)) {
+    for (let i = 0; i < originOption.length; ++i) {
+      if (isRequestOriginAllowed(reqOrigin, originOption[i])) {
         return true
       }
     }
     return false
-  } else if (typeof allowedOrigin === 'string') {
-    return reqOrigin === allowedOrigin
-  } else if (allowedOrigin instanceof RegExp) {
-    allowedOrigin.lastIndex = 0
-    return allowedOrigin.test(reqOrigin)
+  } else if (typeof originOption === 'string') {
+    return reqOrigin === originOption
+  } else if (originOption instanceof RegExp) {
+    originOption.lastIndex = 0
+    return originOption.test(reqOrigin)
   } else {
-    return !!allowedOrigin
+    return !!originOption
   }
 }
 
