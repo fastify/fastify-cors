@@ -22,16 +22,18 @@ const defaultOptions = {
 function fastifyCors (fastify, opts, next) {
   fastify.decorateRequest('corsPreflightEnabled', false)
 
-  let hideOptionsRoute = true
   if (typeof opts === 'function') {
     handleCorsOptionsDelegator(opts, fastify)
   } else {
-    if (opts.hideOptionsRoute !== undefined) hideOptionsRoute = opts.hideOptionsRoute
     const corsOptions = Object.assign({}, defaultOptions, opts)
     fastify.addHook('onRequest', function onRequestCors (req, reply, next) {
       onRequest(fastify, corsOptions, req, reply, next)
     })
   }
+
+  const hideOptionsRoute = typeof opts === 'function'
+    ? true
+    : opts.hideOptionsRoute ?? true
 
   // The preflight reply must occur in the hook. This allows fastify-cors to reply to
   // preflight requests BEFORE possible authentication plugins. If the preflight reply
@@ -40,7 +42,7 @@ function fastifyCors (fastify, opts, next) {
   //
   // This route simply enables fastify to accept preflight requests.
   fastify.options('*', { schema: { hide: hideOptionsRoute } }, (req, reply) => {
-    if (!req.corsPreflightEnabled) {
+    if (req.corsPreflightEnabled === false) {
       // Do not handle preflight requests if the origin option disabled CORS
       reply.callNotFound()
       return
@@ -61,8 +63,10 @@ function handleCorsOptionsDelegator (optionsResolver, fastify) {
       // handle delegator based on Promise
       const ret = optionsResolver(req)
       if (ret && typeof ret.then === 'function') {
-        ret.then(options => Object.assign({}, defaultOptions, options))
-          .then(corsOptions => onRequest(fastify, corsOptions, req, reply, next)).catch(next)
+        ret
+          .then(options => Object.assign({}, defaultOptions, options))
+          .then(corsOptions => onRequest(fastify, corsOptions, req, reply, next))
+          .catch(next)
         return
       }
       next(new Error('Invalid CORS origin option'))
