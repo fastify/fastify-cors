@@ -10,7 +10,7 @@ interface ArrayOfValueOrArray<T> extends Array<ValueOrArray<T>> {
 }
 
 type FastifyCorsPlugin = FastifyPluginCallback<
-  NonNullable<fastifyCors.FastifyCorsOptions>
+  NonNullable<fastifyCors.FastifyCorsOptions> | fastifyCors.FastifyCorsOptionsDelegate
 >;
 
 declare namespace fastifyCors {
@@ -78,7 +78,7 @@ declare namespace fastifyCors {
   export interface FastifyCorsOptionsDelegateCallback { (req: FastifyRequest, cb: (error: Error | null, corsOptions?: FastifyCorsOptions) => void): void }
   export interface FastifyCorsOptionsDelegatePromise { (req: FastifyRequest):  Promise<FastifyCorsOptions> }
   export type FastifyCorsOptionsDelegate = FastifyCorsOptionsDelegateCallback | FastifyCorsOptionsDelegatePromise
-  export type FastifyPluginOptionsDelegate<T> = (instance: FastifyInstance) => T;
+  export type FastifyPluginOptionsDelegate<T = FastifyCorsOptionsDelegate> = (instance: FastifyInstance) => T;
 
   export { fastifyCors as default };
 }
