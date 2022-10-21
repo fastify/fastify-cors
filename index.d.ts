@@ -80,6 +80,7 @@ declare namespace fastifyCors {
   export type FastifyCorsOptionsDelegate = FastifyCorsOptionsDelegateCallback | FastifyCorsOptionsDelegatePromise
   export type FastifyPluginOptionsDelegate<T = FastifyCorsOptionsDelegate> = (instance: FastifyInstance) => T;
 
+export const fastifyCors: FastifyCorsPlugin
   export { fastifyCors as default };
 }
 
