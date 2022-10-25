@@ -220,7 +220,15 @@ function isRequestOriginAllowed (reqOrigin, allowedOrigin) {
   }
 }
 
-module.exports = fp(fastifyCors, {
+const _fastifyCors = fp(fastifyCors, {
   fastify: '4.x',
   name: '@fastify/cors'
 })
+
+/**
+ * These export configurations enable JS and TS developers
+ * to consumer fastify in whatever way best suits their needs.
+ */
+module.exports = _fastifyCors
+module.exports.fastifyCors = _fastifyCors
+module.exports.default = _fastifyCors
