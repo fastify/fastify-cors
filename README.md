@@ -19,7 +19,7 @@ npm i @fastify/cors
 ```
 
 ## Usage
-Require `@fastify/cors` and register it as any other plugin, it will add a `preHandler` hook and a [wildcard options route](https://github.com/fastify/fastify/issues/326#issuecomment-411360862).
+Require `@fastify/cors` and register it as any other plugin, it will add a `onRequest` hook and a [wildcard options route](https://github.com/fastify/fastify/issues/326#issuecomment-411360862).
 ```js
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
@@ -86,6 +86,58 @@ fastify.register(require('@fastify/cors'), (instance) => {
     // callback expects two parameters: error and options
     callback(null, corsOptions)
   }
+})
+
+fastify.register(async function (fastify) {
+  fastify.get('/', (req, reply) => {
+    reply.send({ hello: 'world' })
+  })
+})
+
+fastify.listen({ port: 3000 })
+```
+
+### Custom Fastify hook name
+
+By default, `@fastify/cors` adds a `onRequest` hook where the validation and header injection are executed. This can be customized by passing `hook` in the options.
+
+```js
+import Fastify from 'fastify'
+import cors from '@fastify/cors'
+
+const fastify = Fastify()
+await fastify.register(cors, { 
+  hook: 'preHandler',
+})
+
+fastify.get('/', (req, reply) => {
+  reply.send({ hello: 'world' })
+})
+
+await fastify.listen({ port: 3000 })
+```
+
+When configuring CORS asynchronously, an object with `delegator` key is expected:
+
+```js
+const fastify = require('fastify')()
+
+fastify.register(require('@fastify/cors'), {
+  hook: 'preHandler',
+  delegator: (req, callback) => {
+    const corsOptions = {
+      // This is NOT recommended for production as it enables reflection exploits
+      origin: true
+    };
+
+    // do not include CORS headers for requests from localhost
+    if (/^localhost$/m.test(req.headers.origin)) {
+      corsOptions.origin = false
+    }
+
+    // callback expects two parameters: error and options
+    callback(null, corsOptions)
+  },
 })
 
 fastify.register(async function (fastify) {

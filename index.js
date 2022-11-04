@@ -19,17 +19,22 @@ const defaultOptions = {
   strictPreflight: true
 }
 
+const defaultHook = 'onRequest'
+
 function fastifyCors (fastify, opts, next) {
   fastify.decorateRequest('corsPreflightEnabled', false)
 
   let hideOptionsRoute = true
   if (typeof opts === 'function') {
     handleCorsOptionsDelegator(opts, fastify)
+  } else if (opts.delegator) {
+    const { delegator, ...options } = opts
+    handleCorsOptionsDelegator(delegator, fastify, options)
   } else {
     if (opts.hideOptionsRoute !== undefined) hideOptionsRoute = opts.hideOptionsRoute
     const corsOptions = Object.assign({}, defaultOptions, opts)
-    fastify.addHook('onRequest', function onRequestCors (req, reply, next) {
-      onRequest(fastify, corsOptions, req, reply, next)
+    fastify.addHook(opts.hook || defaultHook, function handleCors (req, reply, next) {
+      addCorsHeadersHandler(fastify, corsOptions, req, reply, next)
     })
   }
 
@@ -52,8 +57,8 @@ function fastifyCors (fastify, opts, next) {
   next()
 }
 
-function handleCorsOptionsDelegator (optionsResolver, fastify) {
-  fastify.addHook('onRequest', function onRequestCors (req, reply, next) {
+function handleCorsOptionsDelegator (optionsResolver, fastify, { hook } = { hook: defaultHook }) {
+  fastify.addHook(hook, function handleCors (req, reply, next) {
     if (optionsResolver.length === 2) {
       handleCorsOptionsCallbackDelegator(optionsResolver, fastify, req, reply, next)
       return
@@ -62,7 +67,7 @@ function handleCorsOptionsDelegator (optionsResolver, fastify) {
       const ret = optionsResolver(req)
       if (ret && typeof ret.then === 'function') {
         ret.then(options => Object.assign({}, defaultOptions, options))
-          .then(corsOptions => onRequest(fastify, corsOptions, req, reply, next)).catch(next)
+          .then(corsOptions => addCorsHeadersHandler(fastify, corsOptions, req, reply, next)).catch(next)
         return
       }
     }
@@ -76,15 +81,16 @@ function handleCorsOptionsCallbackDelegator (optionsResolver, fastify, req, repl
       next(err)
     } else {
       const corsOptions = Object.assign({}, defaultOptions, options)
-      onRequest(fastify, corsOptions, req, reply, next)
+      addCorsHeadersHandler(fastify, corsOptions, req, reply, next)
     }
   })
 }
 
-function onRequest (fastify, options, req, reply, next) {
+function addCorsHeadersHandler (fastify, options, req, reply, next) {
   // Always set Vary header
   // https://github.com/rs/cors/issues/10
   addOriginToVaryHeader(reply)
+  
   const resolveOriginOption = typeof options.origin === 'function' ? resolveOriginWrapper(fastify, options.origin) : (_, cb) => cb(null, options.origin)
 
   resolveOriginOption(req, (error, resolvedOriginOption) => {
