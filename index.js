@@ -58,21 +58,22 @@ function fastifyCors (fastify, opts, next) {
 }
 
 function handleCorsOptionsDelegator (optionsResolver, fastify, { hook } = { hook: defaultHook }) {
-  fastify.addHook(hook, function handleCors (req, reply, next) {
-    if (optionsResolver.length === 2) {
+  if (optionsResolver.length === 2) {
+    fastify.addHook(hook, function handleCors (req, reply, next) {
       handleCorsOptionsCallbackDelegator(optionsResolver, fastify, req, reply, next)
-      return
-    } else {
-      // handle delegator based on Promise
+    })
+  } else {
+    fastify.addHook(hook, function handleCors (req, reply, next) {
       const ret = optionsResolver(req)
+      // handle delegator based on Promise
       if (ret && typeof ret.then === 'function') {
         ret.then(options => Object.assign({}, defaultOptions, options))
           .then(corsOptions => addCorsHeadersHandler(fastify, corsOptions, req, reply, next)).catch(next)
         return
       }
-    }
-    next(new Error('Invalid CORS origin option'))
-  })
+      next(new Error('Invalid CORS origin option'))
+    })
+  }
 }
 
 function handleCorsOptionsCallbackDelegator (optionsResolver, fastify, req, reply, next) {
