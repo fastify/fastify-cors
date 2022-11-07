@@ -19,9 +19,9 @@ test('Should set hook onRequest if hook option is not set', async (t) => {
 
   fastify.register(cors)
 
-  fastify.addHook('onRequest', (request, reply, done) => {
+  fastify.addHook('onResponse', (request, reply, done) => {
     t.equal(request[kFastifyContext].onError, null)
-    t.equal(request[kFastifyContext].onRequest.length, 2)
+    t.equal(request[kFastifyContext].onRequest.length, 1)
     t.equal(request[kFastifyContext].onSend, null)
     t.equal(request[kFastifyContext].preHandler, null)
     t.equal(request[kFastifyContext].preParsing, null)
@@ -51,9 +51,9 @@ test('Should set hook onRequest if hook option is set to onRequest', async (t) =
     hook: 'onRequest'
   })
 
-  fastify.addHook('onRequest', (request, reply, done) => {
+  fastify.addHook('onResponse', (request, reply, done) => {
     t.equal(request[kFastifyContext].onError, null)
-    t.equal(request[kFastifyContext].onRequest.length, 2)
+    t.equal(request[kFastifyContext].onRequest.length, 1)
     t.equal(request[kFastifyContext].onSend, null)
     t.equal(request[kFastifyContext].preHandler, null)
     t.equal(request[kFastifyContext].preParsing, null)
@@ -83,9 +83,9 @@ test('Should set hook preParsing if hook option is set to preParsing', async (t)
     hook: 'preParsing'
   })
 
-  fastify.addHook('onRequest', (request, reply, done) => {
+  fastify.addHook('onResponse', (request, reply, done) => {
     t.equal(request[kFastifyContext].onError, null)
-    t.equal(request[kFastifyContext].onRequest.length, 1)
+    t.equal(request[kFastifyContext].onRequest, null)
     t.equal(request[kFastifyContext].onSend, null)
     t.equal(request[kFastifyContext].preHandler, null)
     t.equal(request[kFastifyContext].preParsing.length, 1)
@@ -115,9 +115,9 @@ test('Should set hook preValidation if hook option is set to preValidation', asy
     hook: 'preValidation'
   })
 
-  fastify.addHook('onRequest', (request, reply, done) => {
+  fastify.addHook('onResponse', (request, reply, done) => {
     t.equal(request[kFastifyContext].onError, null)
-    t.equal(request[kFastifyContext].onRequest.length, 1)
+    t.equal(request[kFastifyContext].onRequest, null)
     t.equal(request[kFastifyContext].onSend, null)
     t.equal(request[kFastifyContext].preHandler, null)
     t.equal(request[kFastifyContext].preParsing, null)
@@ -147,9 +147,9 @@ test('Should set hook preParsing if hook option is set to preParsing', async (t)
     hook: 'preParsing'
   })
 
-  fastify.addHook('onRequest', (request, reply, done) => {
+  fastify.addHook('onResponse', (request, reply, done) => {
     t.equal(request[kFastifyContext].onError, null)
-    t.equal(request[kFastifyContext].onRequest.length, 1)
+    t.equal(request[kFastifyContext].onRequest, null)
     t.equal(request[kFastifyContext].onSend, null)
     t.equal(request[kFastifyContext].preHandler, null)
     t.equal(request[kFastifyContext].preParsing.length, 1)
@@ -179,9 +179,9 @@ test('Should set hook preHandler if hook option is set to preHandler', async (t)
     hook: 'preHandler'
   })
 
-  fastify.addHook('onRequest', (request, reply, done) => {
+  fastify.addHook('onResponse', (request, reply, done) => {
     t.equal(request[kFastifyContext].onError, null)
-    t.equal(request[kFastifyContext].onRequest.length, 1)
+    t.equal(request[kFastifyContext].onRequest, null)
     t.equal(request[kFastifyContext].onSend, null)
     t.equal(request[kFastifyContext].preHandler.length, 1)
     t.equal(request[kFastifyContext].preParsing, null)
@@ -211,9 +211,9 @@ test('Should set hook onSend if hook option is set to onSend', async (t) => {
     hook: 'onSend'
   })
 
-  fastify.addHook('onRequest', (request, reply, done) => {
+  fastify.addHook('onResponse', (request, reply, done) => {
     t.equal(request[kFastifyContext].onError, null)
-    t.equal(request[kFastifyContext].onRequest.length, 1)
+    t.equal(request[kFastifyContext].onRequest, null)
     t.equal(request[kFastifyContext].onSend.length, 1)
     t.equal(request[kFastifyContext].preHandler, null)
     t.equal(request[kFastifyContext].preParsing, null)
@@ -243,9 +243,9 @@ test('Should set hook onError if hook option is set to onError', async (t) => {
     hook: 'onError'
   })
 
-  fastify.addHook('onRequest', (request, reply, done) => {
+  fastify.addHook('onResponse', (request, reply, done) => {
     t.equal(request[kFastifyContext].onError.length, 1)
-    t.equal(request[kFastifyContext].onRequest.length, 1)
+    t.equal(request[kFastifyContext].onRequest, null)
     t.equal(request[kFastifyContext].onSend, null)
     t.equal(request[kFastifyContext].preHandler, null)
     t.equal(request[kFastifyContext].preParsing, null)
@@ -275,9 +275,9 @@ test('Should set hook preSerialization if hook option is set to preSerialization
     hook: 'preSerialization'
   })
 
-  fastify.addHook('onRequest', (request, reply, done) => {
+  fastify.addHook('onResponse', (request, reply, done) => {
     t.equal(request[kFastifyContext].onError, null)
-    t.equal(request[kFastifyContext].onRequest.length, 1)
+    t.equal(request[kFastifyContext].onRequest, null)
     t.equal(request[kFastifyContext].onSend, null)
     t.equal(request[kFastifyContext].preHandler, null)
     t.equal(request[kFastifyContext].preParsing, null)
