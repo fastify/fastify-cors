@@ -13,7 +13,7 @@ test('Should error on invalid hook option', async (t) => {
 })
 
 test('Should set hook onRequest if hook option is not set', async (t) => {
-  t.plan(7)
+  t.plan(10)
 
   const fastify = Fastify()
 
@@ -36,14 +36,20 @@ test('Should set hook onRequest if hook option is not set', async (t) => {
 
   await fastify.ready()
 
-  await fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/'
+  })
+  delete res.headers.date
+  t.equal(res.statusCode, 200)
+  t.equal(res.payload, 'ok')
+  t.match(res.headers, {
+    'access-control-allow-origin': '*'
   })
 })
 
 test('Should set hook onRequest if hook option is set to onRequest', async (t) => {
-  t.plan(7)
+  t.plan(10)
 
   const fastify = Fastify()
 
@@ -68,14 +74,20 @@ test('Should set hook onRequest if hook option is set to onRequest', async (t) =
 
   await fastify.ready()
 
-  await fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/'
+  })
+  delete res.headers.date
+  t.equal(res.statusCode, 200)
+  t.equal(res.payload, 'ok')
+  t.match(res.headers, {
+    'access-control-allow-origin': '*'
   })
 })
 
 test('Should set hook preParsing if hook option is set to preParsing', async (t) => {
-  t.plan(7)
+  t.plan(10)
 
   const fastify = Fastify()
 
@@ -100,14 +112,21 @@ test('Should set hook preParsing if hook option is set to preParsing', async (t)
 
   await fastify.ready()
 
-  await fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/'
+  })
+  delete res.headers.date
+  t.equal(res.statusCode, 200)
+  t.equal(res.payload, 'ok')
+  t.match(res.headers, {
+    'access-control-allow-origin': '*',
+    vary: 'Origin'
   })
 })
 
 test('Should set hook preValidation if hook option is set to preValidation', async (t) => {
-  t.plan(7)
+  t.plan(10)
 
   const fastify = Fastify()
 
@@ -132,14 +151,21 @@ test('Should set hook preValidation if hook option is set to preValidation', asy
 
   await fastify.ready()
 
-  await fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/'
+  })
+  delete res.headers.date
+  t.equal(res.statusCode, 200)
+  t.equal(res.payload, 'ok')
+  t.match(res.headers, {
+    'access-control-allow-origin': '*',
+    vary: 'Origin'
   })
 })
 
 test('Should set hook preParsing if hook option is set to preParsing', async (t) => {
-  t.plan(7)
+  t.plan(10)
 
   const fastify = Fastify()
 
@@ -164,14 +190,21 @@ test('Should set hook preParsing if hook option is set to preParsing', async (t)
 
   await fastify.ready()
 
-  await fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/'
+  })
+  delete res.headers.date
+  t.equal(res.statusCode, 200)
+  t.equal(res.payload, 'ok')
+  t.match(res.headers, {
+    'access-control-allow-origin': '*',
+    vary: 'Origin'
   })
 })
 
 test('Should set hook preHandler if hook option is set to preHandler', async (t) => {
-  t.plan(7)
+  t.plan(10)
 
   const fastify = Fastify()
 
@@ -196,14 +229,21 @@ test('Should set hook preHandler if hook option is set to preHandler', async (t)
 
   await fastify.ready()
 
-  await fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/'
+  })
+  delete res.headers.date
+  t.equal(res.statusCode, 200)
+  t.equal(res.payload, 'ok')
+  t.match(res.headers, {
+    'access-control-allow-origin': '*',
+    vary: 'Origin'
   })
 })
 
 test('Should set hook onSend if hook option is set to onSend', async (t) => {
-  t.plan(7)
+  t.plan(10)
 
   const fastify = Fastify()
 
@@ -228,14 +268,21 @@ test('Should set hook onSend if hook option is set to onSend', async (t) => {
 
   await fastify.ready()
 
-  await fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/'
+  })
+  delete res.headers.date
+  t.equal(res.statusCode, 200)
+  t.equal(res.payload, 'ok')
+  t.match(res.headers, {
+    'access-control-allow-origin': '*',
+    vary: 'Origin'
   })
 })
 
 test('Should set hook onError if hook option is set to onError', async (t) => {
-  t.plan(7)
+  t.plan(10)
 
   const fastify = Fastify()
 
@@ -255,19 +302,26 @@ test('Should set hook onError if hook option is set to onError', async (t) => {
   })
 
   fastify.get('/', (req, reply) => {
-    reply.send('ok')
+    throw new Error('Failed')
   })
 
   await fastify.ready()
 
-  await fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/'
+  })
+  delete res.headers.date
+  t.equal(res.statusCode, 500)
+  t.equal(res.payload, '{"statusCode":500,"error":"Internal Server Error","message":"Failed"}')
+  t.match(res.headers, {
+    'access-control-allow-origin': '*',
+    vary: 'Origin'
   })
 })
 
 test('Should set hook preSerialization if hook option is set to preSerialization', async (t) => {
-  t.plan(7)
+  t.plan(10)
 
   const fastify = Fastify()
 
@@ -287,14 +341,21 @@ test('Should set hook preSerialization if hook option is set to preSerialization
   })
 
   fastify.get('/', (req, reply) => {
-    reply.send('ok')
+    reply.send({ nonString: true })
   })
 
   await fastify.ready()
 
-  await fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/'
+  })
+  delete res.headers.date
+  t.equal(res.statusCode, 200)
+  t.equal(res.payload, '{"nonString":true}')
+  t.match(res.headers, {
+    'access-control-allow-origin': '*',
+    vary: 'Origin'
   })
 })
 
@@ -379,6 +440,294 @@ test('Should support custom hook with dynamic config', t => {
       'access-control-allow-headers': 'baz, foo',
       'access-control-max-age': '321',
       'content-length': '0'
+    })
+  })
+
+  fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  }, (err, res) => {
+    t.error(err)
+    t.equal(res.statusCode, 500)
+  })
+})
+
+test('Should support custom hook with dynamic config (callback)', t => {
+  t.plan(16)
+
+  const configs = [{
+    origin: 'example.com',
+    methods: 'GET',
+    credentials: true,
+    exposedHeaders: ['foo', 'bar'],
+    allowedHeaders: ['baz', 'woo'],
+    maxAge: 123
+  }, {
+    origin: 'sample.com',
+    methods: 'GET',
+    credentials: true,
+    exposedHeaders: ['zoo', 'bar'],
+    allowedHeaders: ['baz', 'foo'],
+    maxAge: 321
+  }]
+
+  const fastify = Fastify()
+  let requestId = 0
+  const configDelegation = function (req, cb) {
+    // request should have id
+    t.ok(req.id)
+    // request should not have send
+    t.notOk(req.send)
+    const config = configs[requestId]
+    requestId++
+    if (config) {
+      cb(null, config)
+    } else {
+      cb(new Error('ouch'))
+    }
+  }
+  fastify.register(cors, {
+    hook: 'preParsing',
+    delegator: configDelegation
+  })
+
+  fastify.get('/', (req, reply) => {
+    reply.send('ok')
+  })
+
+  fastify.inject({
+    method: 'GET',
+    url: '/'
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
+    t.match(res.headers, {
+      'access-control-allow-origin': 'example.com',
+      vary: 'Origin',
+      'access-control-allow-credentials': 'true',
+      'access-control-expose-headers': 'foo, bar',
+      'content-length': '2'
+    })
+  })
+
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.equal(res.statusCode, 204)
+    t.equal(res.payload, '')
+    t.match(res.headers, {
+      'access-control-allow-origin': 'sample.com',
+      vary: 'Origin',
+      'access-control-allow-credentials': 'true',
+      'access-control-expose-headers': 'zoo, bar',
+      'access-control-allow-methods': 'GET',
+      'access-control-allow-headers': 'baz, foo',
+      'access-control-max-age': '321',
+      'content-length': '0'
+    })
+  })
+
+  fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  }, (err, res) => {
+    t.error(err)
+    t.equal(res.statusCode, 500)
+  })
+})
+
+test('Should support custom hook with dynamic config (Promise)', t => {
+  t.plan(16)
+
+  const configs = [{
+    origin: 'example.com',
+    methods: 'GET',
+    credentials: true,
+    exposedHeaders: ['foo', 'bar'],
+    allowedHeaders: ['baz', 'woo'],
+    maxAge: 123
+  }, {
+    origin: 'sample.com',
+    methods: 'GET',
+    credentials: true,
+    exposedHeaders: ['zoo', 'bar'],
+    allowedHeaders: ['baz', 'foo'],
+    maxAge: 321
+  }]
+
+  const fastify = Fastify()
+  let requestId = 0
+  const configDelegation = function (req) {
+    // request should have id
+    t.ok(req.id)
+    // request should not have send
+    t.notOk(req.send)
+    const config = configs[requestId]
+    requestId++
+    if (config) {
+      return Promise.resolve(config)
+    } else {
+      return Promise.reject(new Error('ouch'))
+    }
+  }
+
+  fastify.register(cors, {
+    hook: 'preParsing',
+    delegator: configDelegation
+  })
+
+  fastify.get('/', (req, reply) => {
+    reply.send('ok')
+  })
+
+  fastify.inject({
+    method: 'GET',
+    url: '/'
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
+    t.match(res.headers, {
+      'access-control-allow-origin': 'example.com',
+      vary: 'Origin',
+      'access-control-allow-credentials': 'true',
+      'access-control-expose-headers': 'foo, bar',
+      'content-length': '2'
+    })
+  })
+
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.equal(res.statusCode, 204)
+    t.equal(res.payload, '')
+    t.match(res.headers, {
+      'access-control-allow-origin': 'sample.com',
+      vary: 'Origin',
+      'access-control-allow-credentials': 'true',
+      'access-control-expose-headers': 'zoo, bar',
+      'access-control-allow-methods': 'GET',
+      'access-control-allow-headers': 'baz, foo',
+      'access-control-max-age': '321',
+      'content-length': '0'
+    })
+  })
+
+  fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  }, (err, res) => {
+    t.error(err)
+    t.equal(res.statusCode, 500)
+  })
+})
+
+test('Should support custom hook with dynamic config (Promise), but should error /1', t => {
+  t.plan(6)
+
+  const fastify = Fastify()
+  const configDelegation = function () {
+    return false
+  }
+
+  fastify.register(cors, {
+    hook: 'preParsing',
+    delegator: configDelegation
+  })
+
+  fastify.get('/', (req, reply) => {
+    reply.send('ok')
+  })
+
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.equal(res.statusCode, 500)
+    t.equal(res.payload, '{"statusCode":500,"error":"Internal Server Error","message":"Invalid CORS origin option"}')
+    t.match(res.headers, {
+      'content-length': '89'
+    })
+  })
+
+  fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  }, (err, res) => {
+    t.error(err)
+    t.equal(res.statusCode, 500)
+  })
+})
+
+test('Should support custom hook with dynamic config (Promise), but should error /2', t => {
+  t.plan(6)
+
+  const fastify = Fastify()
+  const configDelegation = function () {
+    return false
+  }
+
+  fastify.register(cors, {
+    delegator: configDelegation
+  })
+
+  fastify.get('/', (req, reply) => {
+    reply.send('ok')
+  })
+
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.equal(res.statusCode, 500)
+    t.equal(res.payload, '{"statusCode":500,"error":"Internal Server Error","message":"Invalid CORS origin option"}')
+    t.match(res.headers, {
+      'content-length': '89'
     })
   })
 

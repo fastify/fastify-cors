@@ -30,6 +30,12 @@ const validHooks = [
   'onError'
 ]
 
+const hookWithPayload = [
+  'preSerialization',
+  'preParsing',
+  'onSend'
+]
+
 function validateHook (value, next) {
   if (validHooks.indexOf(value) !== -1) {
     return
@@ -42,17 +48,23 @@ function fastifyCors (fastify, opts, next) {
 
   let hideOptionsRoute = true
   if (typeof opts === 'function') {
-    handleCorsOptionsDelegator(opts, fastify)
+    handleCorsOptionsDelegator(opts, fastify, { hook: defaultOptions.hook }, next)
   } else if (opts.delegator) {
     const { delegator, ...options } = opts
-    handleCorsOptionsDelegator(delegator, fastify, options)
+    handleCorsOptionsDelegator(delegator, fastify, options, next)
   } else {
     if (opts.hideOptionsRoute !== undefined) hideOptionsRoute = opts.hideOptionsRoute
     const corsOptions = Object.assign({}, defaultOptions, opts)
     validateHook(corsOptions.hook, next)
-    fastify.addHook(corsOptions.hook, function handleCors (req, reply, next) {
-      addCorsHeadersHandler(fastify, corsOptions, req, reply, next)
-    })
+    if (hookWithPayload.indexOf(corsOptions.hook) !== -1) {
+      fastify.addHook(corsOptions.hook, function handleCors (req, reply, payload, next) {
+        addCorsHeadersHandler(fastify, corsOptions, req, reply, next)
+      })
+    } else {
+      fastify.addHook(corsOptions.hook, function handleCors (req, reply, next) {
+        addCorsHeadersHandler(fastify, corsOptions, req, reply, next)
+      })
+    }
   }
 
   // The preflight reply must occur in the hook. This allows fastify-cors to reply to
@@ -74,22 +86,43 @@ function fastifyCors (fastify, opts, next) {
   next()
 }
 
-function handleCorsOptionsDelegator (optionsResolver, fastify, { hook } = { hook: defaultOptions.hook }) {
+function handleCorsOptionsDelegator (optionsResolver, fastify, opts, next) {
+  const hook = (opts && opts.hook) || defaultOptions.hook
+  validateHook(hook, next)
   if (optionsResolver.length === 2) {
-    fastify.addHook(hook, function handleCors (req, reply, next) {
-      handleCorsOptionsCallbackDelegator(optionsResolver, fastify, req, reply, next)
-    })
+    if (hookWithPayload.indexOf(hook) !== -1) {
+      fastify.addHook(hook, function handleCors (req, reply, payload, next) {
+        handleCorsOptionsCallbackDelegator(optionsResolver, fastify, req, reply, next)
+      })
+    } else {
+      fastify.addHook(hook, function handleCors (req, reply, next) {
+        handleCorsOptionsCallbackDelegator(optionsResolver, fastify, req, reply, next)
+      })
+    }
   } else {
-    // handle delegator based on Promise
-    fastify.addHook(hook, function handleCors (req, reply, next) {
-      const ret = optionsResolver(req)
-      if (ret && typeof ret.then === 'function') {
-        ret.then(options => Object.assign({}, defaultOptions, options))
-          .then(corsOptions => addCorsHeadersHandler(fastify, corsOptions, req, reply, next)).catch(next)
-        return
-      }
-      next(new Error('Invalid CORS origin option'))
-    })
+    if (hookWithPayload.indexOf(hook) !== -1) {
+      // handle delegator based on Promise
+      fastify.addHook(hook, function handleCors (req, reply, payload, next) {
+        const ret = optionsResolver(req)
+        if (ret && typeof ret.then === 'function') {
+          ret.then(options => Object.assign({}, defaultOptions, options))
+            .then(corsOptions => addCorsHeadersHandler(fastify, corsOptions, req, reply, next)).catch(next)
+          return
+        }
+        next(new Error('Invalid CORS origin option'))
+      })
+    } else {
+      // handle delegator based on Promise
+      fastify.addHook(hook, function handleCors (req, reply, next) {
+        const ret = optionsResolver(req)
+        if (ret && typeof ret.then === 'function') {
+          ret.then(options => Object.assign({}, defaultOptions, options))
+            .then(corsOptions => addCorsHeadersHandler(fastify, corsOptions, req, reply, next)).catch(next)
+          return
+        }
+        next(new Error('Invalid CORS origin option'))
+      })
+    }
   }
 }
 
