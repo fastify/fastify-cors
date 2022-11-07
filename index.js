@@ -90,7 +90,7 @@ function addCorsHeadersHandler (fastify, options, req, reply, next) {
   // Always set Vary header
   // https://github.com/rs/cors/issues/10
   addOriginToVaryHeader(reply)
-  
+
   const resolveOriginOption = typeof options.origin === 'function' ? resolveOriginWrapper(fastify, options.origin) : (_, cb) => cb(null, options.origin)
 
   resolveOriginOption(req, (error, resolvedOriginOption) => {
