@@ -9,6 +9,7 @@ const {
 const defaultOptions = {
   origin: '*',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  hook: 'onRequest',
   preflightContinue: false,
   optionsSuccessStatus: 204,
   credentials: false,
@@ -19,7 +20,22 @@ const defaultOptions = {
   strictPreflight: true
 }
 
-const defaultHook = 'onRequest'
+const validHooks = [
+  'onRequest',
+  'preParsing',
+  'preValidation',
+  'preHandler',
+  'preSerialization',
+  'onSend',
+  'onError'
+]
+
+function validateHook (value, next) {
+  if (validHooks.indexOf(value) !== -1) {
+    return
+  }
+  next(new TypeError('@fastify/cors: Invalid hook option provided.'))
+}
 
 function fastifyCors (fastify, opts, next) {
   fastify.decorateRequest('corsPreflightEnabled', false)
@@ -33,7 +49,8 @@ function fastifyCors (fastify, opts, next) {
   } else {
     if (opts.hideOptionsRoute !== undefined) hideOptionsRoute = opts.hideOptionsRoute
     const corsOptions = Object.assign({}, defaultOptions, opts)
-    fastify.addHook(opts.hook || defaultHook, function handleCors (req, reply, next) {
+    validateHook(corsOptions.hook, next)
+    fastify.addHook(corsOptions.hook, function handleCors (req, reply, next) {
       addCorsHeadersHandler(fastify, corsOptions, req, reply, next)
     })
   }
@@ -57,23 +74,22 @@ function fastifyCors (fastify, opts, next) {
   next()
 }
 
-function handleCorsOptionsDelegator (optionsResolver, fastify, { hook } = { hook: defaultHook }) {
-  if (optionsResolver.length === 2) {
-    fastify.addHook(hook, function handleCors (req, reply, next) {
+function handleCorsOptionsDelegator (optionsResolver, fastify, { hook } = { hook: defaultOptions.hook }) {
+  fastify.addHook(hook, function handleCors (req, reply, next) {
+    if (optionsResolver.length === 2) {
       handleCorsOptionsCallbackDelegator(optionsResolver, fastify, req, reply, next)
-    })
-  } else {
-    fastify.addHook(hook, function handleCors (req, reply, next) {
-      const ret = optionsResolver(req)
+      return
+    } else {
       // handle delegator based on Promise
+      const ret = optionsResolver(req)
       if (ret && typeof ret.then === 'function') {
         ret.then(options => Object.assign({}, defaultOptions, options))
           .then(corsOptions => addCorsHeadersHandler(fastify, corsOptions, req, reply, next)).catch(next)
         return
       }
-      next(new Error('Invalid CORS origin option'))
-    })
-  }
+    }
+    next(new Error('Invalid CORS origin option'))
+  })
 }
 
 function handleCorsOptionsCallbackDelegator (optionsResolver, fastify, req, reply, next) {
