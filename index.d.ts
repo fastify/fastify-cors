@@ -13,10 +13,28 @@ type FastifyCorsPlugin = FastifyPluginCallback<
   NonNullable<fastifyCors.FastifyCorsOptions> | fastifyCors.FastifyCorsOptionsDelegate
 >;
 
+type FastifyCorsHook =
+  | 'onRequest'
+  | 'preParsing'
+  | 'preValidation'
+  | 'preHandler'
+  | 'preSerialization'
+  | 'onSend'
+
 declare namespace fastifyCors {
   export type OriginFunction = (origin: string, callback: OriginCallback) => void;
 
   export interface FastifyCorsOptions {
+    /**
+     * Configures the Lifecycle Hook.
+     */
+    hook?: FastifyCorsHook;
+
+    /**
+     * Configures the delegate function.
+     */
+    delegator?: FastifyCorsOptionsDelegate;
+
     /**
      * Configures the Access-Control-Allow-Origin CORS header.
      */

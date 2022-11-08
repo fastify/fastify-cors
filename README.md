@@ -19,7 +19,7 @@ npm i @fastify/cors
 ```
 
 ## Usage
-Require `@fastify/cors` and register it as any other plugin, it will add a `preHandler` hook and a [wildcard options route](https://github.com/fastify/fastify/issues/326#issuecomment-411360862).
+Require `@fastify/cors` and register it as any other plugin, it will add a `onRequest` hook and a [wildcard options route](https://github.com/fastify/fastify/issues/326#issuecomment-411360862).
 ```js
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
@@ -56,6 +56,7 @@ You can use it as is without passing any option or you can configure it as expla
   }
   ```
 * `methods`: Configures the **Access-Control-Allow-Methods** CORS header. Expects a comma-delimited string (ex: 'GET,PUT,POST') or an array (ex: `['GET', 'PUT', 'POST']`).
+* `hook`: See the section `Custom Fastify hook name` (default: `onResponse`)
 * `allowedHeaders`: Configures the **Access-Control-Allow-Headers** CORS header. Expects a comma-delimited string (ex: `'Content-Type,Authorization'`) or an array (ex: `['Content-Type', 'Authorization']`). If not specified, defaults to reflecting the headers specified in the request's **Access-Control-Request-Headers** header.
 * `exposedHeaders`: Configures the **Access-Control-Expose-Headers** CORS header. Expects a comma-delimited string (ex: `'Content-Range,X-Content-Range'`) or an array (ex: `['Content-Range', 'X-Content-Range']`). If not specified, no custom headers are exposed.
 * `credentials`: Configures the **Access-Control-Allow-Credentials** CORS header. Set to `true` to pass the header, otherwise it is omitted.
@@ -86,6 +87,58 @@ fastify.register(require('@fastify/cors'), (instance) => {
     // callback expects two parameters: error and options
     callback(null, corsOptions)
   }
+})
+
+fastify.register(async function (fastify) {
+  fastify.get('/', (req, reply) => {
+    reply.send({ hello: 'world' })
+  })
+})
+
+fastify.listen({ port: 3000 })
+```
+
+### Custom Fastify hook name
+
+By default, `@fastify/cors` adds a `onRequest` hook where the validation and header injection are executed. This can be customized by passing `hook` in the options. Valid values are `onRequest`, `preParsing`, `preValidation`, `preHandler`, `preSerialization`, and `onSend`.
+
+```js
+import Fastify from 'fastify'
+import cors from '@fastify/cors'
+
+const fastify = Fastify()
+await fastify.register(cors, { 
+  hook: 'preHandler',
+})
+
+fastify.get('/', (req, reply) => {
+  reply.send({ hello: 'world' })
+})
+
+await fastify.listen({ port: 3000 })
+```
+
+When configuring CORS asynchronously, an object with `delegator` key is expected:
+
+```js
+const fastify = require('fastify')()
+
+fastify.register(require('@fastify/cors'), {
+  hook: 'preHandler',
+  delegator: (req, callback) => {
+    const corsOptions = {
+      // This is NOT recommended for production as it enables reflection exploits
+      origin: true
+    };
+
+    // do not include CORS headers for requests from localhost
+    if (/^localhost$/m.test(req.headers.origin)) {
+      corsOptions.origin = false
+    }
+
+    // callback expects two parameters: error and options
+    callback(null, corsOptions)
+  },
 })
 
 fastify.register(async function (fastify) {
