@@ -26,8 +26,7 @@ const validHooks = [
   'preValidation',
   'preHandler',
   'preSerialization',
-  'onSend',
-  'onError'
+  'onSend'
 ]
 
 const hookWithPayload = [

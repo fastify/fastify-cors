@@ -281,45 +281,6 @@ test('Should set hook onSend if hook option is set to onSend', async (t) => {
   })
 })
 
-test('Should set hook onError if hook option is set to onError', async (t) => {
-  t.plan(10)
-
-  const fastify = Fastify()
-
-  fastify.register(cors, {
-    hook: 'onError'
-  })
-
-  fastify.addHook('onResponse', (request, reply, done) => {
-    t.equal(request[kFastifyContext].onError.length, 1)
-    t.equal(request[kFastifyContext].onRequest, null)
-    t.equal(request[kFastifyContext].onSend, null)
-    t.equal(request[kFastifyContext].preHandler, null)
-    t.equal(request[kFastifyContext].preParsing, null)
-    t.equal(request[kFastifyContext].preSerialization, null)
-    t.equal(request[kFastifyContext].preValidation, null)
-    done()
-  })
-
-  fastify.get('/', (req, reply) => {
-    throw new Error('Failed')
-  })
-
-  await fastify.ready()
-
-  const res = await fastify.inject({
-    method: 'GET',
-    url: '/'
-  })
-  delete res.headers.date
-  t.equal(res.statusCode, 500)
-  t.equal(res.payload, '{"statusCode":500,"error":"Internal Server Error","message":"Failed"}')
-  t.match(res.headers, {
-    'access-control-allow-origin': '*',
-    vary: 'Origin'
-  })
-})
-
 test('Should set hook preSerialization if hook option is set to preSerialization', async (t) => {
   t.plan(10)
 

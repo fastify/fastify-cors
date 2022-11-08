@@ -255,16 +255,22 @@ const delegate: FastifyPluginOptionsDelegate<FastifyCorsOptionsDelegatePromise> 
 }
 
 appHttp2.register(fastifyCors, {
-  hook: 'preHandler'
+  hook: 'onRequest'
 })
 appHttp2.register(fastifyCors, {
-  hook: 'onRequest'
+  hook: 'preParsing'
 })
 appHttp2.register(fastifyCors, {
   hook: 'preValidation'
 })
 appHttp2.register(fastifyCors, {
-  hook: 'preParsing'
+  hook: 'preHandler'
+})
+appHttp2.register(fastifyCors, {
+  hook: 'preSerialization'
+})
+appHttp2.register(fastifyCors, {
+  hook: 'onSend'
 })
 
 appHttp2.register(fastifyCors, {

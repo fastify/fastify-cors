@@ -20,7 +20,6 @@ type FastifyCorsHook =
   | 'preHandler'
   | 'preSerialization'
   | 'onSend'
-  | 'onError'
 
 declare namespace fastifyCors {
   export type OriginFunction = (origin: string, callback: OriginCallback) => void;
