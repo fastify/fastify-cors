@@ -22,7 +22,7 @@ type FastifyCorsHook =
   | 'onSend'
 
 declare namespace fastifyCors {
-  export type OriginFunction = (origin?: string, callback: OriginCallback) => void;
+  export type OriginFunction = (origin: string | undefined, callback: OriginCallback) => void;
 
   export interface FastifyCorsOptions {
     /**
