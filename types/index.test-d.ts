@@ -1,4 +1,5 @@
 import fastify from 'fastify'
+import { expectType } from 'tsd'
 import fastifyCors, {
   FastifyCorsOptionsDelegate,
   FastifyCorsOptionsDelegatePromise,
@@ -310,3 +311,10 @@ appHttp2.register(fastifyCors, {
 })
 
 appHttp2.register(fastifyCors, delegate)
+
+appHttp2.register(fastifyCors, {
+  hook: 'preParsing',
+  origin: function (origin) {
+    expectType<string|undefined>(origin)
+  },
+})

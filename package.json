@@ -3,17 +3,14 @@
   "version": "8.2.0",
   "description": "Fastify CORS",
   "main": "index.js",
-  "types": "index.d.ts",
+  "types": "types/index.d.ts",
   "scripts": {
     "coverage": "tap --cov --coverage-report=html test",
-    "lint": "npm run lint:standard && npm run lint:typescript",
+    "lint": "standard",
     "lint:fix": "standard --fix",
-    "lint:standard": "standard",
-    "lint:typescript": "standard --parser @typescript-eslint/parser --plugin @typescript-eslint/eslint-plugin test/*.ts",
-    "test": "npm run unit && npm run typescript",
-    "test:ci": "npm run lint && tap test/*.test.js --coverage-report=lcovonly && npm run typescript",
-    "typescript": "tsd",
-    "unit": "tap test/*.test.js"
+    "test": "npm run test:unit && npm run test:typescript",
+    "test:typescript": "tsd",
+    "test:unit": "tap test/*.test.js"
   },
   "keywords": [
     "fastify",
