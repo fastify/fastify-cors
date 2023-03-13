@@ -53,7 +53,7 @@ function fastifyCors (fastify, opts, next) {
     handleCorsOptionsDelegator(delegator, fastify, options, next)
   } else {
     if (opts.hideOptionsRoute !== undefined) hideOptionsRoute = opts.hideOptionsRoute
-    const corsOptions = Object.assign({}, defaultOptions, opts)
+    const corsOptions = normalizeCorsOptions(opts)
     validateHook(corsOptions.hook, next)
     if (hookWithPayload.indexOf(corsOptions.hook) !== -1) {
       fastify.addHook(corsOptions.hook, function handleCors (req, reply, payload, next) {
@@ -104,8 +104,7 @@ function handleCorsOptionsDelegator (optionsResolver, fastify, opts, next) {
       fastify.addHook(hook, function handleCors (req, reply, payload, next) {
         const ret = optionsResolver(req)
         if (ret && typeof ret.then === 'function') {
-          ret.then(options => Object.assign({}, defaultOptions, options))
-            .then(corsOptions => addCorsHeadersHandler(fastify, corsOptions, req, reply, next)).catch(next)
+          ret.then(options => addCorsHeadersHandler(fastify, normalizeCorsOptions(options), req, reply, next)).catch(next)
           return
         }
         next(new Error('Invalid CORS origin option'))
@@ -115,8 +114,7 @@ function handleCorsOptionsDelegator (optionsResolver, fastify, opts, next) {
       fastify.addHook(hook, function handleCors (req, reply, next) {
         const ret = optionsResolver(req)
         if (ret && typeof ret.then === 'function') {
-          ret.then(options => Object.assign({}, defaultOptions, options))
-            .then(corsOptions => addCorsHeadersHandler(fastify, corsOptions, req, reply, next)).catch(next)
+          ret.then(options => addCorsHeadersHandler(fastify, normalizeCorsOptions(options), req, reply, next)).catch(next)
           return
         }
         next(new Error('Invalid CORS origin option'))
@@ -130,10 +128,17 @@ function handleCorsOptionsCallbackDelegator (optionsResolver, fastify, req, repl
     if (err) {
       next(err)
     } else {
-      const corsOptions = Object.assign({}, defaultOptions, options)
-      addCorsHeadersHandler(fastify, corsOptions, req, reply, next)
+      addCorsHeadersHandler(fastify, normalizeCorsOptions(options), req, reply, next)
     }
   })
+}
+
+function normalizeCorsOptions (opts) {
+  const corsOptions = Object.assign({}, defaultOptions, opts)
+  if (Array.isArray(opts.origin) && opts.origin.indexOf('*') !== -1) {
+    corsOptions.origin = '*'
+  }
+  return corsOptions
 }
 
 function addCorsHeadersHandler (fastify, options, req, reply, next) {

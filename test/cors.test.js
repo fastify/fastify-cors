@@ -825,3 +825,45 @@ test('Allow only request from with specific headers', t => {
     })
   })
 })
+
+test('Should support wildcard config /1', t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+  fastify.register(cors, { origin: '*' })
+
+  fastify.get('/', (req, reply) => {
+    reply.send('ok')
+  })
+
+  fastify.inject({
+    method: 'GET',
+    url: '/'
+  }, (err, res) => {
+    t.error(err)
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
+    t.equal(res.headers['access-control-allow-origin'], '*')
+  })
+})
+
+test('Should support wildcard config /2', t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+  fastify.register(cors, { origin: ['*'] })
+
+  fastify.get('/', (req, reply) => {
+    reply.send('ok')
+  })
+
+  fastify.inject({
+    method: 'GET',
+    url: '/'
+  }, (err, res) => {
+    t.error(err)
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, 'ok')
+    t.equal(res.headers['access-control-allow-origin'], '*')
+  })
+})
