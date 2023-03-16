@@ -265,7 +265,7 @@ function getAccessControlAllowOriginHeader (reqOrigin, originOption) {
 
 function isRequestOriginAllowed (reqOrigin, allowedOrigin) {
   if (Array.isArray(allowedOrigin)) {
-    for (let i = 0; i < allowedOrigin.length; ++i) {
+    for (let i = 0, il = allowedOrigin.length; i < il; ++i) {
       if (isRequestOriginAllowed(reqOrigin, allowedOrigin[i])) {
         return true
       }
