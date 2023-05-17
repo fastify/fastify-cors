@@ -70,6 +70,13 @@ declare namespace fastifyCors {
      */
     maxAge?: number;
     /**
+     * Configures the Cache-Control header for CORS preflight responses.
+     * Set to an integer to pass the header as `Cache-Control: max-age=${cacheControl}`,
+     * or set to a string to pass the header as `Cache-Control: ${cacheControl}` (fully define
+     * the header value), otherwise the header is omitted.
+     */
+    cacheControl?: number | string;
+    /**
      * Pass the CORS preflight response to the route handler (default: false).
      */
     preflightContinue?: boolean;

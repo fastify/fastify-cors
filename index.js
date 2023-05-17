@@ -235,6 +235,12 @@ function addPreflightHeaders (req, reply, corsOptions) {
   if (corsOptions.maxAge !== null) {
     reply.header('Access-Control-Max-Age', String(corsOptions.maxAge))
   }
+
+  if (typeof corsOptions.cacheControl === 'number') {
+    reply.header('Cache-Control', `max-age=${corsOptions.cacheControl}`)
+  } else if (typeof corsOptions.cacheControl === 'string') {
+    reply.header('Cache-Control', corsOptions.cacheControl)
+  }
 }
 
 function resolveOriginWrapper (fastify, origin) {

@@ -38,7 +38,8 @@ test('Should add cors headers (custom values)', t => {
     credentials: true,
     exposedHeaders: ['foo', 'bar'],
     allowedHeaders: ['baz', 'woo'],
-    maxAge: 123
+    maxAge: 123,
+    cacheControl: 321
   })
 
   fastify.get('/', (req, reply) => {
@@ -65,6 +66,7 @@ test('Should add cors headers (custom values)', t => {
       'access-control-allow-methods': 'GET',
       'access-control-allow-headers': 'baz, woo',
       'access-control-max-age': '123',
+      'cache-control': 'max-age=321',
       'content-length': '0'
     })
   })
@@ -96,14 +98,16 @@ test('Should support dynamic config (callback)', t => {
     credentials: true,
     exposedHeaders: ['foo', 'bar'],
     allowedHeaders: ['baz', 'woo'],
-    maxAge: 123
+    maxAge: 123,
+    cacheControl: 456
   }, {
     origin: 'sample.com',
     methods: 'GET',
     credentials: true,
     exposedHeaders: ['zoo', 'bar'],
     allowedHeaders: ['baz', 'foo'],
-    maxAge: 321
+    maxAge: 321,
+    cacheControl: 'public, max-age=456'
   }]
 
   const fastify = Fastify()
@@ -164,6 +168,7 @@ test('Should support dynamic config (callback)', t => {
       'access-control-allow-methods': 'GET',
       'access-control-allow-headers': 'baz, foo',
       'access-control-max-age': '321',
+      'cache-control': 'public, max-age=456',
       'content-length': '0'
     })
   })
@@ -197,7 +202,8 @@ test('Should support dynamic config (Promise)', t => {
     credentials: true,
     exposedHeaders: ['zoo', 'bar'],
     allowedHeaders: ['baz', 'foo'],
-    maxAge: 321
+    maxAge: 321,
+    cacheControl: 'public, max-age=456'
   }]
 
   const fastify = Fastify()
@@ -258,6 +264,7 @@ test('Should support dynamic config (Promise)', t => {
       'access-control-allow-methods': 'GET',
       'access-control-allow-headers': 'baz, foo',
       'access-control-max-age': '321',
+      'cache-control': 'public, max-age=456',
       'content-length': '0'
     })
   })
