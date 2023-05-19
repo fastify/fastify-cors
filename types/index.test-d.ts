@@ -1,6 +1,7 @@
-import fastify from 'fastify'
+import fastify, { FastifyRequest } from 'fastify'
 import { expectType } from 'tsd'
 import fastifyCors, {
+  FastifyCorsOptions,
   FastifyCorsOptionsDelegate,
   FastifyCorsOptionsDelegatePromise,
   FastifyPluginOptionsDelegate,
@@ -293,25 +294,29 @@ appHttp2.register(fastifyCors, {
 
 appHttp2.register(fastifyCors, {
   hook: 'preParsing',
-  delegator: () => {
-    return {
+  delegator: (req, cb) => {
+    if (req.url.startsWith('/some-value')) {
+      cb(new Error())
+    }
+    cb(null, {
       origin: [/\*/, /something/],
       allowedHeaders: ['authorization', 'content-type'],
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       credentials: true,
       exposedHeaders: ['authorization'],
       maxAge: 13000,
+      cacheControl: 12000,
       preflightContinue: false,
       optionsSuccessStatus: 200,
       preflight: false,
       strictPreflight: false
-    }
+    })
   }
 })
 
 appHttp2.register(fastifyCors, {
   hook: 'preParsing',
-  delegator: () => {
+  delegator: async (req: FastifyRequest): Promise<FastifyCorsOptions> => {
     return {
       origin: [/\*/, /something/],
       allowedHeaders: ['authorization', 'content-type'],
@@ -319,7 +324,7 @@ appHttp2.register(fastifyCors, {
       credentials: true,
       exposedHeaders: ['authorization'],
       maxAge: 13000,
-      cacheControl: 13000,
+      cacheControl: 'public, max-age=3500',
       preflightContinue: false,
       optionsSuccessStatus: 200,
       preflight: false,
