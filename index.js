@@ -141,8 +141,12 @@ function normalizeCorsOptions (opts) {
   if (Array.isArray(opts.origin) && opts.origin.indexOf('*') !== -1) {
     corsOptions.origin = '*'
   }
-  if (Number.isInteger(Number(corsOptions.cacheControl)) === true) {
+  if (Number.isInteger(corsOptions.cacheControl)) {
+    // integer numbers are formatted this way
     corsOptions.cacheControl = `max-age=${corsOptions.cacheControl}`
+  } else if (typeof corsOptions.cacheControl !== 'string') {
+    // strings are applied directly and any other value is ignored
+    corsOptions.cacheControl = null
   }
   return corsOptions
 }
@@ -242,7 +246,7 @@ function addPreflightHeaders (req, reply, corsOptions) {
     reply.header('Access-Control-Max-Age', String(corsOptions.maxAge))
   }
 
-  if (corsOptions.cacheControl && (typeof corsOptions.cacheControl === 'string')) {
+  if (corsOptions.cacheControl) {
     reply.header('Cache-Control', corsOptions.cacheControl)
   }
 }
