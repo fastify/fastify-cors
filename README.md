@@ -61,6 +61,7 @@ You can use it as is without passing any option or you can configure it as expla
 * `exposedHeaders`: Configures the **Access-Control-Expose-Headers** CORS header. Expects a comma-delimited string (ex: `'Content-Range,X-Content-Range'`) or an array (ex: `['Content-Range', 'X-Content-Range']`). If not specified, no custom headers are exposed.
 * `credentials`: Configures the **Access-Control-Allow-Credentials** CORS header. Set to `true` to pass the header, otherwise it is omitted.
 * `maxAge`: Configures the **Access-Control-Max-Age** CORS header. In seconds. Set to an integer to pass the header, otherwise it is omitted.
+* `cacheControl`: Configures the **Cache-Control** header for CORS preflight responses. Set to an integer to pass the header as `Cache-Control: max-age=${cacheControl}`, or set to a string to pass the header as `Cache-Control: ${cacheControl}` (fully define the header value), otherwise the header is omitted.
 * `preflightContinue`: Pass the CORS preflight response to the route handler (default: `false`).
 * `optionsSuccessStatus`: Provides a status code to use for successful `OPTIONS` requests, since some legacy browsers (IE11, various SmartTVs) choke on `204`.
 * `preflight`: if needed you can entirely disable preflight by passing `false` here (default: `true`).
