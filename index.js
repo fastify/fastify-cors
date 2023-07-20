@@ -137,7 +137,7 @@ function handleCorsOptionsCallbackDelegator (optionsResolver, fastify, req, repl
  * @param {import('./types').FastifyCorsOptions} opts
  */
 function normalizeCorsOptions (opts) {
-  const corsOptions = Object.assign({}, defaultOptions, opts)
+  const corsOptions = { ...defaultOptions, ...opts }
   if (Array.isArray(opts.origin) && opts.origin.indexOf('*') !== -1) {
     corsOptions.origin = '*'
   }
