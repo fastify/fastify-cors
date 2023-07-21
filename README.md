@@ -16,10 +16,10 @@ npm i @fastify/cors
 
 | Plugin version | Fastify version |
 | -------------- |---------------- |
-| `^1.0.0`       | `^1.0.0`        |
-| `^3.0.0`       | `^2.0.0`        |
-| `^7.0.0`       | `^3.0.0`        |
 | `^8.0.0`       | `^4.0.0`        |
+| `^7.0.0`       | `^3.0.0`        |
+| `^3.0.0`       | `^2.0.0`        |
+| `^1.0.0`       | `^1.0.0`        |
 
 ## Usage
 Require `@fastify/cors` and register it as any other plugin, it will add an `onRequest` hook and a [wildcard options route](https://github.com/fastify/fastify/issues/326#issuecomment-411360862).
