@@ -675,7 +675,7 @@ test('Allow only request from a specific origin using regex', t => {
   t.plan(8)
 
   const fastify = Fastify()
-  fastify.register(cors, { origin: /(example|other)\.com/gi })
+  fastify.register(cors, { origin: /(example|other)\.com$/gi })
 
   fastify.get('/', (req, reply) => {
     reply.send('ok')
