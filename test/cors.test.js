@@ -1,8 +1,10 @@
 'use strict'
 
 const { test } = require('tap')
+const { createReadStream, statSync, readFileSync } = require('fs')
 const Fastify = require('fastify')
 const cors = require('../')
+const { resolve } = require('path')
 
 test('Should add cors headers', t => {
   t.plan(4)
@@ -24,6 +26,38 @@ test('Should add cors headers', t => {
     t.equal(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-allow-origin': '*'
+    })
+  })
+})
+
+test('Should add cors headers when payload is a stream', t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+  fastify.register(cors)
+  const filePath = resolve(__dirname, __filename)
+
+  fastify.get('/', (req, reply) => {
+    const stream = createReadStream(filePath)
+    reply
+      .type('application/json')
+      .header('Content-Length', statSync(filePath).size)
+      .send(stream)
+  })
+
+  const fileContent = readFileSync(filePath, 'utf-8')
+
+  fastify.inject({
+    method: 'GET',
+    url: '/'
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.equal(res.statusCode, 200)
+    t.equal(res.payload, fileContent)
+    t.match(res.headers, {
+      'access-control-allow-origin': '*',
+      'content-length': statSync(filePath).size
     })
   })
 })
