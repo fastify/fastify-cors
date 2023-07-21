@@ -7,19 +7,22 @@
 
 `@fastify/cors` enables the use of [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) in a Fastify application.
 
-Supports Fastify versions `4.x`.
-
-- Please refer to [7.x](https://github.com/fastify/fastify-cors/tree/v7.0.0) for Fastify `^3.x` compatibility.
-- Please refer to [3.x](https://github.com/fastify/fastify-cors/tree/3.x) for Fastify `^2.x` compatibility.
-- Please refer to [1.x](https://github.com/fastify/fastify-cors/tree/v1.0.0) for Fastify `^1.x` compatibility.
-
 ## Install
 ```
 npm i @fastify/cors
 ```
 
+### Compatibility
+
+| Plugin version | Fastify version |
+| -------------- |---------------- |
+| `^1.0.0`       | `^1.0.0`        |
+| `^3.0.0`       | `^2.0.0`        |
+| `^7.0.0`       | `^3.0.0`        |
+| `^8.0.0`       | `^4.0.0`        |
+
 ## Usage
-Require `@fastify/cors` and register it as any other plugin, it will add a `onRequest` hook and a [wildcard options route](https://github.com/fastify/fastify/issues/326#issuecomment-411360862).
+Require `@fastify/cors` and register it as any other plugin, it will add an `onRequest` hook and a [wildcard options route](https://github.com/fastify/fastify/issues/326#issuecomment-411360862).
 ```js
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
