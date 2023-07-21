@@ -21,6 +21,10 @@ npm i @fastify/cors
 | `^3.0.0`       | `^2.0.0`        |
 | `^1.0.0`       | `^1.0.0`        |
 
+
+Please note that if a Fastify version is out of support, then so are the corresponding version(s) of this plugin
+in the table above. See [Fastify's LTS policy](https://github.com/fastify/fastify/blob/main/docs/Reference/LTS.md) for more details.
+
 ## Usage
 Require `@fastify/cors` and register it as any other plugin, it will add an `onRequest` hook and a [wildcard options route](https://github.com/fastify/fastify/issues/326#issuecomment-411360862).
 ```js
