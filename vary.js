@@ -1,6 +1,6 @@
 'use strict'
 
-const LRUCache = require('mnemonist').LRUCache
+const LRUCache = require('mnemonist/lru-cache')
 
 /**
  * Field Value Components
