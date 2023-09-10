@@ -1,10 +1,10 @@
 'use strict'
 
 const { test } = require('tap')
-const { createReadStream, statSync, readFileSync } = require('fs')
+const { createReadStream, statSync, readFileSync } = require('node:fs')
 const Fastify = require('fastify')
 const cors = require('../')
-const { resolve } = require('path')
+const { resolve } = require('node:path')
 
 test('Should add cors headers', t => {
   t.plan(4)
