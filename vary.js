@@ -20,7 +20,7 @@ const LRUCache = require('mnemonist/lru-cache')
  * @see https://datatracker.ietf.org/doc/html/rfc7230#section-3.2.6
  */
 
-const validFieldnameRE = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/
+const validFieldnameRE = /^[!#$%&'*+\-.^\w`|~]+$/u
 function validateFieldname (fieldname) {
   if (validFieldnameRE.test(fieldname) === false) {
     throw new TypeError('Fieldname contains invalid characters.')
