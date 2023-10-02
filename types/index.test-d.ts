@@ -117,6 +117,18 @@ app.register(fastifyCors, {
   strictPreflight: false
 })
 
+app.register(fastifyCors, {
+  origin: (origin, cb) => cb(null, true)
+})
+
+app.register(fastifyCors, {
+  origin: (origin, cb) => cb(null, '*')
+})
+
+app.register(fastifyCors, {
+  origin: (origin, cb) => cb(null, /\*/)
+})
+
 const appHttp2 = fastify({ http2: true })
 
 appHttp2.register(fastifyCors)

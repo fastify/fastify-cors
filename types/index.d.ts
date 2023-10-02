@@ -2,7 +2,7 @@
 
 import { FastifyInstance, FastifyPluginCallback, FastifyRequest } from 'fastify';
 
-type OriginCallback = (err: Error | null, allow: boolean) => void;
+type OriginCallback = (err: Error | null, origin: ValueOrArray<OriginType>) => void;
 type OriginType = string | boolean | RegExp;
 type ValueOrArray<T> = T | ArrayOfValueOrArray<T>;
 
