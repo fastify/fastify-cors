@@ -3,6 +3,7 @@
   "version": "8.4.0",
   "description": "Fastify CORS",
   "main": "index.js",
+  "type": "commonjs",
   "types": "types/index.d.ts",
   "scripts": {
     "coverage": "tap --cov --coverage-report=html test",
