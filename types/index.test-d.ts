@@ -97,7 +97,7 @@ app.register(fastifyCors, {
 })
 
 const corsDelegate: OriginFunction = (origin, cb) => {
-  if (typeof origin === 'undefined' || /localhost/.test(origin)) {
+  if (origin === undefined || /localhost/.test(origin)) {
     cb(null, true)
     return
   }
@@ -219,7 +219,7 @@ appHttp2.register(fastifyCors, {
 
 appHttp2.register(fastifyCors, {
   origin: (origin: string | undefined, cb: (err: Error | null, allow: boolean) => void) => {
-    if (typeof origin === 'undefined' || /localhost/.test(origin)) {
+    if (origin === undefined || /localhost/.test(origin)) {
       cb(null, true)
       return
     }
