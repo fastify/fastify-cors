@@ -354,7 +354,7 @@ test('Should support dynamic config. (Invalid function)', t => {
   t.plan(2)
 
   const fastify = Fastify()
-  fastify.register(cors, () => (a, b, c) => {})
+  fastify.register(cors, () => (a, b, c) => { })
 
   fastify.get('/', (req, reply) => {
     reply.send('ok')
@@ -944,17 +944,14 @@ test('Should support wildcard config /2', t => {
 })
 
 test('should support embedded cors registration with route params', t => {
-  t.plan(2)
+  t.plan(3)
 
   const fastify = Fastify()
 
   const custom = async (instance, opts) => {
     instance.register(cors, instance => async (req, cb) => {
       const corsOptions = {
-        credentials: true,
-        origin: ['example1'],
-        methods: 'PUT,GET,POST,DELETE',
-        preflightContinue: false
+        origin: ['example.com']
       }
       cb(null, corsOptions)
     })
@@ -978,5 +975,6 @@ test('should support embedded cors registration with route params', t => {
   }, (err, res) => {
     t.error(err)
     t.equal(res.statusCode, 204)
+    t.equal(res.headers['access-control-allow-origin'], 'example.com')
   })
 })
