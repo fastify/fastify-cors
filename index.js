@@ -72,7 +72,7 @@ function fastifyCors (fastify, opts, next) {
   // remove most headers (such as the Authentication header).
   //
   // This route simply enables fastify to accept preflight requests.
-  fastify.options('*', { schema: { hide: hideOptionsRoute } }, (req, reply) => {
+  fastify.options('/*', { schema: { hide: hideOptionsRoute } }, (req, reply) => {
     if (!req.corsPreflightEnabled) {
       // Do not handle preflight requests if the origin option disabled CORS
       reply.callNotFound()

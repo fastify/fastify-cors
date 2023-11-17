@@ -189,7 +189,7 @@ test('hide options route by default', t => {
   const fastify = Fastify()
 
   fastify.addHook('onRoute', (route) => {
-    if (route.method === 'OPTIONS' && route.url === '*') {
+    if (route.method === 'OPTIONS' && route.url === '/*') {
       t.equal(route.schema.hide, true)
     }
   })
@@ -206,7 +206,7 @@ test('show options route', t => {
   const fastify = Fastify()
 
   fastify.addHook('onRoute', (route) => {
-    if (route.method === 'OPTIONS' && route.url === '*') {
+    if (route.method === 'OPTIONS' && route.url === '/*') {
       t.equal(route.schema.hide, false)
     }
   })

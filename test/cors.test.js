@@ -942,3 +942,41 @@ test('Should support wildcard config /2', t => {
     t.equal(res.headers['access-control-allow-origin'], '*')
   })
 })
+
+test('should support embedded cors registration with route params', t => {
+  t.plan(2)
+
+  const fastify = Fastify()
+
+  const custom = async (instance, opts) => {
+    instance.register(cors, instance => async (req, cb) => {
+      const corsOptions = {
+        credentials: true,
+        origin: ['example1'],
+        methods: 'PUT,GET,POST,DELETE',
+        preflightContinue: false
+      }
+      cb(null, corsOptions)
+    })
+
+    instance.get('/route1', (req, reply) => {
+      reply.send('ok')
+    })
+  }
+
+  fastify.register(custom, {
+    prefix: '/:id'
+  })
+
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/id1/route1',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  }, (err, res) => {
+    t.error(err)
+    t.equal(res.statusCode, 204)
+  })
+})
