@@ -949,11 +949,8 @@ test('should support embedded cors registration with route params', t => {
   const fastify = Fastify()
 
   const custom = async (instance, opts) => {
-    instance.register(cors, instance => async (req, cb) => {
-      const corsOptions = {
-        origin: ['example.com']
-      }
-      cb(null, corsOptions)
+    instance.register(cors, {
+      origin: ['example.com']
     })
 
     instance.get('/route1', (req, reply) => {
