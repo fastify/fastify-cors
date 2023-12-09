@@ -70,9 +70,8 @@ function fastifyCors (fastify, opts, next) {
   // preflight requests BEFORE possible authentication plugins. If the preflight reply
   // occurred in this handler, other plugins may deny the request since the browser will
   // remove most headers (such as the Authentication header).
-  //
-  // This route simply enables fastify to accept preflight requests.
-  fastify.options('/*', { schema: { hide: hideOptionsRoute } }, (req, reply) => {
+  const handlerOptions = { schema: { hide: hideOptionsRoute } }
+  const handler = (req, reply) => {
     if (!req.corsPreflightEnabled) {
       // Do not handle preflight requests if the origin option disabled CORS
       reply.callNotFound()
@@ -80,7 +79,12 @@ function fastifyCors (fastify, opts, next) {
     }
 
     reply.send()
-  })
+  }
+
+  // This route enables fastify to accept preflight requests on all nested routes, as well as the index route in prefixed setups
+  // https://github.com/fastify/fastify-cors/issues/281
+  fastify.options('/*', handlerOptions, handler)
+  if (fastify.prefix) { fastify.options('/', handlerOptions, handler) }
 
   next()
 }

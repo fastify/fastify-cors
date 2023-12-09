@@ -360,3 +360,38 @@ test('Can override preflight response with preflightContinue', t => {
     })
   })
 })
+
+test('Can get a preflight response on prefixed index routes', t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+  const noop = () => {}
+  const prefixRoutes = (app, options, done) => {
+    app.register(cors)
+    app.get('/', noop)
+    done()
+  }
+  fastify.register(prefixRoutes, { prefix: 'test' })
+
+  fastify.ready(() => {
+    fastify.inject({
+      method: 'OPTIONS',
+      url: '/test',
+      headers: {
+        'access-control-request-method': 'GET',
+        origin: 'example.com'
+      }
+    }, (err, res) => {
+      t.error(err)
+      delete res.headers.date
+      t.equal(res.statusCode, 204)
+      t.equal(res.payload, '')
+      t.match(res.headers, {
+        'access-control-allow-origin': '*',
+        'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        vary: 'Origin, Access-Control-Request-Headers',
+        'content-length': '0'
+      })
+    })
+  })
+})
