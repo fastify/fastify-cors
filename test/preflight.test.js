@@ -360,3 +360,76 @@ test('Can override preflight response with preflightContinue', t => {
     })
   })
 })
+
+test('Should support ongoing prefix ', t => {
+  t.plan(12)
+
+  const fastify = Fastify()
+
+  fastify.register(async (instance) => {
+    instance.register(cors)
+  }, { prefix: '/prefix' })
+
+  // support prefixed route
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/prefix',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.equal(res.statusCode, 204)
+    t.equal(res.payload, '')
+    t.match(res.headers, {
+      'access-control-allow-origin': '*',
+      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      vary: 'Origin, Access-Control-Request-Headers',
+      'content-length': '0'
+    })
+  })
+
+  // support prefixed route without / continue
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/prefixfoo',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.equal(res.statusCode, 204)
+    t.equal(res.payload, '')
+    t.match(res.headers, {
+      'access-control-allow-origin': '*',
+      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      vary: 'Origin, Access-Control-Request-Headers',
+      'content-length': '0'
+    })
+  })
+
+  // support prefixed route with / continue
+  fastify.inject({
+    method: 'OPTIONS',
+    url: '/prefix/foo',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  }, (err, res) => {
+    t.error(err)
+    delete res.headers.date
+    t.equal(res.statusCode, 204)
+    t.equal(res.payload, '')
+    t.match(res.headers, {
+      'access-control-allow-origin': '*',
+      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      vary: 'Origin, Access-Control-Request-Headers',
+      'content-length': '0'
+    })
+  })
+})
