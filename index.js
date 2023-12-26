@@ -152,9 +152,11 @@ function normalizeCorsOptions (opts) {
 }
 
 function addCorsHeadersHandler (fastify, options, req, reply, next) {
-  // Always set Vary header
-  // https://github.com/rs/cors/issues/10
-  addOriginToVaryHeader(reply)
+  if (typeof options.origin !== 'string' && options.origin !== false) {
+    // Always set Vary header for non-static origin option
+    // https://fetch.spec.whatwg.org/#cors-protocol-and-http-caches
+    addOriginToVaryHeader(reply)
+  }
 
   const resolveOriginOption = typeof options.origin === 'function' ? resolveOriginWrapper(fastify, options.origin) : (_, cb) => cb(null, options.origin)
 
@@ -263,13 +265,8 @@ function resolveOriginWrapper (fastify, origin) {
 }
 
 function getAccessControlAllowOriginHeader (reqOrigin, originOption) {
-  if (originOption === '*') {
-    // allow any origin
-    return '*'
-  }
-
   if (typeof originOption === 'string') {
-    // fixed origin
+    // fixed or any origin ('*')
     return originOption
   }
 

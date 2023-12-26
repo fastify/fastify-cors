@@ -63,7 +63,7 @@ test('Should add cors headers when payload is a stream', t => {
 })
 
 test('Should add cors headers (custom values)', t => {
-  t.plan(8)
+  t.plan(10)
 
   const fastify = Fastify()
   fastify.register(cors, {
@@ -94,7 +94,6 @@ test('Should add cors headers (custom values)', t => {
     t.equal(res.payload, '')
     t.match(res.headers, {
       'access-control-allow-origin': 'example.com',
-      vary: 'Origin',
       'access-control-allow-credentials': 'true',
       'access-control-expose-headers': 'foo, bar',
       'access-control-allow-methods': 'GET',
@@ -103,6 +102,7 @@ test('Should add cors headers (custom values)', t => {
       'cache-control': 'max-age=321',
       'content-length': '0'
     })
+    t.notMatch(res.headers, { vary: 'Origin' })
   })
 
   fastify.inject({
@@ -115,16 +115,16 @@ test('Should add cors headers (custom values)', t => {
     t.equal(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-allow-origin': 'example.com',
-      vary: 'Origin',
       'access-control-allow-credentials': 'true',
       'access-control-expose-headers': 'foo, bar',
       'content-length': '2'
     })
+    t.notMatch(res.headers, { vary: 'Origin' })
   })
 })
 
 test('Should support dynamic config (callback)', t => {
-  t.plan(16)
+  t.plan(18)
 
   const configs = [{
     origin: 'example.com',
@@ -175,11 +175,11 @@ test('Should support dynamic config (callback)', t => {
     t.equal(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-allow-origin': 'example.com',
-      vary: 'Origin',
       'access-control-allow-credentials': 'true',
       'access-control-expose-headers': 'foo, bar',
       'content-length': '2'
     })
+    t.notMatch(res.headers, { vary: 'Origin' })
   })
 
   fastify.inject({
@@ -196,7 +196,6 @@ test('Should support dynamic config (callback)', t => {
     t.equal(res.payload, '')
     t.match(res.headers, {
       'access-control-allow-origin': 'sample.com',
-      vary: 'Origin',
       'access-control-allow-credentials': 'true',
       'access-control-expose-headers': 'zoo, bar',
       'access-control-allow-methods': 'GET',
@@ -205,6 +204,7 @@ test('Should support dynamic config (callback)', t => {
       'cache-control': '456',
       'content-length': '0'
     })
+    t.notMatch(res.headers, { vary: 'Origin' })
   })
 
   fastify.inject({
@@ -221,7 +221,7 @@ test('Should support dynamic config (callback)', t => {
 })
 
 test('Should support dynamic config (Promise)', t => {
-  t.plan(23)
+  t.plan(26)
 
   const configs = [{
     origin: 'example.com',
@@ -280,11 +280,11 @@ test('Should support dynamic config (Promise)', t => {
     t.equal(res.payload, 'ok')
     t.match(res.headers, {
       'access-control-allow-origin': 'example.com',
-      vary: 'Origin',
       'access-control-allow-credentials': 'true',
       'access-control-expose-headers': 'foo, bar',
       'content-length': '2'
     })
+    t.notMatch(res.headers, { vary: 'Origin' })
   })
 
   fastify.inject({
@@ -301,7 +301,6 @@ test('Should support dynamic config (Promise)', t => {
     t.equal(res.payload, '')
     t.match(res.headers, {
       'access-control-allow-origin': 'sample.com',
-      vary: 'Origin',
       'access-control-allow-credentials': 'true',
       'access-control-expose-headers': 'zoo, bar',
       'access-control-allow-methods': 'GET',
@@ -309,6 +308,7 @@ test('Should support dynamic config (Promise)', t => {
       'access-control-max-age': '321',
       'content-length': '0'
     })
+    t.notMatch(res.headers, { vary: 'Origin' })
     t.equal(res.headers['cache-control'], undefined, 'cache-control omitted (invalid value)')
   })
 
@@ -326,7 +326,6 @@ test('Should support dynamic config (Promise)', t => {
     t.equal(res.payload, '')
     t.match(res.headers, {
       'access-control-allow-origin': 'sample.com',
-      vary: 'Origin',
       'access-control-allow-credentials': 'true',
       'access-control-expose-headers': 'zoo, bar',
       'access-control-allow-methods': 'GET',
@@ -335,6 +334,7 @@ test('Should support dynamic config (Promise)', t => {
       'cache-control': 'public, max-age=456', // cache-control included (custom string)
       'content-length': '0'
     })
+    t.notMatch(res.headers, { vary: 'Origin' })
   })
 
   fastify.inject({
@@ -564,7 +564,7 @@ test('Dynamic origin resolution (errored - promises)', t => {
   })
 })
 
-test('Should reply 404 without cors headers other than `vary` when origin is false', t => {
+test('Should reply 404 without cors headers when origin is false', t => {
   t.plan(8)
 
   const fastify = Fastify()
@@ -592,8 +592,7 @@ test('Should reply 404 without cors headers other than `vary` when origin is fal
     t.same(res.headers, {
       'content-length': '76',
       'content-type': 'application/json; charset=utf-8',
-      connection: 'keep-alive',
-      vary: 'Origin'
+      connection: 'keep-alive'
     })
   })
 
@@ -608,8 +607,7 @@ test('Should reply 404 without cors headers other than `vary` when origin is fal
     t.same(res.headers, {
       'content-length': '2',
       'content-type': 'text/plain; charset=utf-8',
-      connection: 'keep-alive',
-      vary: 'Origin'
+      connection: 'keep-alive'
     })
   })
 })
@@ -632,14 +630,13 @@ test('Server error if origin option is falsy but not false', t => {
     t.same(res.headers, {
       'content-length': '89',
       'content-type': 'application/json; charset=utf-8',
-      connection: 'keep-alive',
-      vary: 'Origin'
+      connection: 'keep-alive'
     })
   })
 })
 
 test('Allow only request from a specific origin', t => {
-  t.plan(4)
+  t.plan(5)
 
   const fastify = Fastify()
   fastify.register(cors, { origin: 'other.io' })
@@ -658,9 +655,9 @@ test('Allow only request from a specific origin', t => {
     t.equal(res.statusCode, 200)
     t.equal(res.payload, 'ok')
     t.match(res.headers, {
-      'access-control-allow-origin': 'other.io',
-      vary: 'Origin'
+      'access-control-allow-origin': 'other.io'
     })
+    t.notMatch(res.headers, { vary: 'Origin' })
   })
 })
 
@@ -772,11 +769,11 @@ test('Disable preflight', t => {
   })
 })
 
-test('Should always add vary header to `Origin` by default', t => {
+test('Should always add vary header to `Origin` for reflected origin', t => {
   t.plan(12)
 
   const fastify = Fastify()
-  fastify.register(cors)
+  fastify.register(cors, { origin: true })
 
   fastify.get('/', (req, reply) => {
     reply.send('ok')
@@ -829,7 +826,7 @@ test('Should always add vary header to `Origin` by default', t => {
   })
 })
 
-test('Should always add vary header to `Origin` by default (vary is array)', t => {
+test('Should always add vary header to `Origin` for reflected origin (vary is array)', t => {
   t.plan(4)
 
   const fastify = Fastify()
@@ -837,7 +834,7 @@ test('Should always add vary header to `Origin` by default (vary is array)', t =
   // Mock getHeader function
   fastify.decorateReply('getHeader', (name) => ['foo', 'bar'])
 
-  fastify.register(cors)
+  fastify.register(cors, { origin: true })
 
   fastify.get('/', (req, reply) => {
     reply.send('ok')
@@ -858,7 +855,7 @@ test('Should always add vary header to `Origin` by default (vary is array)', t =
 })
 
 test('Allow only request from with specific headers', t => {
-  t.plan(7)
+  t.plan(8)
 
   const fastify = Fastify()
   fastify.register(cors, {
@@ -882,9 +879,9 @@ test('Allow only request from with specific headers', t => {
     delete res.headers.date
     t.equal(res.statusCode, 204)
     t.match(res.headers, {
-      'access-control-allow-headers': 'foo',
-      vary: 'Origin'
+      'access-control-allow-headers': 'foo'
     })
+    t.notMatch(res.headers, { vary: 'Origin' })
   })
 
   fastify.inject({

@@ -25,7 +25,7 @@ test('Should reply to preflight requests', t => {
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Origin, Access-Control-Request-Headers',
+      vary: 'Access-Control-Request-Headers',
       'content-length': '0'
     })
   })
@@ -55,7 +55,7 @@ test('Should add access-control-allow-headers to response if preflight req has a
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
       'access-control-allow-headers': 'x-requested-with',
-      vary: 'Origin, Access-Control-Request-Headers',
+      vary: 'Access-Control-Request-Headers',
       'content-length': '0'
     })
   })
@@ -82,14 +82,14 @@ test('Should reply to preflight requests with custom status code', t => {
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Origin, Access-Control-Request-Headers',
+      vary: 'Access-Control-Request-Headers',
       'content-length': '0'
     })
   })
 })
 
 test('Should be able to override preflight response with a route', t => {
-  t.plan(4)
+  t.plan(5)
 
   const fastify = Fastify()
   fastify.register(cors, { preflightContinue: true })
@@ -112,9 +112,9 @@ test('Should be able to override preflight response with a route', t => {
     t.equal(res.payload, 'ok')
     t.match(res.headers, {
       // Only the base cors headers and no preflight headers
-      'access-control-allow-origin': '*',
-      vary: 'Origin'
+      'access-control-allow-origin': '*'
     })
+    t.notMatch(res.headers, { vary: 'Origin' })
   })
 })
 
@@ -139,7 +139,7 @@ test('Should reply to all options requests', t => {
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Origin, Access-Control-Request-Headers',
+      vary: 'Access-Control-Request-Headers',
       'content-length': '0'
     })
   })
@@ -177,7 +177,7 @@ test('Should support a prefix for preflight requests', t => {
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Origin, Access-Control-Request-Headers',
+      vary: 'Access-Control-Request-Headers',
       'content-length': '0'
     })
   })
@@ -218,7 +218,7 @@ test('show options route', t => {
 })
 
 test('Allow only request from with specific methods', t => {
-  t.plan(3)
+  t.plan(4)
 
   const fastify = Fastify()
   fastify.register(cors, { methods: ['GET', 'POST'] })
@@ -235,9 +235,9 @@ test('Allow only request from with specific methods', t => {
     delete res.headers.date
     t.equal(res.statusCode, 204)
     t.match(res.headers, {
-      'access-control-allow-methods': 'GET, POST',
-      vary: 'Origin'
+      'access-control-allow-methods': 'GET, POST'
     })
+    t.notMatch(res.headers, { vary: 'Origin' })
   })
 })
 
@@ -299,7 +299,7 @@ test('Should reply to all preflight requests when strictPreflight is disabled', 
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Origin, Access-Control-Request-Headers',
+      vary: 'Access-Control-Request-Headers',
       'content-length': '0'
     })
   })
@@ -326,7 +326,7 @@ test('Default empty 200 response with preflightContinue on OPTIONS routes', t =>
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Origin, Access-Control-Request-Headers'
+      vary: 'Access-Control-Request-Headers'
     })
   })
 })
@@ -356,7 +356,7 @@ test('Can override preflight response with preflightContinue', t => {
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Origin, Access-Control-Request-Headers'
+      vary: 'Access-Control-Request-Headers'
     })
   })
 })
@@ -386,7 +386,7 @@ test('Should support ongoing prefix ', t => {
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Origin, Access-Control-Request-Headers',
+      vary: 'Access-Control-Request-Headers',
       'content-length': '0'
     })
   })
@@ -407,7 +407,7 @@ test('Should support ongoing prefix ', t => {
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Origin, Access-Control-Request-Headers',
+      vary: 'Access-Control-Request-Headers',
       'content-length': '0'
     })
   })
@@ -428,7 +428,7 @@ test('Should support ongoing prefix ', t => {
     t.match(res.headers, {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Origin, Access-Control-Request-Headers',
+      vary: 'Access-Control-Request-Headers',
       'content-length': '0'
     })
   })
