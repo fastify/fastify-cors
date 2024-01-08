@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "fastify-plugin": "^4.0.0",
-    "mnemonist": "0.39.6"
+    "mnemonist": "0.39.7"
   },
   "tsd": {
     "directory": "test"
