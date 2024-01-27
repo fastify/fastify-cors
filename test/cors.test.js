@@ -124,7 +124,7 @@ test('Should add cors headers (custom values)', t => {
 })
 
 test('Should support dynamic config (callback)', t => {
-  t.plan(18)
+  t.plan(16)
 
   const configs = [{
     origin: 'example.com',
@@ -177,9 +177,9 @@ test('Should support dynamic config (callback)', t => {
       'access-control-allow-origin': 'example.com',
       'access-control-allow-credentials': 'true',
       'access-control-expose-headers': 'foo, bar',
-      'content-length': '2'
+      'content-length': '2',
+      vary: 'Origin'
     })
-    t.notMatch(res.headers, { vary: 'Origin' })
   })
 
   fastify.inject({
@@ -202,9 +202,9 @@ test('Should support dynamic config (callback)', t => {
       'access-control-allow-headers': 'baz, foo',
       'access-control-max-age': '321',
       'cache-control': '456',
-      'content-length': '0'
+      'content-length': '0',
+      vary: 'Origin'
     })
-    t.notMatch(res.headers, { vary: 'Origin' })
   })
 
   fastify.inject({
@@ -221,7 +221,7 @@ test('Should support dynamic config (callback)', t => {
 })
 
 test('Should support dynamic config (Promise)', t => {
-  t.plan(26)
+  t.plan(23)
 
   const configs = [{
     origin: 'example.com',
@@ -282,9 +282,9 @@ test('Should support dynamic config (Promise)', t => {
       'access-control-allow-origin': 'example.com',
       'access-control-allow-credentials': 'true',
       'access-control-expose-headers': 'foo, bar',
-      'content-length': '2'
+      'content-length': '2',
+      vary: 'Origin'
     })
-    t.notMatch(res.headers, { vary: 'Origin' })
   })
 
   fastify.inject({
@@ -306,9 +306,9 @@ test('Should support dynamic config (Promise)', t => {
       'access-control-allow-methods': 'GET',
       'access-control-allow-headers': 'baz, foo',
       'access-control-max-age': '321',
-      'content-length': '0'
+      'content-length': '0',
+      vary: 'Origin'
     })
-    t.notMatch(res.headers, { vary: 'Origin' })
     t.equal(res.headers['cache-control'], undefined, 'cache-control omitted (invalid value)')
   })
 
@@ -332,9 +332,9 @@ test('Should support dynamic config (Promise)', t => {
       'access-control-allow-headers': 'baz, foo',
       'access-control-max-age': '321',
       'cache-control': 'public, max-age=456', // cache-control included (custom string)
-      'content-length': '0'
+      'content-length': '0',
+      vary: 'Origin'
     })
-    t.notMatch(res.headers, { vary: 'Origin' })
   })
 
   fastify.inject({

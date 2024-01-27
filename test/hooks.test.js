@@ -321,7 +321,7 @@ test('Should set hook preSerialization if hook option is set to preSerialization
 })
 
 test('Should support custom hook with dynamic config', t => {
-  t.plan(18)
+  t.plan(16)
 
   const configs = [{
     origin: 'example.com',
@@ -375,9 +375,9 @@ test('Should support custom hook with dynamic config', t => {
       'access-control-allow-origin': 'example.com',
       'access-control-allow-credentials': 'true',
       'access-control-expose-headers': 'foo, bar',
-      'content-length': '2'
+      'content-length': '2',
+      vary: 'Origin'
     })
-    t.notMatch(res.headers, { vary: 'Origin' })
   })
 
   fastify.inject({
@@ -399,9 +399,9 @@ test('Should support custom hook with dynamic config', t => {
       'access-control-allow-methods': 'GET',
       'access-control-allow-headers': 'baz, foo',
       'access-control-max-age': '321',
-      'content-length': '0'
+      'content-length': '0',
+      vary: 'Origin'
     })
-    t.notMatch(res.headers, { vary: 'Origin' })
   })
 
   fastify.inject({
@@ -418,7 +418,7 @@ test('Should support custom hook with dynamic config', t => {
 })
 
 test('Should support custom hook with dynamic config (callback)', t => {
-  t.plan(18)
+  t.plan(16)
 
   const configs = [{
     origin: 'example.com',
@@ -472,9 +472,9 @@ test('Should support custom hook with dynamic config (callback)', t => {
       'access-control-allow-origin': 'example.com',
       'access-control-allow-credentials': 'true',
       'access-control-expose-headers': 'foo, bar',
-      'content-length': '2'
+      'content-length': '2',
+      vary: 'Origin'
     })
-    t.notMatch(res.headers, { vary: 'Origin' })
   })
 
   fastify.inject({
@@ -496,9 +496,9 @@ test('Should support custom hook with dynamic config (callback)', t => {
       'access-control-allow-methods': 'GET',
       'access-control-allow-headers': 'baz, foo',
       'access-control-max-age': '321',
-      'content-length': '0'
+      'content-length': '0',
+      vary: 'Origin'
     })
-    t.notMatch(res.headers, { vary: 'Origin' })
   })
 
   fastify.inject({
@@ -515,7 +515,7 @@ test('Should support custom hook with dynamic config (callback)', t => {
 })
 
 test('Should support custom hook with dynamic config (Promise)', t => {
-  t.plan(18)
+  t.plan(16)
 
   const configs = [{
     origin: 'example.com',
@@ -570,9 +570,9 @@ test('Should support custom hook with dynamic config (Promise)', t => {
       'access-control-allow-origin': 'example.com',
       'access-control-allow-credentials': 'true',
       'access-control-expose-headers': 'foo, bar',
-      'content-length': '2'
+      'content-length': '2',
+      vary: 'Origin'
     })
-    t.notMatch(res.headers, { vary: 'Origin' })
   })
 
   fastify.inject({
@@ -594,9 +594,9 @@ test('Should support custom hook with dynamic config (Promise)', t => {
       'access-control-allow-methods': 'GET',
       'access-control-allow-headers': 'baz, foo',
       'access-control-max-age': '321',
-      'content-length': '0'
+      'content-length': '0',
+      vary: 'Origin'
     })
-    t.notMatch(res.headers, { vary: 'Origin' })
   })
 
   fastify.inject({
