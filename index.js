@@ -35,7 +35,11 @@ const hookWithPayload = [
   'onSend'
 ]
 
-const optionsDelegated = Symbol('options has been delegated to a function and could be dynamic')
+const OptionsDelegated = Symbol('options has been delegated to a function and could be dynamic')
+function optionsDelegated (opts) {
+  opts[OptionsDelegated] = true
+  return opts
+}
 
 function validateHook (value, next) {
   if (validHooks.indexOf(value) !== -1) {
@@ -106,7 +110,7 @@ function handleCorsOptionsDelegator (optionsResolver, fastify, opts, next) {
       fastify.addHook(hook, function handleCors (req, reply, payload, next) {
         const ret = optionsResolver(req)
         if (ret && typeof ret.then === 'function') {
-          ret.then(options => addCorsHeadersHandler(fastify, normalizeCorsOptions(options, { delegated: true }), req, reply, next)).catch(next)
+          ret.then(options => addCorsHeadersHandler(fastify, optionsDelegated(normalizeCorsOptions(options)), req, reply, next)).catch(next)
           return
         }
         next(new Error('Invalid CORS origin option'))
@@ -116,7 +120,7 @@ function handleCorsOptionsDelegator (optionsResolver, fastify, opts, next) {
       fastify.addHook(hook, function handleCors (req, reply, next) {
         const ret = optionsResolver(req)
         if (ret && typeof ret.then === 'function') {
-          ret.then(options => addCorsHeadersHandler(fastify, normalizeCorsOptions(options, { delegated: true }), req, reply, next)).catch(next)
+          ret.then(options => addCorsHeadersHandler(fastify, optionsDelegated(normalizeCorsOptions(options)), req, reply, next)).catch(next)
           return
         }
         next(new Error('Invalid CORS origin option'))
@@ -130,7 +134,7 @@ function handleCorsOptionsCallbackDelegator (optionsResolver, fastify, req, repl
     if (err) {
       next(err)
     } else {
-      addCorsHeadersHandler(fastify, normalizeCorsOptions(options, { delegated: true }), req, reply, next)
+      addCorsHeadersHandler(fastify, optionsDelegated(normalizeCorsOptions(options)), req, reply, next)
     }
   })
 }
@@ -138,8 +142,8 @@ function handleCorsOptionsCallbackDelegator (optionsResolver, fastify, req, repl
 /**
  * @param {import('./types').FastifyCorsOptions} opts
  */
-function normalizeCorsOptions (opts, { delegated = false } = { }) {
-  const corsOptions = { ...defaultOptions, ...opts, [optionsDelegated]: delegated }
+function normalizeCorsOptions (opts) {
+  const corsOptions = { ...defaultOptions, ...opts }
   if (Array.isArray(opts.origin) && opts.origin.indexOf('*') !== -1) {
     corsOptions.origin = '*'
   }
@@ -154,7 +158,7 @@ function normalizeCorsOptions (opts, { delegated = false } = { }) {
 }
 
 function addCorsHeadersHandler (fastify, options, req, reply, next) {
-  if ((typeof options.origin !== 'string' && options.origin !== false) || options[optionsDelegated]) {
+  if ((typeof options.origin !== 'string' && options.origin !== false) || options[OptionsDelegated]) {
     // Always set Vary header for non-static origin option
     // https://fetch.spec.whatwg.org/#cors-protocol-and-http-caches
     addOriginToVaryHeader(reply)
