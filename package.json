@@ -6,7 +6,7 @@
   "type": "commonjs",
   "types": "types/index.d.ts",
   "scripts": {
-    "coverage": "tap --cov --coverage-report=html test",
+    "coverage": "tap --coverage-report=html test",
     "lint": "standard",
     "lint:fix": "standard --fix",
     "test": "npm run test:unit && npm run test:typescript",
@@ -31,19 +31,19 @@
   },
   "homepage": "https://github.com/fastify/fastify-cors#readme",
   "devDependencies": {
-    "@fastify/pre-commit": "^2.0.2",
-    "@types/node": "^20.1.0",
-    "@typescript-eslint/eslint-plugin": "^7.1.1",
-    "@typescript-eslint/parser": "^7.1.1",
+    "@fastify/pre-commit": "^2.1.0",
+    "@types/node": "^20.11.30",
+    "@typescript-eslint/eslint-plugin": "^7.3.1",
+    "@typescript-eslint/parser": "^7.3.1",
     "cors": "^2.8.5",
-    "fastify": "^4.0.0-rc.2",
-    "standard": "^17.0.0",
-    "tap": "16.3.9",
-    "tsd": "^0.30.0",
-    "typescript": "^5.0.2"
+    "fastify": "^4.26.2",
+    "standard": "^17.1.0",
+    "tap": "18.7.1",
+    "tsd": "^0.30.7",
+    "typescript": "^5.4.2"
   },
   "dependencies": {
-    "fastify-plugin": "^4.0.0",
+    "fastify-plugin": "^4.5.1",
     "mnemonist": "0.39.8"
   },
   "tsd": {
