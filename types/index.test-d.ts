@@ -1,6 +1,7 @@
 import fastify, { FastifyRequest } from 'fastify'
 import { expectType } from 'tsd'
 import fastifyCors, {
+  AsyncOriginFunction,
   FastifyCorsOptions,
   FastifyCorsOptionsDelegate,
   FastifyCorsOptionsDelegatePromise,
@@ -106,6 +107,26 @@ const corsDelegate: OriginFunction = (origin, cb) => {
 
 app.register(fastifyCors, {
   origin: corsDelegate,
+  allowedHeaders: ['authorization', 'content-type'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  exposedHeaders: ['authorization'],
+  maxAge: 13000,
+  cacheControl: 13000,
+  optionsSuccessStatus: 200,
+  preflight: false,
+  strictPreflight: false
+})
+
+const asyncCorsDelegate: OriginFunction = async (origin) => {
+  if (origin === undefined || /localhost/.test(origin)) {
+    return true;
+  }
+  return false;
+}
+
+app.register(fastifyCors, {
+  origin: asyncCorsDelegate,
   allowedHeaders: ['authorization', 'content-type'],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   credentials: true,
@@ -349,7 +370,18 @@ appHttp2.register(fastifyCors, delegate)
 
 appHttp2.register(fastifyCors, {
   hook: 'preParsing',
-  origin: function (origin) {
+  origin: function (origin, cb) {
     expectType<string|undefined>(origin)
+    cb(null, false)
   },
+})
+
+const asyncOriginFn: AsyncOriginFunction = async function (origin): Promise<boolean>  {
+  expectType<string|undefined>(origin)
+  return false;
+};
+
+appHttp2.register(fastifyCors, {
+  hook: 'preParsing',
+  origin: asyncOriginFn,
 })
