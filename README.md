@@ -76,6 +76,11 @@ You can use it as is without passing any option or you can configure it as expla
 * `strictPreflight`: Enforces strict requirement of the CORS preflight request headers (**Access-Control-Request-Method** and **Origin**) as defined by the [W3C CORS specification](https://www.w3.org/TR/2020/SPSD-cors-20200602/#resource-preflight-requests) (the current [fetch living specification](https://fetch.spec.whatwg.org/) does not define server behavior for missing headers). Preflight requests without the required headers will result in 400 errors when set to `true` (default: `true`).
 * `hideOptionsRoute`: hide options route from the documentation built using [@fastify/swagger](https://github.com/fastify/fastify-swagger) (default: `true`).
 
+#### :warning: DoS attacks
+
+The use of `RegExp` or a `function` for the `origin` parameter might allow an attacker to perform a Denial of Service
+attack. Craft those with extreme care.
+
 ### Configuring CORS Asynchronously
 
 ```js

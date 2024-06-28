@@ -23,6 +23,7 @@ type FastifyCorsHook =
 
 declare namespace fastifyCors {
   export type OriginFunction = (origin: string | undefined, callback: OriginCallback) => void;
+  export type AsyncOriginFunction = (origin: string | undefined) => Promise<ValueOrArray<OriginType>>;
 
   export interface FastifyCorsOptions {
     /**
@@ -38,7 +39,7 @@ declare namespace fastifyCors {
     /**
      * Configures the Access-Control-Allow-Origin CORS header.
      */
-    origin?: ValueOrArray<OriginType> | fastifyCors.OriginFunction;
+    origin?: ValueOrArray<OriginType> | fastifyCors.AsyncOriginFunction | fastifyCors.OriginFunction;
     /**
      * Configures the Access-Control-Allow-Credentials CORS header.
      * Set to true to pass the header, otherwise it is omitted.
