@@ -1,6 +1,6 @@
 {
   "name": "@fastify/cors",
-  "version": "9.0.1",
+  "version": "10.0.0-pre.fv5.1",
   "description": "Fastify CORS",
   "main": "index.js",
   "type": "commonjs",
@@ -36,14 +36,14 @@
     "@typescript-eslint/eslint-plugin": "^7.3.1",
     "@typescript-eslint/parser": "^7.3.1",
     "cors": "^2.8.5",
-    "fastify": "^4.26.2",
+    "fastify": "^5.0.0-alpha.3",
     "standard": "^17.1.0",
     "tap": "18.7.1",
     "tsd": "^0.30.7",
     "typescript": "^5.4.2"
   },
   "dependencies": {
-    "fastify-plugin": "^4.5.1",
+    "fastify-plugin": "^5.0.0-pre.fv5.1",
     "mnemonist": "0.39.8"
   },
   "tsd": {
