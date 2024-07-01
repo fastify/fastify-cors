@@ -39,7 +39,7 @@
     "fastify": "^5.0.0-alpha.3",
     "standard": "^17.1.0",
     "tap": "18.7.1",
-    "tsd": "^0.30.7",
+    "tsd": "^0.31.1",
     "typescript": "^5.4.2"
   },
   "dependencies": {
