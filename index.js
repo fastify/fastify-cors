@@ -294,7 +294,7 @@ function isRequestOriginAllowed (reqOrigin, allowedOrigin) {
 }
 
 const _fastifyCors = fp(fastifyCors, {
-  fastify: '4.x',
+  fastify: '5.x',
   name: '@fastify/cors'
 })
 
