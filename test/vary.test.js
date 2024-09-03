@@ -1,10 +1,10 @@
 'use strict'
 
-const test = require('tap').test
+const { test } = require('node:test')
 const createAddFieldnameToVary = require('../vary').createAddFieldnameToVary
 const parse = require('../vary').parse
 
-test('Should set * even if we set a specific field', t => {
+test('Should set * even if we set a specific field', async t => {
   t.plan(1)
 
   const addOriginToVary = createAddFieldnameToVary('Origin')
@@ -18,7 +18,7 @@ test('Should set * even if we set a specific field', t => {
   }
 
   addOriginToVary(replyMock)
-  t.pass()
+  t.assert.ok(true) // equalivant to tap t.pass()
 })
 
 test('Should set * even if we set a specific field', t => {
@@ -30,8 +30,8 @@ test('Should set * even if we set a specific field', t => {
       return 'Origin'
     },
     header (name, value) {
-      t.same(name, 'Vary')
-      t.same(value, '*')
+      t.assert.deepStrictEqual(name, 'Vary')
+      t.assert.deepStrictEqual(value, '*')
     }
   }
 
@@ -47,13 +47,13 @@ test('Should set * when field contains a *', t => {
       return ['Origin', '*', 'Access-Control-Request-Headers']
     },
     header (name, value) {
-      t.same(name, 'Vary')
-      t.same(value, '*')
+      t.assert.deepStrictEqual(name, 'Vary')
+      t.assert.deepStrictEqual(value, '*')
     }
   }
 
   addOriginToVary(replyMock)
-  t.pass()
+  t.assert.ok(true) // equalivant to tap t.pass()
 })
 
 test('Should concat vary values', t => {
@@ -65,13 +65,13 @@ test('Should concat vary values', t => {
       return 'Access-Control-Request-Headers'
     },
     header (name, value) {
-      t.same(name, 'Vary')
-      t.same(value, 'Access-Control-Request-Headers, Origin')
+      t.assert.deepStrictEqual(name, 'Vary')
+      t.assert.deepStrictEqual(value, 'Access-Control-Request-Headers, Origin')
     }
   }
 
   addOriginToVary(replyMock)
-  t.pass()
+  t.assert.ok(true) // equalivant to tap t.pass()
 })
 
 test('Should concat vary values ignoring consecutive commas', t => {
@@ -83,13 +83,13 @@ test('Should concat vary values ignoring consecutive commas', t => {
       return ' Access-Control-Request-Headers,Access-Control-Request-Method'
     },
     header (name, value) {
-      t.same(name, 'Vary')
-      t.same(value, ' Access-Control-Request-Headers,Access-Control-Request-Method, Origin')
+      t.assert.deepStrictEqual(name, 'Vary')
+      t.assert.deepStrictEqual(value, ' Access-Control-Request-Headers,Access-Control-Request-Method, Origin')
     }
   }
 
   addOriginToVary(replyMock)
-  t.pass()
+  t.assert.ok(true) // equalivant to tap t.pass()
 })
 
 test('Should concat vary values ignoring whitespace', t => {
@@ -101,13 +101,13 @@ test('Should concat vary values ignoring whitespace', t => {
       return ' Access-Control-Request-Headers ,Access-Control-Request-Method'
     },
     header (name, value) {
-      t.same(name, 'Vary')
-      t.same(value, ' Access-Control-Request-Headers ,Access-Control-Request-Method, Origin')
+      t.assert.deepStrictEqual(name, 'Vary')
+      t.assert.deepStrictEqual(value, ' Access-Control-Request-Headers ,Access-Control-Request-Method, Origin')
     }
   }
 
   addOriginToVary(replyMock)
-  t.pass()
+  t.assert.ok(true) // equalivant to tap t.pass()
 })
 
 test('Should set the field as value for vary if no vary is defined', t => {
@@ -119,8 +119,8 @@ test('Should set the field as value for vary if no vary is defined', t => {
       return undefined
     },
     header (name, value) {
-      t.same(name, 'Vary')
-      t.same(value, 'Origin')
+      t.assert.deepStrictEqual(name, 'Vary')
+      t.assert.deepStrictEqual(value, 'Origin')
     }
   }
 
@@ -136,8 +136,8 @@ test('Should set * as value for vary if vary contains *', t => {
       return 'Accept,*'
     },
     header (name, value) {
-      t.same(name, 'Vary')
-      t.same(value, '*')
+      t.assert.deepStrictEqual(name, 'Vary')
+      t.assert.deepStrictEqual(value, '*')
     }
   }
 
@@ -153,8 +153,8 @@ test('Should set Accept-Encoding as value for vary if vary is empty string', t =
       return ''
     },
     header (name, value) {
-      t.same(name, 'Vary')
-      t.same(value, 'Accept-Encoding')
+      t.assert.deepStrictEqual(name, 'Vary')
+      t.assert.deepStrictEqual(value, 'Accept-Encoding')
     }
   }
 
@@ -171,8 +171,8 @@ test('Should have no issues with values containing dashes', t => {
       return this.value
     },
     header (name, value) {
-      t.same(name, 'Vary')
-      t.same(value, 'Accept-Encoding, X-Foo')
+      t.assert.deepStrictEqual(name, 'Vary')
+      t.assert.deepStrictEqual(value, 'Accept-Encoding, X-Foo')
       this.value = value
     }
   }
@@ -195,35 +195,43 @@ test('Should ignore the header as value for vary if it is already in vary', t =>
   }
   addOriginToVary(replyMock)
   addOriginToVary(replyMock)
-  t.pass()
+
+  t.assert.ok(true) // equalivant to tap t.pass()
 })
 
 test('parse', t => {
   t.plan(18)
-  t.same(parse(''), [])
-  t.same(parse('a'), ['a'])
-  t.same(parse('a,b'), ['a', 'b'])
-  t.same(parse('  a,b'), ['a', 'b'])
-  t.same(parse('a,b  '), ['a', 'b'])
-  t.same(parse('a,b,c'), ['a', 'b', 'c'])
-  t.same(parse('A,b,c'), ['a', 'b', 'c'])
-  t.same(parse('a,b,c,'), ['a', 'b', 'c'])
-  t.same(parse('a,b,c, '), ['a', 'b', 'c'])
-  t.same(parse(',a,b,c'), ['a', 'b', 'c'])
-  t.same(parse(' ,a,b,c'), ['a', 'b', 'c'])
-  t.same(parse('a,,b,c'), ['a', 'b', 'c'])
-  t.same(parse('a,,,b,,c'), ['a', 'b', 'c'])
-  t.same(parse('a, b,c'), ['a', 'b', 'c'])
-  t.same(parse('a,   b,c'), ['a', 'b', 'c'])
-  t.same(parse('a, , b,c'), ['a', 'b', 'c'])
-  t.same(parse('a,  , b,c'), ['a', 'b', 'c'])
+  t.assert.deepStrictEqual(parse(''), [])
+  t.assert.deepStrictEqual(parse('a'), ['a'])
+  t.assert.deepStrictEqual(parse('a,b'), ['a', 'b'])
+  t.assert.deepStrictEqual(parse('  a,b'), ['a', 'b'])
+  t.assert.deepStrictEqual(parse('a,b  '), ['a', 'b'])
+  t.assert.deepStrictEqual(parse('a,b,c'), ['a', 'b', 'c'])
+  t.assert.deepStrictEqual(parse('A,b,c'), ['a', 'b', 'c'])
+  t.assert.deepStrictEqual(parse('a,b,c,'), ['a', 'b', 'c'])
+  t.assert.deepStrictEqual(parse('a,b,c, '), ['a', 'b', 'c'])
+  t.assert.deepStrictEqual(parse(',a,b,c'), ['a', 'b', 'c'])
+  t.assert.deepStrictEqual(parse(' ,a,b,c'), ['a', 'b', 'c'])
+  t.assert.deepStrictEqual(parse('a,,b,c'), ['a', 'b', 'c'])
+  t.assert.deepStrictEqual(parse('a,,,b,,c'), ['a', 'b', 'c'])
+  t.assert.deepStrictEqual(parse('a, b,c'), ['a', 'b', 'c'])
+  t.assert.deepStrictEqual(parse('a,   b,c'), ['a', 'b', 'c'])
+  t.assert.deepStrictEqual(parse('a, , b,c'), ['a', 'b', 'c'])
+  t.assert.deepStrictEqual(parse('a,  , b,c'), ['a', 'b', 'c'])
 
   // one for the cache
-  t.same(parse('A,b,c'), ['a', 'b', 'c'])
+  t.assert.deepStrictEqual(parse('A,b,c'), ['a', 'b', 'c'])
 })
 
-test('createAddFieldnameToVary', t => {
-  t.plan(2)
-  t.same(typeof createAddFieldnameToVary('valid-header'), 'function')
-  t.throws(() => createAddFieldnameToVary('invalid:header'), TypeError, 'Field contains invalid characters.')
+test('createAddFieldnameToVary', async t => {
+  t.plan(4)
+  t.assert.strictEqual(typeof createAddFieldnameToVary('valid-header'), 'function')
+  await t.assert.rejects(
+    async () => createAddFieldnameToVary('invalid:header'),
+    (err) => {
+      t.assert.strictEqual(err.name, 'TypeError')
+      t.assert.strictEqual(err.message, 'Fieldname contains invalid characters.')
+      return true
+    }
+  )
 })
