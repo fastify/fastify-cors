@@ -1,12 +1,13 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const { createReadStream, statSync, readFileSync } = require('node:fs')
 const Fastify = require('fastify')
 const cors = require('../')
 const { resolve } = require('node:path')
+const { setTimeout: sleep } = require('node:timers/promises')
 
-test('Should add cors headers', t => {
+test('Should add cors headers', async t => {
   t.plan(4)
 
   const fastify = Fastify()
@@ -16,21 +17,21 @@ test('Should add cors headers', t => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/'
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.match(res.headers, {
-      'access-control-allow-origin': '*'
-    })
   })
+
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  t.assert.deepStrictEqual(res.headers['access-control-allow-origin'],
+    '*'
+  )
 })
 
-test('Should add cors headers when payload is a stream', t => {
+test('Should add cors headers when payload is a stream', async t => {
   t.plan(4)
 
   const fastify = Fastify()
@@ -47,22 +48,26 @@ test('Should add cors headers when payload is a stream', t => {
 
   const fileContent = readFileSync(filePath, 'utf-8')
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/'
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, fileContent)
-    t.match(res.headers, {
-      'access-control-allow-origin': '*',
-      'content-length': statSync(filePath).size
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, fileContent)
+  const actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'content-length': res.headers['content-length']
+
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': '*',
+    'content-length': statSync(filePath).size.toString()
   })
 })
 
-test('Should add cors headers (custom values)', t => {
+test('Should add cors headers (custom values)', async t => {
   t.plan(10)
 
   const fastify = Fastify()
@@ -80,50 +85,64 @@ test('Should add cors headers (custom values)', t => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  let res = await fastify.inject({
     method: 'OPTIONS',
     url: '/',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 204)
-    t.equal(res.payload, '')
-    t.match(res.headers, {
-      'access-control-allow-origin': 'example.com',
-      'access-control-allow-credentials': 'true',
-      'access-control-expose-headers': 'foo, bar',
-      'access-control-allow-methods': 'GET',
-      'access-control-allow-headers': 'baz, woo',
-      'access-control-max-age': '123',
-      'cache-control': 'max-age=321',
-      'content-length': '0'
-    })
-    t.notMatch(res.headers, { vary: 'Origin' })
   })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.payload, '')
+  const actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-credentials': res.headers['access-control-allow-credentials'],
+    'access-control-expose-headers': res.headers['access-control-expose-headers'],
+    'access-control-allow-methods': res.headers['access-control-allow-methods'],
+    'access-control-allow-headers': res.headers['access-control-allow-headers'],
+    'access-control-max-age': res.headers['access-control-max-age'],
+    'cache-control': res.headers['cache-control'],
+    'content-length': res.headers['content-length']
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': 'example.com',
+    'access-control-allow-credentials': 'true',
+    'access-control-expose-headers': 'foo, bar',
+    'access-control-allow-methods': 'GET',
+    'access-control-allow-headers': 'baz, woo',
+    'access-control-max-age': '123',
+    'cache-control': 'max-age=321',
+    'content-length': '0'
+  })
+  t.assert.notDeepEqual(res.headers, { vary: 'Origin' })
 
-  fastify.inject({
+  res = await fastify.inject({
     method: 'GET',
     url: '/'
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.match(res.headers, {
-      'access-control-allow-origin': 'example.com',
-      'access-control-allow-credentials': 'true',
-      'access-control-expose-headers': 'foo, bar',
-      'content-length': '2'
-    })
-    t.notMatch(res.headers, { vary: 'Origin' })
   })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  const actualHeaders2 = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-credentials': res.headers['access-control-allow-credentials'],
+    'access-control-expose-headers': res.headers['access-control-expose-headers'],
+    'content-length': res.headers['content-length']
+  }
+  t.assert.deepStrictEqual(actualHeaders2, {
+    'access-control-allow-origin': 'example.com',
+    'access-control-allow-credentials': 'true',
+    'access-control-expose-headers': 'foo, bar',
+    'content-length': '2'
+  })
+  t.assert.notDeepEqual(res.headers, { vary: 'Origin' })
 })
 
-test('Should support dynamic config (callback)', t => {
+test('Should support dynamic config (callback)', async t => {
   t.plan(16)
 
   const configs = [{
@@ -146,11 +165,12 @@ test('Should support dynamic config (callback)', t => {
 
   const fastify = Fastify()
   let requestId = 0
-  const configDelegation = function (req, cb) {
+  const configDelegation = async function (req, cb) {
     // request should have id
-    t.ok(req.id)
+    t.assert.ok(req.id)
     // request should not have send
-    t.notOk(req.send)
+    t.assert.ifError(req.send)
+
     const config = configs[requestId]
     requestId++
     if (config) {
@@ -159,68 +179,87 @@ test('Should support dynamic config (callback)', t => {
       cb(new Error('ouch'))
     }
   }
-  fastify.register(cors, () => configDelegation)
+  await fastify.register(cors, () => configDelegation)
 
   fastify.get('/', (req, reply) => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  let res = await fastify.inject({
     method: 'GET',
     url: '/'
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.match(res.headers, {
-      'access-control-allow-origin': 'example.com',
-      'access-control-allow-credentials': 'true',
-      'access-control-expose-headers': 'foo, bar',
-      'content-length': '2',
-      vary: 'Origin'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  const actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-credentials': res.headers['access-control-allow-credentials'],
+    'access-control-expose-headers': res.headers['access-control-expose-headers'],
+    'content-length': res.headers['content-length'],
+    vary: res.headers.vary
+  }
+  // Sleep to wait for callback
+  sleep()
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': 'example.com',
+    'access-control-allow-credentials': 'true',
+    'access-control-expose-headers': 'foo, bar',
+    'content-length': '2',
+    vary: 'Origin'
   })
 
-  fastify.inject({
+  res = await fastify.inject({
     method: 'OPTIONS',
     url: '/',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 204)
-    t.equal(res.payload, '')
-    t.match(res.headers, {
-      'access-control-allow-origin': 'sample.com',
-      'access-control-allow-credentials': 'true',
-      'access-control-expose-headers': 'zoo, bar',
-      'access-control-allow-methods': 'GET',
-      'access-control-allow-headers': 'baz, foo',
-      'access-control-max-age': '321',
-      'cache-control': '456',
-      'content-length': '0',
-      vary: 'Origin'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.payload, '')
+  const actualHeaders2 = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-credentials': res.headers['access-control-allow-credentials'],
+    'access-control-expose-headers': res.headers['access-control-expose-headers'],
+    'access-control-allow-methods': res.headers['access-control-allow-methods'],
+    'access-control-allow-headers': res.headers['access-control-allow-headers'],
+    'access-control-max-age': res.headers['access-control-max-age'],
+    'cache-control': res.headers['cache-control'],
+    'content-length': res.headers['content-length'],
+    vary: res.headers.vary
+  }
+  // Sleep to wait for callback
+  sleep()
+  t.assert.deepStrictEqual(actualHeaders2, {
+    'access-control-allow-origin': 'sample.com',
+    'access-control-allow-credentials': 'true',
+    'access-control-expose-headers': 'zoo, bar',
+    'access-control-allow-methods': 'GET',
+    'access-control-allow-headers': 'baz, foo',
+    'access-control-max-age': '321',
+    'cache-control': '456',
+    'content-length': '0',
+    vary: 'Origin'
   })
 
-  fastify.inject({
+  res = await fastify.inject({
     method: 'GET',
     url: '/',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    t.equal(res.statusCode, 500)
   })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 500)
 })
 
-test('Should support dynamic config (Promise)', t => {
+test('Should support dynamic config (Promise)', async t => {
   t.plan(23)
 
   const configs = [{
@@ -251,11 +290,11 @@ test('Should support dynamic config (Promise)', t => {
 
   const fastify = Fastify()
   let requestId = 0
-  const configDelegation = function (req) {
+  const configDelegation = async function (req) {
     // request should have id
-    t.ok(req.id)
+    t.assert.ok(req.id)
     // request should not have send
-    t.notOk(req.send)
+    t.assert.ifError(req.send)
     const config = configs[requestId]
     requestId++
     if (config) {
@@ -264,93 +303,117 @@ test('Should support dynamic config (Promise)', t => {
       return Promise.reject(new Error('ouch'))
     }
   }
-  fastify.register(cors, () => configDelegation)
+  await fastify.register(cors, () => configDelegation)
 
   fastify.get('/', (req, reply) => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  let res = await fastify.inject({
     method: 'GET',
     url: '/'
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.match(res.headers, {
-      'access-control-allow-origin': 'example.com',
-      'access-control-allow-credentials': 'true',
-      'access-control-expose-headers': 'foo, bar',
-      'content-length': '2',
-      vary: 'Origin'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  const actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-credentials': res.headers['access-control-allow-credentials'],
+    'access-control-expose-headers': res.headers['access-control-expose-headers'],
+    'content-length': res.headers['content-length'],
+    vary: res.headers.vary
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': 'example.com',
+    'access-control-allow-credentials': 'true',
+    'access-control-expose-headers': 'foo, bar',
+    'content-length': '2',
+    vary: 'Origin'
   })
 
-  fastify.inject({
+  res = await fastify.inject({
     method: 'OPTIONS',
     url: '/',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'sample.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 204)
-    t.equal(res.payload, '')
-    t.match(res.headers, {
-      'access-control-allow-origin': 'sample.com',
-      'access-control-allow-credentials': 'true',
-      'access-control-expose-headers': 'zoo, bar',
-      'access-control-allow-methods': 'GET',
-      'access-control-allow-headers': 'baz, foo',
-      'access-control-max-age': '321',
-      'content-length': '0',
-      vary: 'Origin'
-    })
-    t.equal(res.headers['cache-control'], undefined, 'cache-control omitted (invalid value)')
   })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.payload, '')
+  const acutalHeaders2 = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-credentials': res.headers['access-control-allow-credentials'],
+    'access-control-expose-headers': res.headers['access-control-expose-headers'],
+    'access-control-allow-methods': res.headers['access-control-allow-methods'],
+    'access-control-allow-headers': res.headers['access-control-allow-headers'],
+    'access-control-max-age': res.headers['access-control-max-age'],
+    'content-length': res.headers['content-length'],
+    vary: res.headers.vary
+  }
+  t.assert.deepStrictEqual(acutalHeaders2, {
+    'access-control-allow-origin': 'sample.com',
+    'access-control-allow-credentials': 'true',
+    'access-control-expose-headers': 'zoo, bar',
+    'access-control-allow-methods': 'GET',
+    'access-control-allow-headers': 'baz, foo',
+    'access-control-max-age': '321',
+    'content-length': '0',
+    vary: 'Origin'
+  })
+  t.assert.strictEqual(res.headers['cache-control'], undefined, 'cache-control omitted (invalid value)')
 
-  fastify.inject({
+  res = await fastify.inject({
     method: 'OPTIONS',
     url: '/',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 204)
-    t.equal(res.payload, '')
-    t.match(res.headers, {
-      'access-control-allow-origin': 'sample.com',
-      'access-control-allow-credentials': 'true',
-      'access-control-expose-headers': 'zoo, bar',
-      'access-control-allow-methods': 'GET',
-      'access-control-allow-headers': 'baz, foo',
-      'access-control-max-age': '321',
-      'cache-control': 'public, max-age=456', // cache-control included (custom string)
-      'content-length': '0',
-      vary: 'Origin'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.payload, '')
+  const actualHeaders3 = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-credentials': res.headers['access-control-allow-credentials'],
+    'access-control-expose-headers': res.headers['access-control-expose-headers'],
+    'access-control-allow-methods': res.headers['access-control-allow-methods'],
+    'access-control-allow-headers': res.headers['access-control-allow-headers'],
+    'access-control-max-age': res.headers['access-control-max-age'],
+    'cache-control': res.headers['cache-control'],
+    'content-length': res.headers['content-length'],
+    vary: res.headers.vary
+  }
+  t.assert.deepStrictEqual(actualHeaders3, {
+    'access-control-allow-origin': 'sample.com',
+    'access-control-allow-credentials': 'true',
+    'access-control-expose-headers': 'zoo, bar',
+    'access-control-allow-methods': 'GET',
+    'access-control-allow-headers': 'baz, foo',
+    'access-control-max-age': '321',
+    'cache-control': 'public, max-age=456', // cache-control included (custom string)
+    'content-length': '0',
+    vary: 'Origin'
   })
 
-  fastify.inject({
+  res = await fastify.inject({
     method: 'GET',
     url: '/',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    t.equal(res.statusCode, 500)
   })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 500)
 })
 
-test('Should support dynamic config. (Invalid function)', t => {
+test('Should support dynamic config. (Invalid function)', async t => {
   t.plan(2)
 
   const fastify = Fastify()
@@ -360,26 +423,25 @@ test('Should support dynamic config. (Invalid function)', t => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    t.equal(res.statusCode, 500)
   })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 500)
 })
 
-test('Dynamic origin resolution (valid origin)', t => {
+test('Dynamic origin resolution (valid origin)', async t => {
   t.plan(6)
 
   const fastify = Fastify()
   const origin = function (header, cb) {
-    t.equal(header, 'example.com')
-    t.same(this, fastify)
+    t.assert.strictEqual(header, 'example.com')
+    t.assert.equal(this, fastify)
     cb(null, true)
   }
   fastify.register(cors, { origin })
@@ -388,28 +450,31 @@ test('Dynamic origin resolution (valid origin)', t => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/',
     headers: { origin: 'example.com' }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.match(res.headers, {
-      'access-control-allow-origin': 'example.com',
-      vary: 'Origin'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  const actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    vary: res.headers.vary
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': 'example.com',
+    vary: 'Origin'
   })
 })
 
-test('Dynamic origin resolution (not valid origin)', t => {
+test('Dynamic origin resolution (not valid origin)', async t => {
   t.plan(5)
 
   const fastify = Fastify()
   const origin = (header, cb) => {
-    t.equal(header, 'example.com')
+    t.assert.strictEqual(header, 'example.com')
     cb(null, false)
   }
   fastify.register(cors, { origin })
@@ -418,71 +483,74 @@ test('Dynamic origin resolution (not valid origin)', t => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/',
     headers: { origin: 'example.com' }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.same(res.headers, {
-      'content-length': '2',
-      'content-type': 'text/plain; charset=utf-8',
-      connection: 'keep-alive',
-      vary: 'Origin'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  const actualHeaders = {
+    'content-length': res.headers['content-length'],
+    'content-type': res.headers['content-type'],
+    connection: res.headers.connection,
+    vary: res.headers.vary
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'content-length': '2',
+    'content-type': 'text/plain; charset=utf-8',
+    connection: 'keep-alive',
+    vary: 'Origin'
   })
 })
 
-test('Dynamic origin resolution (errored)', t => {
+test('Dynamic origin resolution (errored)', async t => {
   t.plan(3)
 
   const fastify = Fastify()
   const origin = (header, cb) => {
-    t.equal(header, 'example.com')
+    t.assert.strictEqual(header, 'example.com')
     cb(new Error('ouch'))
   }
   fastify.register(cors, { origin })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/',
     headers: { origin: 'example.com' }
-  }, (err, res) => {
-    t.error(err)
-    t.equal(res.statusCode, 500)
   })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 500)
 })
 
-test('Dynamic origin resolution (invalid result)', t => {
+test('Dynamic origin resolution (invalid result)', async t => {
   t.plan(3)
 
   const fastify = Fastify()
   const origin = (header, cb) => {
-    t.equal(header, 'example.com')
+    t.assert.strictEqual(header, 'example.com')
     cb(null, undefined)
   }
   fastify.register(cors, { origin })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/',
     headers: { origin: 'example.com' }
-  }, (err, res) => {
-    t.error(err)
-    t.equal(res.statusCode, 500)
   })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 500)
 })
 
-test('Dynamic origin resolution (valid origin - promises)', t => {
+test('Dynamic origin resolution (valid origin - promises)', async t => {
   t.plan(5)
 
   const fastify = Fastify()
   const origin = (header, cb) => {
     return new Promise((resolve, reject) => {
-      t.equal(header, 'example.com')
+      t.assert.strictEqual(header, 'example.com')
       resolve(true)
     })
   }
@@ -492,29 +560,32 @@ test('Dynamic origin resolution (valid origin - promises)', t => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/',
     headers: { origin: 'example.com' }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.match(res.headers, {
-      'access-control-allow-origin': 'example.com',
-      vary: 'Origin'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  const actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    vary: res.headers.vary
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': 'example.com',
+    vary: 'Origin'
   })
 })
 
-test('Dynamic origin resolution (not valid origin - promises)', t => {
+test('Dynamic origin resolution (not valid origin - promises)', async t => {
   t.plan(5)
 
   const fastify = Fastify()
   const origin = (header, cb) => {
     return new Promise((resolve, reject) => {
-      t.equal(header, 'example.com')
+      t.assert.strictEqual(header, 'example.com')
       resolve(false)
     })
   }
@@ -524,47 +595,51 @@ test('Dynamic origin resolution (not valid origin - promises)', t => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/',
     headers: { origin: 'example.com' }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.same(res.headers, {
-      'content-length': '2',
-      'content-type': 'text/plain; charset=utf-8',
-      connection: 'keep-alive',
-      vary: 'Origin'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  const actualHeaders = {
+    'content-length': res.headers['content-length'],
+    'content-type': res.headers['content-type'],
+    connection: res.headers.connection,
+    vary: res.headers.vary
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'content-length': '2',
+    'content-type': 'text/plain; charset=utf-8',
+    connection: 'keep-alive',
+    vary: 'Origin'
   })
 })
 
-test('Dynamic origin resolution (errored - promises)', t => {
+test('Dynamic origin resolution (errored - promises)', async t => {
   t.plan(3)
 
   const fastify = Fastify()
   const origin = (header, cb) => {
     return new Promise((resolve, reject) => {
-      t.equal(header, 'example.com')
+      t.assert.strictEqual(header, 'example.com')
       reject(new Error('ouch'))
     })
   }
   fastify.register(cors, { origin })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/',
     headers: { origin: 'example.com' }
-  }, (err, res) => {
-    t.error(err)
-    t.equal(res.statusCode, 500)
   })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 500)
 })
 
-test('Should reply 404 without cors headers when origin is false', t => {
+test('Should reply 404 without cors headers when origin is false', async t => {
   t.plan(8)
 
   const fastify = Fastify()
@@ -581,61 +656,68 @@ test('Should reply 404 without cors headers when origin is false', t => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  let res = await fastify.inject({
     method: 'OPTIONS',
     url: '/'
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 404)
-    t.equal(res.payload, '{"message":"Route OPTIONS:/ not found","error":"Not Found","statusCode":404}')
-    t.same(res.headers, {
-      'content-length': '76',
-      'content-type': 'application/json; charset=utf-8',
-      connection: 'keep-alive'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 404)
+  t.assert.strictEqual(res.payload, '{"message":"Route OPTIONS:/ not found","error":"Not Found","statusCode":404}')
+  const actualHeaders = {
+    'content-length': res.headers['content-length'],
+    'content-type': res.headers['content-type'],
+    connection: res.headers.connection
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'content-length': '76',
+    'content-type': 'application/json; charset=utf-8',
+    connection: 'keep-alive'
   })
 
-  fastify.inject({
+  res = await fastify.inject({
     method: 'GET',
     url: '/'
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.same(res.headers, {
-      'content-length': '2',
-      'content-type': 'text/plain; charset=utf-8',
-      connection: 'keep-alive'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  t.assert.deepStrictEqual(res.headers, {
+    'content-length': '2',
+    'content-type': 'text/plain; charset=utf-8',
+    connection: 'keep-alive'
   })
 })
 
-test('Server error if origin option is falsy but not false', t => {
+test('Server error if origin option is falsy but not false', async t => {
   t.plan(4)
 
   const fastify = Fastify()
   fastify.register(cors, { origin: '' })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/',
     headers: { origin: 'example.com' }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 500)
-    t.same(res.json(), { statusCode: 500, error: 'Internal Server Error', message: 'Invalid CORS origin option' })
-    t.same(res.headers, {
-      'content-length': '89',
-      'content-type': 'application/json; charset=utf-8',
-      connection: 'keep-alive'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 500)
+  t.assert.deepStrictEqual(res.json(), { statusCode: 500, error: 'Internal Server Error', message: 'Invalid CORS origin option' })
+  const actualHeaders = {
+    'content-length': res.headers['content-length'],
+    'content-type': res.headers['content-type'],
+    connection: res.headers.connection
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'content-length': '89',
+    'content-type': 'application/json; charset=utf-8',
+    connection: 'keep-alive'
   })
 })
 
-test('Allow only request from a specific origin', t => {
+test('Allow only request from a specific origin', async t => {
   t.plan(5)
 
   const fastify = Fastify()
@@ -645,23 +727,22 @@ test('Allow only request from a specific origin', t => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/',
     headers: { origin: 'example.com' }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.match(res.headers, {
-      'access-control-allow-origin': 'other.io'
-    })
-    t.notMatch(res.headers, { vary: 'Origin' })
   })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  t.assert.deepStrictEqual(res.headers['access-control-allow-origin'],
+    'other.io'
+  )
+  t.assert.notDeepEqual(res.headers, { vary: 'Origin' })
 })
 
-test('Allow only request from multiple specific origin', t => {
+test('Allow only request from multiple specific origin', async t => {
   t.plan(9)
 
   const fastify = Fastify()
@@ -671,38 +752,40 @@ test('Allow only request from multiple specific origin', t => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  let res = await fastify.inject({
     method: 'GET',
     url: '/',
     headers: { origin: 'other.io' }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.match(res.headers, {
-      'access-control-allow-origin': 'other.io',
-      vary: 'Origin'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  const actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    vary: res.headers.vary
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': 'other.io',
+    vary: 'Origin'
   })
 
-  fastify.inject({
+  res = await fastify.inject({
     method: 'GET',
     url: '/',
     headers: { origin: 'foo.com' }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.match(res.headers, {
-      vary: 'Origin'
-    })
-    t.equal(res.headers['access-control-allow-origin'], undefined)
   })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  t.assert.deepStrictEqual(res.headers.vary,
+    'Origin'
+  )
+  t.assert.strictEqual(res.headers['access-control-allow-origin'], undefined)
 })
 
-test('Allow only request from a specific origin using regex', t => {
+test('Allow only request from a specific origin using regex', async t => {
   t.plan(8)
 
   const fastify = Fastify()
@@ -716,24 +799,27 @@ test('Allow only request from a specific origin using regex', t => {
   // different results with global (e.g. /g) regexes. Therefore, check this
   // twice to check consistency
   for (let i = 0; i < 2; i++) {
-    fastify.inject({
+    const res = await fastify.inject({
       method: 'GET',
       url: '/',
       headers: { origin: 'https://www.example.com/' }
-    }, (err, res) => {
-      t.error(err)
-      delete res.headers.date
-      t.equal(res.statusCode, 200)
-      t.equal(res.payload, 'ok')
-      t.match(res.headers, {
-        'access-control-allow-origin': 'https://www.example.com/',
-        vary: 'Origin'
-      })
+    })
+    t.assert.ok(res)
+    delete res.headers.date
+    t.assert.strictEqual(res.statusCode, 200)
+    t.assert.strictEqual(res.payload, 'ok')
+    const actualHeaders = {
+      'access-control-allow-origin': res.headers['access-control-allow-origin'],
+      vary: res.headers.vary
+    }
+    t.assert.deepStrictEqual(actualHeaders, {
+      'access-control-allow-origin': 'https://www.example.com/',
+      vary: 'Origin'
     })
   }
 })
 
-test('Disable preflight', t => {
+test('Disable preflight', async t => {
   t.plan(7)
 
   const fastify = Fastify()
@@ -743,33 +829,31 @@ test('Disable preflight', t => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  let res = await fastify.inject({
     method: 'OPTIONS',
     url: '/hello'
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 404)
-    t.match(res.headers, {
-      'access-control-allow-origin': '*'
-    })
   })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 404)
+  t.assert.strictEqual(res.headers['access-control-allow-origin'],
+    '*'
+  )
 
-  fastify.inject({
+  res = await fastify.inject({
     method: 'GET',
     url: '/'
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.match(res.headers, {
-      'access-control-allow-origin': '*'
-    })
   })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  t.assert.strictEqual(res.headers['access-control-allow-origin'],
+    '*'
+  )
 })
 
-test('Should always add vary header to `Origin` for reflected origin', t => {
+test('Should always add vary header to `Origin` for reflected origin', async t => {
   t.plan(12)
 
   const fastify = Fastify()
@@ -780,53 +864,50 @@ test('Should always add vary header to `Origin` for reflected origin', t => {
   })
 
   // Invalid Preflight
-  fastify.inject({
+  let res = await fastify.inject({
     method: 'OPTIONS',
     url: '/'
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 400)
-    t.equal(res.payload, 'Invalid Preflight Request')
-    t.match(res.headers, {
-      vary: 'Origin'
-    })
   })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 400)
+  t.assert.strictEqual(res.payload, 'Invalid Preflight Request')
+  t.assert.strictEqual(res.headers.vary,
+    'Origin'
+  )
 
   // Valid Preflight
-  fastify.inject({
+  res = await fastify.inject({
     method: 'OPTIONS',
     url: '/',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 204)
-    t.equal(res.payload, '')
-    t.match(res.headers, {
-      vary: 'Origin'
-    })
   })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.payload, '')
+  t.assert.strictEqual(res.headers.vary,
+    'Origin, Access-Control-Request-Headers'
+  )
 
   // Other Route
-  fastify.inject({
+  res = await fastify.inject({
     method: 'GET',
     url: '/'
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.match(res.headers, {
-      vary: 'Origin'
-    })
   })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  t.assert.strictEqual(res.headers.vary,
+    'Origin'
+  )
 })
 
-test('Should always add vary header to `Origin` for reflected origin (vary is array)', t => {
+test('Should always add vary header to `Origin` for reflected origin (vary is array)', async t => {
   t.plan(4)
 
   const fastify = Fastify()
@@ -840,21 +921,20 @@ test('Should always add vary header to `Origin` for reflected origin (vary is ar
     reply.send('ok')
   })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/'
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.match(res.headers, {
-      vary: 'foo, bar, Origin'
-    })
   })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  t.assert.strictEqual(res.headers.vary,
+    'foo, bar, Origin'
+  )
 })
 
-test('Allow only request from with specific headers', t => {
+test('Allow only request from with specific headers', async t => {
   t.plan(8)
 
   const fastify = Fastify()
@@ -867,38 +947,36 @@ test('Allow only request from with specific headers', t => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  let res = await fastify.inject({
     method: 'OPTIONS',
     url: '/',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 204)
-    t.match(res.headers, {
-      'access-control-allow-headers': 'foo'
-    })
-    t.notMatch(res.headers, { vary: 'Origin' })
   })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.deepStrictEqual(res.headers['access-control-allow-headers'],
+    'foo'
+  )
+  t.assert.notDeepEqual(res.headers.vary, 'Origin')
 
-  fastify.inject({
+  res = await fastify.inject({
     method: 'GET',
     url: '/'
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.match(res.headers, {
-      'access-control-expose-headers': 'bar'
-    })
   })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  t.assert.strictEqual(res.headers['access-control-expose-headers'],
+    'bar'
+  )
 })
 
-test('Should support wildcard config /1', t => {
+test('Should support wildcard config /1', async t => {
   t.plan(4)
 
   const fastify = Fastify()
@@ -908,18 +986,17 @@ test('Should support wildcard config /1', t => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/'
-  }, (err, res) => {
-    t.error(err)
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.equal(res.headers['access-control-allow-origin'], '*')
   })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  t.assert.strictEqual(res.headers['access-control-allow-origin'], '*')
 })
 
-test('Should support wildcard config /2', t => {
+test('Should support wildcard config /2', async t => {
   t.plan(4)
 
   const fastify = Fastify()
@@ -929,13 +1006,12 @@ test('Should support wildcard config /2', t => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'GET',
     url: '/'
-  }, (err, res) => {
-    t.error(err)
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.equal(res.headers['access-control-allow-origin'], '*')
   })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  t.assert.strictEqual(res.headers['access-control-allow-origin'], '*')
 })

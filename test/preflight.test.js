@@ -1,43 +1,48 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const Fastify = require('fastify')
 const cors = require('../')
 
-test('Should reply to preflight requests', t => {
+test('Should reply to preflight requests', async t => {
   t.plan(4)
 
   const fastify = Fastify()
-  fastify.register(cors)
+  await fastify.register(cors)
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'OPTIONS',
     url: '/',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 204)
-    t.equal(res.payload, '')
-    t.match(res.headers, {
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers',
-      'content-length': '0'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.payload, '')
+  const actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-methods': res.headers['access-control-allow-methods'],
+    vary: res.headers.vary,
+    'content-length': res.headers['content-length']
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    vary: 'Access-Control-Request-Headers',
+    'content-length': '0'
   })
 })
 
-test('Should add access-control-allow-headers to response if preflight req has access-control-request-headers', t => {
+test('Should add access-control-allow-headers to response if preflight req has access-control-request-headers', async t => {
   t.plan(4)
 
   const fastify = Fastify()
-  fastify.register(cors)
+  await fastify.register(cors)
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'OPTIONS',
     url: '/',
     headers: {
@@ -46,390 +51,438 @@ test('Should add access-control-allow-headers to response if preflight req has a
       origin: 'example.com'
     }
 
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 204)
-    t.equal(res.payload, '')
-    t.match(res.headers, {
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      'access-control-allow-headers': 'x-requested-with',
-      vary: 'Access-Control-Request-Headers',
-      'content-length': '0'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.payload, '')
+  const actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-methods': res.headers['access-control-allow-methods'],
+    'access-control-allow-headers': res.headers['access-control-allow-headers'],
+    vary: res.headers.vary,
+    'content-length': res.headers['content-length']
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    'access-control-allow-headers': 'x-requested-with',
+    vary: 'Access-Control-Request-Headers',
+    'content-length': '0'
   })
 })
 
-test('Should reply to preflight requests with custom status code', t => {
+test('Should reply to preflight requests with custom status code', async t => {
   t.plan(4)
 
   const fastify = Fastify()
-  fastify.register(cors, { optionsSuccessStatus: 200 })
+  await fastify.register(cors, { optionsSuccessStatus: 200 })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'OPTIONS',
     url: '/',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, '')
-    t.match(res.headers, {
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers',
-      'content-length': '0'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, '')
+  const actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-methods': res.headers['access-control-allow-methods'],
+    vary: res.headers.vary,
+    'content-length': res.headers['content-length']
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    vary: 'Access-Control-Request-Headers',
+    'content-length': '0'
   })
 })
 
-test('Should be able to override preflight response with a route', t => {
+test('Should be able to override preflight response with a route', async t => {
   t.plan(5)
 
   const fastify = Fastify()
-  fastify.register(cors, { preflightContinue: true })
+  await fastify.register(cors, { preflightContinue: true })
 
   fastify.options('/', (req, reply) => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'OPTIONS',
     url: '/',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.match(res.headers, {
-      // Only the base cors headers and no preflight headers
-      'access-control-allow-origin': '*'
-    })
-    t.notMatch(res.headers, { vary: 'Origin' })
   })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  const actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin']
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    // Only the base cors headers and no preflight headers
+    'access-control-allow-origin': '*'
+  })
+  t.assert.notStrictEqual(res.headers.vary, 'Origin')
 })
 
-test('Should reply to all options requests', t => {
+test('Should reply to all options requests', async t => {
   t.plan(4)
 
   const fastify = Fastify()
-  fastify.register(cors)
+  await fastify.register(cors)
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'OPTIONS',
     url: '/hello',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 204)
-    t.equal(res.payload, '')
-    t.match(res.headers, {
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers',
-      'content-length': '0'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.payload, '')
+  const actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-methods': res.headers['access-control-allow-methods'],
+    vary: res.headers.vary,
+    'content-length': res.headers['content-length']
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    vary: 'Access-Control-Request-Headers',
+    'content-length': '0'
   })
 })
 
-test('Should support a prefix for preflight requests', t => {
+test('Should support a prefix for preflight requests', async t => {
   t.plan(6)
 
   const fastify = Fastify()
-  fastify.register((instance, opts, next) => {
+  await fastify.register((instance, opts, next) => {
     instance.register(cors)
     next()
   }, { prefix: '/subsystem' })
 
-  fastify.inject({
+  let res = await fastify.inject({
     method: 'OPTIONS',
     url: '/hello'
-  }, (err, res) => {
-    t.error(err)
-    t.equal(res.statusCode, 404)
   })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 404)
 
-  fastify.inject({
+  res = await fastify.inject({
     method: 'OPTIONS',
     url: '/subsystem/hello',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 204)
-    t.equal(res.payload, '')
-    t.match(res.headers, {
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers',
-      'content-length': '0'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.payload, '')
+  const actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-methods': res.headers['access-control-allow-methods'],
+    vary: res.headers.vary,
+    'content-length': res.headers['content-length']
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    vary: 'Access-Control-Request-Headers',
+    'content-length': '0'
   })
 })
 
-test('hide options route by default', t => {
+test('hide options route by default', async t => {
   t.plan(2)
 
   const fastify = Fastify()
 
   fastify.addHook('onRoute', (route) => {
     if (route.method === 'OPTIONS' && route.url === '*') {
-      t.equal(route.schema.hide, true)
+      t.assert.strictEqual(route.schema.hide, true)
     }
   })
-  fastify.register(cors)
+  await fastify.register(cors)
 
-  fastify.ready(err => {
-    t.error(err)
-  })
+  const ready = await fastify.ready()
+  t.assert.ok(ready)
 })
 
-test('show options route', t => {
+test('show options route', async t => {
   t.plan(2)
 
   const fastify = Fastify()
 
   fastify.addHook('onRoute', (route) => {
     if (route.method === 'OPTIONS' && route.url === '*') {
-      t.equal(route.schema.hide, false)
+      t.assert.strictEqual(route.schema.hide, false)
     }
   })
-  fastify.register(cors, { hideOptionsRoute: false })
+  await fastify.register(cors, { hideOptionsRoute: false })
 
-  fastify.ready(err => {
-    t.error(err)
-  })
+  const ready = await fastify.ready()
+  t.assert.ok(ready)
 })
 
-test('Allow only request from with specific methods', t => {
+test('Allow only request from with specific methods', async t => {
   t.plan(4)
 
   const fastify = Fastify()
-  fastify.register(cors, { methods: ['GET', 'POST'] })
+  await fastify.register(cors, { methods: ['GET', 'POST'] })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'OPTIONS',
     url: '/',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 204)
-    t.match(res.headers, {
-      'access-control-allow-methods': 'GET, POST'
-    })
-    t.notMatch(res.headers, { vary: 'Origin' })
   })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 204)
+  const actualHeaders = {
+    'access-control-allow-methods': res.headers['access-control-allow-methods']
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-methods': 'GET, POST'
+  })
+  t.assert.notStrictEqual(res.headers.vary, 'Origin')
 })
 
-test('Should reply with 400 error to OPTIONS requests missing origin header when default strictPreflight', t => {
+test('Should reply with 400 error to OPTIONS requests missing origin header when default strictPreflight', async t => {
   t.plan(3)
 
   const fastify = Fastify()
-  fastify.register(cors)
+  await fastify.register(cors)
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'OPTIONS',
     url: '/',
     headers: {
       'access-control-request-method': 'GET'
     }
-  }, (err, res) => {
-    t.error(err)
-    t.equal(res.statusCode, 400)
-    t.equal(res.payload, 'Invalid Preflight Request')
   })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 400)
+  t.assert.strictEqual(res.payload, 'Invalid Preflight Request')
 })
 
-test('Should reply with 400 to OPTIONS requests when missing Access-Control-Request-Method header when default strictPreflight', t => {
+test('Should reply with 400 to OPTIONS requests when missing Access-Control-Request-Method header when default strictPreflight', async t => {
   t.plan(3)
 
   const fastify = Fastify()
-  fastify.register(cors, {
+  await fastify.register(cors, {
     strictPreflight: true
   })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'OPTIONS',
     url: '/',
     headers: {
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    t.equal(res.statusCode, 400)
-    t.equal(res.payload, 'Invalid Preflight Request')
   })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 400)
+  t.assert.strictEqual(res.payload, 'Invalid Preflight Request')
 })
 
-test('Should reply to all preflight requests when strictPreflight is disabled', t => {
+test('Should reply to all preflight requests when strictPreflight is disabled', async t => {
   t.plan(4)
 
   const fastify = Fastify()
-  fastify.register(cors, { strictPreflight: false })
+  await fastify.register(cors, { strictPreflight: false })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'OPTIONS',
     url: '/'
     // No access-control-request-method or origin headers
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 204)
-    t.equal(res.payload, '')
-    t.match(res.headers, {
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers',
-      'content-length': '0'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.payload, '')
+  const actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-methods': res.headers['access-control-allow-methods'],
+    vary: res.headers.vary,
+    'content-length': res.headers['content-length']
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    vary: 'Access-Control-Request-Headers',
+    'content-length': '0'
   })
 })
 
-test('Default empty 200 response with preflightContinue on OPTIONS routes', t => {
+test('Default empty 200 response with preflightContinue on OPTIONS routes', async t => {
   t.plan(4)
 
   const fastify = Fastify()
-  fastify.register(cors, { preflightContinue: true })
+  await fastify.register(cors, { preflightContinue: true })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'OPTIONS',
     url: '/doesnotexist',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, '')
-    t.match(res.headers, {
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, '')
+  const actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-methods': res.headers['access-control-allow-methods'],
+    vary: res.headers.vary
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    vary: 'Access-Control-Request-Headers'
   })
 })
 
-test('Can override preflight response with preflightContinue', t => {
+test('Can override preflight response with preflightContinue', async t => {
   t.plan(4)
 
   const fastify = Fastify()
-  fastify.register(cors, { preflightContinue: true })
+  await fastify.register(cors, { preflightContinue: true })
 
   fastify.options('/', (req, reply) => {
     reply.send('ok')
   })
 
-  fastify.inject({
+  const res = await fastify.inject({
     method: 'OPTIONS',
     url: '/',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 200)
-    t.equal(res.payload, 'ok')
-    t.match(res.headers, {
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  const actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-methods': res.headers['access-control-allow-methods'],
+    vary: res.headers.vary
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    vary: 'Access-Control-Request-Headers'
   })
 })
 
-test('Should support ongoing prefix ', t => {
+test('Should support ongoing prefix ', async t => {
   t.plan(12)
 
   const fastify = Fastify()
 
-  fastify.register(async (instance) => {
+  await fastify.register(async (instance) => {
     instance.register(cors)
   }, { prefix: '/prefix' })
 
   // support prefixed route
-  fastify.inject({
+  let res = await fastify.inject({
     method: 'OPTIONS',
     url: '/prefix',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 204)
-    t.equal(res.payload, '')
-    t.match(res.headers, {
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers',
-      'content-length': '0'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.payload, '')
+  let actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-methods': res.headers['access-control-allow-methods'],
+    vary: res.headers.vary,
+    'content-length': res.headers['content-length']
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    vary: 'Access-Control-Request-Headers',
+    'content-length': '0'
   })
 
   // support prefixed route without / continue
-  fastify.inject({
+  res = await fastify.inject({
     method: 'OPTIONS',
     url: '/prefixfoo',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 204)
-    t.equal(res.payload, '')
-    t.match(res.headers, {
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers',
-      'content-length': '0'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.payload, '')
+  actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-methods': res.headers['access-control-allow-methods'],
+    vary: res.headers.vary,
+    'content-length': res.headers['content-length']
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    vary: 'Access-Control-Request-Headers',
+    'content-length': '0'
   })
 
   // support prefixed route with / continue
-  fastify.inject({
+  res = await fastify.inject({
     method: 'OPTIONS',
     url: '/prefix/foo',
     headers: {
       'access-control-request-method': 'GET',
       origin: 'example.com'
     }
-  }, (err, res) => {
-    t.error(err)
-    delete res.headers.date
-    t.equal(res.statusCode, 204)
-    t.equal(res.payload, '')
-    t.match(res.headers, {
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      vary: 'Access-Control-Request-Headers',
-      'content-length': '0'
-    })
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.payload, '')
+  actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-methods': res.headers['access-control-allow-methods'],
+    vary: res.headers.vary,
+    'content-length': res.headers['content-length']
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    vary: 'Access-Control-Request-Headers',
+    'content-length': '0'
   })
 })
