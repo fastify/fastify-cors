@@ -1,17 +1,17 @@
 /// <reference types="node" />
 
-import { FastifyInstance, FastifyPluginCallback, FastifyRequest } from 'fastify';
+import { FastifyInstance, FastifyPluginCallback, FastifyRequest } from 'fastify'
 
-type OriginCallback = (err: Error | null, origin: ValueOrArray<OriginType>) => void;
-type OriginType = string | boolean | RegExp;
-type ValueOrArray<T> = T | ArrayOfValueOrArray<T>;
+type OriginCallback = (err: Error | null, origin: ValueOrArray<OriginType>) => void
+type OriginType = string | boolean | RegExp
+type ValueOrArray<T> = T | ArrayOfValueOrArray<T>
 
 interface ArrayOfValueOrArray<T> extends Array<ValueOrArray<T>> {
 }
 
 type FastifyCorsPlugin = FastifyPluginCallback<
   NonNullable<fastifyCors.FastifyCorsOptions> | fastifyCors.FastifyCorsOptionsDelegate
->;
+>
 
 type FastifyCorsHook =
   | 'onRequest'
@@ -22,8 +22,8 @@ type FastifyCorsHook =
   | 'onSend'
 
 declare namespace fastifyCors {
-  export type OriginFunction = (origin: string | undefined, callback: OriginCallback) => void;
-  export type AsyncOriginFunction = (origin: string | undefined) => Promise<ValueOrArray<OriginType>>;
+  export type OriginFunction = (origin: string | undefined, callback: OriginCallback) => void
+  export type AsyncOriginFunction = (origin: string | undefined) => Promise<ValueOrArray<OriginType>>
 
   export interface FastifyCorsOptions {
     /**
@@ -102,16 +102,16 @@ declare namespace fastifyCors {
   }
 
   export interface FastifyCorsOptionsDelegateCallback { (req: FastifyRequest, cb: (error: Error | null, corsOptions?: FastifyCorsOptions) => void): void }
-  export interface FastifyCorsOptionsDelegatePromise { (req: FastifyRequest):  Promise<FastifyCorsOptions> }
+  export interface FastifyCorsOptionsDelegatePromise { (req: FastifyRequest): Promise<FastifyCorsOptions> }
   export type FastifyCorsOptionsDelegate = FastifyCorsOptionsDelegateCallback | FastifyCorsOptionsDelegatePromise
-  export type FastifyPluginOptionsDelegate<T = FastifyCorsOptionsDelegate> = (instance: FastifyInstance) => T;
+  export type FastifyPluginOptionsDelegate<T = FastifyCorsOptionsDelegate> = (instance: FastifyInstance) => T
 
   export const fastifyCors: FastifyCorsPlugin
-  export { fastifyCors as default };
+  export { fastifyCors as default }
 }
 
-declare function fastifyCors(
+declare function fastifyCors (
   ...params: Parameters<FastifyCorsPlugin>
-): ReturnType<FastifyCorsPlugin>;
+): ReturnType<FastifyCorsPlugin>
 
-export = fastifyCors;
+export = fastifyCors

@@ -120,9 +120,9 @@ app.register(fastifyCors, {
 
 const asyncCorsDelegate: OriginFunction = async (origin) => {
   if (origin === undefined || /localhost/.test(origin)) {
-    return true;
+    return true
   }
-  return false;
+  return false
 }
 
 app.register(fastifyCors, {
@@ -371,15 +371,15 @@ appHttp2.register(fastifyCors, delegate)
 appHttp2.register(fastifyCors, {
   hook: 'preParsing',
   origin: function (origin, cb) {
-    expectType<string|undefined>(origin)
+    expectType<string | undefined>(origin)
     cb(null, false)
   },
 })
 
-const asyncOriginFn: AsyncOriginFunction = async function (origin): Promise<boolean>  {
-  expectType<string|undefined>(origin)
-  return false;
-};
+const asyncOriginFn: AsyncOriginFunction = async function (origin): Promise<boolean> {
+  expectType<string | undefined>(origin)
+  return false
+}
 
 appHttp2.register(fastifyCors, {
   hook: 'preParsing',

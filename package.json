@@ -6,8 +6,8 @@
   "type": "commonjs",
   "types": "types/index.d.ts",
   "scripts": {
-    "lint": "standard",
-    "lint:fix": "standard --fix",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "test": "npm run test:unit && npm run test:typescript",
     "test:typescript": "tsd",
     "test:unit": "c8 --100 node --test"
@@ -32,12 +32,10 @@
   "devDependencies": {
     "@fastify/pre-commit": "^2.1.0",
     "@types/node": "^22.0.0",
-    "@typescript-eslint/eslint-plugin": "^7.3.1",
-    "@typescript-eslint/parser": "^7.3.1",
     "c8": "^10.1.2",
     "cors": "^2.8.5",
     "fastify": "^5.0.0",
-    "standard": "^17.1.0",
+    "neostandard": "^0.11.9",
     "tsd": "^0.31.1",
     "typescript": "~5.7.2"
   },
