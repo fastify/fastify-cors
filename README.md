@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/fastify/fastify-cors/workflows/CI/badge.svg)
 [![NPM version](https://img.shields.io/npm/v/@fastify/cors.svg?style=flat)](https://www.npmjs.com/package/@fastify/cors)
-[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://standardjs.com/)
+[![neostandard javascript style](https://img.shields.io/badge/code_style-neostandard-brightgreen?style=flat)](https://github.com/neostandard/neostandard)
 
 
 `@fastify/cors` enables the use of [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) in a Fastify application.
