@@ -4,7 +4,6 @@
 [![NPM version](https://img.shields.io/npm/v/@fastify/cors.svg?style=flat)](https://www.npmjs.com/package/@fastify/cors)
 [![neostandard javascript style](https://img.shields.io/badge/code_style-neostandard-brightgreen?style=flat)](https://github.com/neostandard/neostandard)
 
-
 `@fastify/cors` enables the use of [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) in a Fastify application.
 
 ## Install
