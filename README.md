@@ -1,6 +1,6 @@
 # @fastify/cors
 
-![CI](https://github.com/fastify/fastify-cors/workflows/CI/badge.svg)
+![CI](https://github.com/fastify/fastify-cors/workflows/CI/badge.svg?branch=master)
 [![NPM version](https://img.shields.io/npm/v/@fastify/cors.svg?style=flat)](https://www.npmjs.com/package/@fastify/cors)
 [![neostandard javascript style](https://img.shields.io/badge/code_style-neostandard-brightgreen?style=flat)](https://github.com/neostandard/neostandard)
 
