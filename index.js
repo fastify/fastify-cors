@@ -171,6 +171,11 @@ function addCorsHeadersHandler (fastify, options, req, reply, next) {
       return next()
     }
 
+    // Allow routes to disable CORS individually
+    if (req.routeOptions.config?.cors === false) {
+      return next()
+    }
+
     // Falsy values are invalid
     if (!resolvedOriginOption) {
       return next(new Error('Invalid CORS origin option'))
