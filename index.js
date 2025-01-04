@@ -86,7 +86,7 @@ function fastifyCors (fastify, opts, next) {
 }
 
 function handleCorsOptionsDelegator (optionsResolver, fastify, opts, next) {
-  const hook = (opts && opts.hook) || defaultOptions.hook
+  const hook = opts?.hook || defaultOptions.hook
   validateHook(hook, next)
   if (optionsResolver.length === 2) {
     if (hookWithPayload.indexOf(hook) !== -1) {
