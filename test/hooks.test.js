@@ -27,7 +27,7 @@ test('Should set hook onRequest if hook option is not set', async (t) => {
 
   fastify.register(cors)
 
-  fastify.addHook('onResponse', (request, reply, done) => {
+  fastify.addHook('onResponse', (request, _reply, done) => {
     t.assert.strictEqual(request[kFastifyContext].onError, null)
     t.assert.strictEqual(request[kFastifyContext].onRequest.length, 1)
     t.assert.strictEqual(request[kFastifyContext].onSend, null)
@@ -38,7 +38,7 @@ test('Should set hook onRequest if hook option is not set', async (t) => {
     done()
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -68,7 +68,7 @@ test('Should set hook onRequest if hook option is set to onRequest', async (t) =
     hook: 'onRequest'
   })
 
-  fastify.addHook('onResponse', (request, reply, done) => {
+  fastify.addHook('onResponse', (request, _reply, done) => {
     t.assert.strictEqual(request[kFastifyContext].onError, null)
     t.assert.strictEqual(request[kFastifyContext].onRequest.length, 1)
     t.assert.strictEqual(request[kFastifyContext].onSend, null)
@@ -79,7 +79,7 @@ test('Should set hook onRequest if hook option is set to onRequest', async (t) =
     done()
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -109,7 +109,7 @@ test('Should set hook preParsing if hook option is set to preParsing', async (t)
     hook: 'preParsing'
   })
 
-  fastify.addHook('onResponse', (request, reply, done) => {
+  fastify.addHook('onResponse', (request, _reply, done) => {
     t.assert.strictEqual(request[kFastifyContext].onError, null)
     t.assert.strictEqual(request[kFastifyContext].onRequest, null)
     t.assert.strictEqual(request[kFastifyContext].onSend, null)
@@ -120,7 +120,7 @@ test('Should set hook preParsing if hook option is set to preParsing', async (t)
     done()
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -151,7 +151,7 @@ test('Should set hook preValidation if hook option is set to preValidation', asy
     hook: 'preValidation'
   })
 
-  fastify.addHook('onResponse', (request, reply, done) => {
+  fastify.addHook('onResponse', (request, _reply, done) => {
     t.assert.strictEqual(request[kFastifyContext].onError, null)
     t.assert.strictEqual(request[kFastifyContext].onRequest, null)
     t.assert.strictEqual(request[kFastifyContext].onSend, null)
@@ -162,7 +162,7 @@ test('Should set hook preValidation if hook option is set to preValidation', asy
     done()
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -193,7 +193,7 @@ test('Should set hook preParsing if hook option is set to preParsing', async (t)
     hook: 'preParsing'
   })
 
-  fastify.addHook('onResponse', (request, reply, done) => {
+  fastify.addHook('onResponse', (request, _reply, done) => {
     t.assert.strictEqual(request[kFastifyContext].onError, null)
     t.assert.strictEqual(request[kFastifyContext].onRequest, null)
     t.assert.strictEqual(request[kFastifyContext].onSend, null)
@@ -204,7 +204,7 @@ test('Should set hook preParsing if hook option is set to preParsing', async (t)
     done()
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -235,7 +235,7 @@ test('Should set hook preHandler if hook option is set to preHandler', async (t)
     hook: 'preHandler'
   })
 
-  fastify.addHook('onResponse', (request, reply, done) => {
+  fastify.addHook('onResponse', (request, _reply, done) => {
     t.assert.strictEqual(request[kFastifyContext].onError, null)
     t.assert.strictEqual(request[kFastifyContext].onRequest, null)
     t.assert.strictEqual(request[kFastifyContext].onSend, null)
@@ -246,7 +246,7 @@ test('Should set hook preHandler if hook option is set to preHandler', async (t)
     done()
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -277,7 +277,7 @@ test('Should set hook onSend if hook option is set to onSend', async (t) => {
     hook: 'onSend'
   })
 
-  fastify.addHook('onResponse', (request, reply, done) => {
+  fastify.addHook('onResponse', (request, _reply, done) => {
     t.assert.strictEqual(request[kFastifyContext].onError, null)
     t.assert.strictEqual(request[kFastifyContext].onRequest, null)
     t.assert.strictEqual(request[kFastifyContext].onSend.length, 1)
@@ -288,7 +288,7 @@ test('Should set hook onSend if hook option is set to onSend', async (t) => {
     done()
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -319,7 +319,7 @@ test('Should set hook preSerialization if hook option is set to preSerialization
     hook: 'preSerialization'
   })
 
-  fastify.addHook('onResponse', (request, reply, done) => {
+  fastify.addHook('onResponse', (request, _reply, done) => {
     t.assert.strictEqual(request[kFastifyContext].onError, null)
     t.assert.strictEqual(request[kFastifyContext].onRequest, null)
     t.assert.strictEqual(request[kFastifyContext].onSend, null)
@@ -330,7 +330,7 @@ test('Should set hook preSerialization if hook option is set to preSerialization
     done()
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send({ nonString: true })
   })
 
@@ -391,7 +391,7 @@ test('Should support custom hook with dynamic config', async t => {
     delegator: configDelegation
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -502,7 +502,7 @@ test('Should support custom hook with dynamic config (callback)', async t => {
     delegator: configDelegation
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -618,7 +618,7 @@ test('Should support custom hook with dynamic config (Promise)', async t => {
     delegator: configDelegation
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -704,7 +704,7 @@ test('Should support custom hook with dynamic config (Promise), but should error
     delegator: configDelegation
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -751,7 +751,7 @@ test('Should support custom hook with dynamic config (Promise), but should error
     delegator: configDelegation
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
