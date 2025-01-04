@@ -9,10 +9,10 @@ test('Should set * even if we set a specific field', async t => {
 
   const addOriginToVary = createAddFieldnameToVary('Origin')
   const replyMock = {
-    getHeader (name) {
+    getHeader () {
       return '*'
     },
-    header (name, value) {
+    header () {
       t.fail('Should not be here')
     }
   }
@@ -26,7 +26,7 @@ test('Should set * even if we set a specific field', t => {
 
   const addWildcardToVary = createAddFieldnameToVary('*')
   const replyMock = {
-    getHeader (name) {
+    getHeader () {
       return 'Origin'
     },
     header (name, value) {
@@ -43,7 +43,7 @@ test('Should set * when field contains a *', t => {
 
   const addOriginToVary = createAddFieldnameToVary('Origin')
   const replyMock = {
-    getHeader (name) {
+    getHeader () {
       return ['Origin', '*', 'Access-Control-Request-Headers']
     },
     header (name, value) {
@@ -61,7 +61,7 @@ test('Should concat vary values', t => {
 
   const addOriginToVary = createAddFieldnameToVary('Origin')
   const replyMock = {
-    getHeader (name) {
+    getHeader () {
       return 'Access-Control-Request-Headers'
     },
     header (name, value) {
@@ -79,7 +79,7 @@ test('Should concat vary values ignoring consecutive commas', t => {
 
   const addOriginToVary = createAddFieldnameToVary('Origin')
   const replyMock = {
-    getHeader (name) {
+    getHeader () {
       return ' Access-Control-Request-Headers,Access-Control-Request-Method'
     },
     header (name, value) {
@@ -97,7 +97,7 @@ test('Should concat vary values ignoring whitespace', t => {
 
   const addOriginToVary = createAddFieldnameToVary('Origin')
   const replyMock = {
-    getHeader (name) {
+    getHeader () {
       return ' Access-Control-Request-Headers ,Access-Control-Request-Method'
     },
     header (name, value) {
@@ -115,7 +115,7 @@ test('Should set the field as value for vary if no vary is defined', t => {
 
   const addOriginToVary = createAddFieldnameToVary('Origin')
   const replyMock = {
-    getHeader (name) {
+    getHeader () {
       return undefined
     },
     header (name, value) {
@@ -132,7 +132,7 @@ test('Should set * as value for vary if vary contains *', t => {
 
   const addOriginToVary = createAddFieldnameToVary('Origin')
   const replyMock = {
-    getHeader (name) {
+    getHeader () {
       return 'Accept,*'
     },
     header (name, value) {
@@ -149,7 +149,7 @@ test('Should set Accept-Encoding as value for vary if vary is empty string', t =
 
   const addAcceptEncodingToVary = createAddFieldnameToVary('Accept-Encoding')
   const replyMock = {
-    getHeader (name) {
+    getHeader () {
       return ''
     },
     header (name, value) {
@@ -167,7 +167,7 @@ test('Should have no issues with values containing dashes', t => {
   const addXFooToVary = createAddFieldnameToVary('X-Foo')
   const replyMock = {
     value: 'Accept-Encoding',
-    getHeader (name) {
+    getHeader () {
       return this.value
     },
     header (name, value) {
@@ -186,10 +186,10 @@ test('Should ignore the header as value for vary if it is already in vary', t =>
 
   const addOriginToVary = createAddFieldnameToVary('Origin')
   const replyMock = {
-    getHeader (name) {
+    getHeader () {
       return 'Origin'
     },
-    header (name, value) {
+    header () {
       t.fail('Should not be here')
     }
   }

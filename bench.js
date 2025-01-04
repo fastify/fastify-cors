@@ -2,15 +2,15 @@
 
 const fastify = require('fastify')()
 
-fastify.register((instance, opts, next) => {
+fastify.register((instance, _opts, next) => {
   instance.register(require('./index'))
-  instance.get('/fastify', (req, reply) => reply.send('ok'))
+  instance.get('/fastify', (_req, reply) => reply.send('ok'))
   next()
 })
 
-fastify.register((instance, opts, next) => {
+fastify.register((instance, _opts, next) => {
   instance.use(require('cors')())
-  instance.get('/express', (req, reply) => reply.send('ok'))
+  instance.get('/express', (_req, reply) => reply.send('ok'))
   next()
 })
 

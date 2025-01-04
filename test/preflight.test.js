@@ -110,7 +110,7 @@ test('Should be able to override preflight response with a route', async t => {
   const fastify = Fastify()
   await fastify.register(cors, { preflightContinue: true })
 
-  fastify.options('/', (req, reply) => {
+  fastify.options('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -172,7 +172,7 @@ test('Should support a prefix for preflight requests', async t => {
   t.plan(6)
 
   const fastify = Fastify()
-  await fastify.register((instance, opts, next) => {
+  await fastify.register((instance, _opts, next) => {
     instance.register(cors)
     next()
   }, { prefix: '/subsystem' })
@@ -371,7 +371,7 @@ test('Can override preflight response with preflightContinue', async t => {
   const fastify = Fastify()
   await fastify.register(cors, { preflightContinue: true })
 
-  fastify.options('/', (req, reply) => {
+  fastify.options('/', (_req, reply) => {
     reply.send('ok')
   })
 

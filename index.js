@@ -56,7 +56,7 @@ function fastifyCors (fastify, opts, next) {
     const corsOptions = normalizeCorsOptions(opts)
     validateHook(corsOptions.hook, next)
     if (hookWithPayload.indexOf(corsOptions.hook) !== -1) {
-      fastify.addHook(corsOptions.hook, function handleCors (req, reply, payload, next) {
+      fastify.addHook(corsOptions.hook, function handleCors (req, reply, _payload, next) {
         addCorsHeadersHandler(fastify, corsOptions, req, reply, next)
       })
     } else {
@@ -90,7 +90,7 @@ function handleCorsOptionsDelegator (optionsResolver, fastify, opts, next) {
   validateHook(hook, next)
   if (optionsResolver.length === 2) {
     if (hookWithPayload.indexOf(hook) !== -1) {
-      fastify.addHook(hook, function handleCors (req, reply, payload, next) {
+      fastify.addHook(hook, function handleCors (req, reply, _payload, next) {
         handleCorsOptionsCallbackDelegator(optionsResolver, fastify, req, reply, next)
       })
     } else {
@@ -101,7 +101,7 @@ function handleCorsOptionsDelegator (optionsResolver, fastify, opts, next) {
   } else {
     if (hookWithPayload.indexOf(hook) !== -1) {
       // handle delegator based on Promise
-      fastify.addHook(hook, function handleCors (req, reply, payload, next) {
+      fastify.addHook(hook, function handleCors (req, reply, _payload, next) {
         const ret = optionsResolver(req)
         if (ret && typeof ret.then === 'function') {
           ret.then(options => addCorsHeadersHandler(fastify, normalizeCorsOptions(options, true), req, reply, next)).catch(next)

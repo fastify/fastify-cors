@@ -139,15 +139,15 @@ app.register(fastifyCors, {
 })
 
 app.register(fastifyCors, {
-  origin: (origin, cb) => cb(null, true)
+  origin: (_origin, cb) => cb(null, true)
 })
 
 app.register(fastifyCors, {
-  origin: (origin, cb) => cb(null, '*')
+  origin: (_origin, cb) => cb(null, '*')
 })
 
 app.register(fastifyCors, {
-  origin: (origin, cb) => cb(null, /\*/)
+  origin: (_origin, cb) => cb(null, /\*/)
 })
 
 const appHttp2 = fastify({ http2: true })
@@ -258,7 +258,7 @@ appHttp2.register(fastifyCors, {
   strictPreflight: false
 })
 
-appHttp2.register(fastifyCors, (): FastifyCorsOptionsDelegate => (req, cb) => {
+appHttp2.register(fastifyCors, (): FastifyCorsOptionsDelegate => (_req, cb) => {
   cb(null, {
     origin: [/\*/, /something/],
     allowedHeaders: ['authorization', 'content-type'],
@@ -274,7 +274,7 @@ appHttp2.register(fastifyCors, (): FastifyCorsOptionsDelegate => (req, cb) => {
   })
 })
 
-appHttp2.register(fastifyCors, (): FastifyCorsOptionsDelegatePromise => (req) => {
+appHttp2.register(fastifyCors, (): FastifyCorsOptionsDelegatePromise => () => {
   return Promise.resolve({
     origin: [/\*/, /something/],
     allowedHeaders: ['authorization', 'content-type'],
@@ -290,7 +290,7 @@ appHttp2.register(fastifyCors, (): FastifyCorsOptionsDelegatePromise => (req) =>
   })
 })
 
-const delegate: FastifyPluginOptionsDelegate<FastifyCorsOptionsDelegatePromise> = () => async (req) => {
+const delegate: FastifyPluginOptionsDelegate<FastifyCorsOptionsDelegatePromise> = () => async () => {
   return {
     origin: [/\*/, /something/],
     allowedHeaders: ['authorization', 'content-type'],
@@ -349,7 +349,7 @@ appHttp2.register(fastifyCors, {
 
 appHttp2.register(fastifyCors, {
   hook: 'preParsing',
-  delegator: async (req: FastifyRequest): Promise<FastifyCorsOptions> => {
+  delegator: async (_req: FastifyRequest): Promise<FastifyCorsOptions> => {
     return {
       origin: [/\*/, /something/],
       allowedHeaders: ['authorization', 'content-type'],

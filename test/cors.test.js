@@ -13,7 +13,7 @@ test('Should add cors headers', async t => {
   const fastify = Fastify()
   fastify.register(cors)
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -38,7 +38,7 @@ test('Should add cors headers when payload is a stream', async t => {
   fastify.register(cors)
   const filePath = resolve(__dirname, __filename)
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     const stream = createReadStream(filePath)
     reply
       .type('application/json')
@@ -81,7 +81,7 @@ test('Should add cors headers (custom values)', async t => {
     cacheControl: 321
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -181,7 +181,7 @@ test('Should support dynamic config (callback)', async t => {
   }
   await fastify.register(cors, () => configDelegation)
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -305,7 +305,7 @@ test('Should support dynamic config (Promise)', async t => {
   }
   await fastify.register(cors, () => configDelegation)
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -417,9 +417,9 @@ test('Should support dynamic config. (Invalid function)', async t => {
   t.plan(2)
 
   const fastify = Fastify()
-  fastify.register(cors, () => (a, b, c) => {})
+  fastify.register(cors, () => () => {})
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -446,7 +446,7 @@ test('Dynamic origin resolution (valid origin)', async t => {
   }
   fastify.register(cors, { origin })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -479,7 +479,7 @@ test('Dynamic origin resolution (not valid origin)', async t => {
   }
   fastify.register(cors, { origin })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -548,15 +548,15 @@ test('Dynamic origin resolution (valid origin - promises)', async t => {
   t.plan(5)
 
   const fastify = Fastify()
-  const origin = (header, cb) => {
-    return new Promise((resolve, reject) => {
+  const origin = (header) => {
+    return new Promise((resolve) => {
       t.assert.strictEqual(header, 'example.com')
       resolve(true)
     })
   }
   fastify.register(cors, { origin })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -583,15 +583,15 @@ test('Dynamic origin resolution (not valid origin - promises)', async t => {
   t.plan(5)
 
   const fastify = Fastify()
-  const origin = (header, cb) => {
-    return new Promise((resolve, reject) => {
+  const origin = (header) => {
+    return new Promise((resolve) => {
       t.assert.strictEqual(header, 'example.com')
       resolve(false)
     })
   }
   fastify.register(cors, { origin })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -622,8 +622,8 @@ test('Dynamic origin resolution (errored - promises)', async t => {
   t.plan(3)
 
   const fastify = Fastify()
-  const origin = (header, cb) => {
-    return new Promise((resolve, reject) => {
+  const origin = (header) => {
+    return new Promise((_resolve, reject) => {
       t.assert.strictEqual(header, 'example.com')
       reject(new Error('ouch'))
     })
@@ -652,7 +652,7 @@ test('Should reply 404 without cors headers when origin is false', async t => {
     maxAge: 123
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -723,7 +723,7 @@ test('Allow only request from a specific origin', async t => {
   const fastify = Fastify()
   fastify.register(cors, { origin: 'other.io' })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -748,7 +748,7 @@ test('Allow only request from multiple specific origin', async t => {
   const fastify = Fastify()
   fastify.register(cors, { origin: ['other.io', 'example.com'] })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -791,7 +791,7 @@ test('Allow only request from a specific origin using regex', async t => {
   const fastify = Fastify()
   fastify.register(cors, { origin: /(?:example|other)\.com/giu })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -825,7 +825,7 @@ test('Disable preflight', async t => {
   const fastify = Fastify()
   fastify.register(cors, { preflight: false })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -859,7 +859,7 @@ test('Should always add vary header to `Origin` for reflected origin', async t =
   const fastify = Fastify()
   fastify.register(cors, { origin: true })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -913,11 +913,11 @@ test('Should always add vary header to `Origin` for reflected origin (vary is ar
   const fastify = Fastify()
 
   // Mock getHeader function
-  fastify.decorateReply('getHeader', (name) => ['foo', 'bar'])
+  fastify.decorateReply('getHeader', () => ['foo', 'bar'])
 
   fastify.register(cors, { origin: true })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -943,7 +943,7 @@ test('Allow only request from with specific headers', async t => {
     exposedHeaders: 'bar'
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -982,7 +982,7 @@ test('Should support wildcard config /1', async t => {
   const fastify = Fastify()
   fastify.register(cors, { origin: '*' })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
@@ -1002,7 +1002,7 @@ test('Should support wildcard config /2', async t => {
   const fastify = Fastify()
   fastify.register(cors, { origin: ['*'] })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send('ok')
   })
 
