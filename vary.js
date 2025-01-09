@@ -42,7 +42,7 @@ function parse (header) {
     let char
 
     // tokenize the header
-    for (i = 0; i < il; ++i) {
+    for (i; i < il; ++i) {
       char = header[i]
       // when we have whitespace set the pos to the next position
       if (char === ' ') {
