@@ -64,7 +64,7 @@ You can use it as is without passing any option or you can configure it as expla
   }
   ```
 * `methods`: Configures the **Access-Control-Allow-Methods** CORS header. Expects a comma-delimited string (e.g., 'GET,PUT,POST') or an array (e.g., `['GET', 'PUT', 'POST']`). Default: `GET,HEAD,PUT,PATCH,POST,DELETE`.
-* `hook`: See the section `Custom Fastify hook name`. Default: `onRequest`.
+* `hook`: See [Custom Fastify hook name](#custom-fastify-hook-name). Default: `onRequest`.
 * `allowedHeaders`: Configures the **Access-Control-Allow-Headers** CORS header. Expects a comma-delimited string (e.g., `'Content-Type,Authorization'`) or an array (e.g., `['Content-Type', 'Authorization']`). Defaults to reflecting the headers specified in the request's **Access-Control-Request-Headers** header if not specified.
 * `exposedHeaders`: Configures the **Access-Control-Expose-Headers** CORS header. Expects a comma-delimited string (e.g., `'Content-Range,X-Content-Range'`) or an array (e.g., `['Content-Range', 'X-Content-Range']`). No custom headers are exposed if not specified.
 * `credentials`: Configures the **Access-Control-Allow-Credentials** CORS header. Set to `true` to pass the header; otherwise, it is omitted.
