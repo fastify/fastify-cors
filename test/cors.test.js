@@ -789,7 +789,7 @@ test('Allow only request from a specific origin using regex', async t => {
   t.plan(8)
 
   const fastify = Fastify()
-  fastify.register(cors, { origin: /(?:example|other)\.com/giu })
+  fastify.register(cors, { origin: /(?:example|other)\.com\/?$/giu })
 
   fastify.get('/', (_req, reply) => {
     reply.send('ok')
