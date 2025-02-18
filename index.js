@@ -8,7 +8,7 @@ const {
 
 const defaultOptions = {
   origin: '*',
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  methods: 'GET,HEAD,PUT',
   hook: 'onRequest',
   preflightContinue: false,
   optionsSuccessStatus: 204,
