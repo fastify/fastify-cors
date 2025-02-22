@@ -30,7 +30,7 @@ test('Should reply to preflight requests', async t => {
   }
   t.assert.deepStrictEqual(actualHeaders, {
     'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    'access-control-allow-methods': 'GET,HEAD,POST',
     vary: 'Access-Control-Request-Headers',
     'content-length': '0'
   })
@@ -65,7 +65,7 @@ test('Should add access-control-allow-headers to response if preflight req has a
   }
   t.assert.deepStrictEqual(actualHeaders, {
     'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    'access-control-allow-methods': 'GET,HEAD,POST',
     'access-control-allow-headers': 'x-requested-with',
     vary: 'Access-Control-Request-Headers',
     'content-length': '0'
@@ -98,7 +98,7 @@ test('Should reply to preflight requests with custom status code', async t => {
   }
   t.assert.deepStrictEqual(actualHeaders, {
     'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    'access-control-allow-methods': 'GET,HEAD,POST',
     vary: 'Access-Control-Request-Headers',
     'content-length': '0'
   })
@@ -162,7 +162,7 @@ test('Should reply to all options requests', async t => {
   }
   t.assert.deepStrictEqual(actualHeaders, {
     'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    'access-control-allow-methods': 'GET,HEAD,POST',
     vary: 'Access-Control-Request-Headers',
     'content-length': '0'
   })
@@ -204,7 +204,7 @@ test('Should support a prefix for preflight requests', async t => {
   }
   t.assert.deepStrictEqual(actualHeaders, {
     'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    'access-control-allow-methods': 'GET,HEAD,POST',
     vary: 'Access-Control-Request-Headers',
     'content-length': '0'
   })
@@ -329,7 +329,7 @@ test('Should reply to all preflight requests when strictPreflight is disabled', 
   }
   t.assert.deepStrictEqual(actualHeaders, {
     'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    'access-control-allow-methods': 'GET,HEAD,POST',
     vary: 'Access-Control-Request-Headers',
     'content-length': '0'
   })
@@ -360,7 +360,7 @@ test('Default empty 200 response with preflightContinue on OPTIONS routes', asyn
   }
   t.assert.deepStrictEqual(actualHeaders, {
     'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    'access-control-allow-methods': 'GET,HEAD,POST',
     vary: 'Access-Control-Request-Headers'
   })
 })
@@ -394,7 +394,7 @@ test('Can override preflight response with preflightContinue', async t => {
   }
   t.assert.deepStrictEqual(actualHeaders, {
     'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    'access-control-allow-methods': 'GET,HEAD,POST',
     vary: 'Access-Control-Request-Headers'
   })
 })
@@ -429,7 +429,7 @@ test('Should support ongoing prefix ', async t => {
   }
   t.assert.deepStrictEqual(actualHeaders, {
     'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    'access-control-allow-methods': 'GET,HEAD,POST',
     vary: 'Access-Control-Request-Headers',
     'content-length': '0'
   })
@@ -455,7 +455,7 @@ test('Should support ongoing prefix ', async t => {
   }
   t.assert.deepStrictEqual(actualHeaders, {
     'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    'access-control-allow-methods': 'GET,HEAD,POST',
     vary: 'Access-Control-Request-Headers',
     'content-length': '0'
   })
@@ -481,7 +481,7 @@ test('Should support ongoing prefix ', async t => {
   }
   t.assert.deepStrictEqual(actualHeaders, {
     'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    'access-control-allow-methods': 'GET,HEAD,POST',
     vary: 'Access-Control-Request-Headers',
     'content-length': '0'
   })
