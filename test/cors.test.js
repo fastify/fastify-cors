@@ -1015,3 +1015,38 @@ test('Should support wildcard config /2', async t => {
   t.assert.strictEqual(res.payload, 'ok')
   t.assert.strictEqual(res.headers['access-control-allow-origin'], '*')
 })
+
+test('Should allow routes to disable CORS individually', async t => {
+  t.plan(6)
+
+  const fastify = Fastify()
+  fastify.register(cors, { origin: '*' })
+
+  fastify.get('/cors-enabled', (_req, reply) => {
+    reply.send('ok')
+  })
+
+  fastify.get('/cors-disabled', { config: { cors: false } }, (_req, reply) => {
+    reply.send('ok')
+  })
+
+  // Test CORS enabled route
+  let res = await fastify.inject({
+    method: 'GET',
+    url: '/cors-enabled',
+    headers: { origin: 'example.com' }
+  })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.headers['access-control-allow-origin'], '*')
+
+  // Test CORS disabled route
+  res = await fastify.inject({
+    method: 'GET',
+    url: '/cors-disabled',
+    headers: { origin: 'example.com' }
+  })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.headers['access-control-allow-origin'], undefined)
+})

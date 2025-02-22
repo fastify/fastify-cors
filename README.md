@@ -112,6 +112,26 @@ fastify.register(async function (fastify) {
 fastify.listen({ port: 3000 })
 ```
 
+### Disabling CORS for a specific route
+
+CORS can be disabled at the route level by setting the `cors` option to `false`.
+
+```js
+const fastify = require('fastify')()
+
+fastify.register(require('@fastify/cors'), { origin: '*' })
+
+fastify.get('/cors-enabled', (_req, reply) => {
+  reply.send('CORS headers')
+})
+
+fastify.get('/cors-disabled', { cors: false }, (_req, reply) => {
+  reply.send('No CORS headers')
+})
+
+fastify.listen({ port: 3000 })
+```
+
 ### Custom Fastify hook name
 
 By default, `@fastify/cors` adds an `onRequest` hook for validation and header injection. This can be customized by passing `hook` in the options. Valid values are `onRequest`, `preParsing`, `preValidation`, `preHandler`, `preSerialization`, and `onSend`.
