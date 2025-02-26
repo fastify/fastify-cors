@@ -1,8 +1,8 @@
 'use strict'
 
 const { test } = require('node:test')
-const createAddFieldnameToVary = require('../vary').createAddFieldnameToVary
-const parse = require('../vary').parse
+const { createAddFieldnameToVary } = require('../vary')
+const { parse } = require('../vary')
 
 test('Should set * even if we set a specific field', async t => {
   t.plan(1)
