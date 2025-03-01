@@ -63,7 +63,7 @@ You can use it as is without passing any option or you can configure it as expla
     cb(new Error("Not allowed"), false)
   }
   ```
-* `methods`: Configures the **Access-Control-Allow-Methods** CORS header. Expects a comma-delimited string (e.g., 'GET,PUT,POST') or an array (e.g., `['GET', 'PUT', 'POST']`). Default: [CORS-safelisted methods](https://fetch.spec.whatwg.org/#methods) `GET,HEAD,PUT`.
+* `methods`: Configures the **Access-Control-Allow-Methods** CORS header. Expects a comma-delimited string (e.g., 'GET,HEAD,POST') or an array (e.g., `['GET', 'HEAD', 'POST']`). Default: [CORS-safelisted methods](https://fetch.spec.whatwg.org/#methods) `GET,HEAD,POST`.
 * `hook`: See [Custom Fastify hook name](#custom-fastify-hook-name). Default: `onRequest`.
 * `allowedHeaders`: Configures the **Access-Control-Allow-Headers** CORS header. Expects a comma-delimited string (e.g., `'Content-Type,Authorization'`) or an array (e.g., `['Content-Type', 'Authorization']`). Defaults to reflecting the headers specified in the request's **Access-Control-Request-Headers** header if not specified.
 * `exposedHeaders`: Configures the **Access-Control-Expose-Headers** CORS header. Expects a comma-delimited string (e.g., `'Content-Range,X-Content-Range'`) or an array (e.g., `['Content-Range', 'X-Content-Range']`). No custom headers are exposed if not specified.
