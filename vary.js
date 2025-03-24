@@ -1,6 +1,6 @@
 'use strict'
 
-const LRUCache = require('mnemonist/lru-cache')
+const { Lru: LRUCache } = require('toad-cache')
 
 /**
  * Field Value Components
@@ -92,7 +92,7 @@ function createAddFieldnameToVary (fieldname) {
       header = header.join(', ')
     }
 
-    if (!headerCache.has(header)) {
+    if (!headerCache.get(header)) {
       const vals = parse(header)
 
       if (vals.indexOf('*') !== -1) {
