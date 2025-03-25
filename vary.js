@@ -1,6 +1,6 @@
 'use strict'
 
-const { Lru: LRUCache } = require('toad-cache')
+const { FifoMap: FifoCache } = require('toad-cache')
 
 /**
  * Field Value Components
@@ -67,7 +67,7 @@ function parse (header) {
 }
 
 function createAddFieldnameToVary (fieldname) {
-  const headerCache = new LRUCache(1000)
+  const headerCache = new FifoCache(1000)
 
   validateFieldname(fieldname)
 
