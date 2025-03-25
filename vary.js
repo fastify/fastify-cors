@@ -92,7 +92,7 @@ function createAddFieldnameToVary (fieldname) {
       header = header.join(', ')
     }
 
-    if (!headerCache.get(header)) {
+    if (headerCache.get(header) === undefined) {
       const vals = parse(header)
 
       if (vals.indexOf('*') !== -1) {
