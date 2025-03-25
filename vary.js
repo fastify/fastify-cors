@@ -1,6 +1,6 @@
 'use strict'
 
-const LRUCache = require('mnemonist/lru-cache')
+const { FifoMap: FifoCache } = require('toad-cache')
 
 /**
  * Field Value Components
@@ -67,7 +67,7 @@ function parse (header) {
 }
 
 function createAddFieldnameToVary (fieldname) {
-  const headerCache = new LRUCache(1000)
+  const headerCache = new FifoCache(1000)
 
   validateFieldname(fieldname)
 
@@ -92,7 +92,7 @@ function createAddFieldnameToVary (fieldname) {
       header = header.join(', ')
     }
 
-    if (!headerCache.has(header)) {
+    if (headerCache.get(header) === undefined) {
       const vals = parse(header)
 
       if (vals.indexOf('*') !== -1) {
