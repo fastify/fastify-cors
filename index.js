@@ -17,7 +17,8 @@ const defaultOptions = {
   allowedHeaders: null,
   maxAge: null,
   preflight: true,
-  strictPreflight: true
+  strictPreflight: true,
+  logLevel: null
 }
 
 const validHooks = [
@@ -46,6 +47,11 @@ function fastifyCors (fastify, opts, next) {
   fastify.decorateRequest('corsPreflightEnabled', false)
 
   let hideOptionsRoute = true
+  let routeLogLevel = null
+
+  if (opts && typeof opts === 'object' && opts.logLevel !== undefined) {
+    routeLogLevel = opts.logLevel
+  }
   if (typeof opts === 'function') {
     handleCorsOptionsDelegator(opts, fastify, { hook: defaultOptions.hook }, next)
   } else if (opts.delegator) {
@@ -72,7 +78,8 @@ function fastifyCors (fastify, opts, next) {
   // remove most headers (such as the Authentication header).
   //
   // This route simply enables fastify to accept preflight requests.
-  fastify.options('*', { schema: { hide: hideOptionsRoute } }, (req, reply) => {
+
+  fastify.options('*', { schema: { hide: hideOptionsRoute }, ...(routeLogLevel !== null && { logLevel: routeLogLevel }) }, (req, reply) => {
     if (!req.corsPreflightEnabled) {
       // Do not handle preflight requests if the origin option disabled CORS
       reply.callNotFound()
