@@ -486,3 +486,46 @@ test('Should support ongoing prefix ', async t => {
     'content-length': '0'
   })
 })
+
+test('Silences preflight logs when logLevel is "silent"', async t => {
+  const logs = []
+  const fastify = Fastify({
+    logger: {
+      level: 'info',
+      stream: {
+        write (line) {
+          try {
+            logs.push(JSON.parse(line))
+          } catch {
+          }
+        }
+      }
+    }
+  })
+
+  await fastify.register(cors, { logLevel: 'silent' })
+
+  fastify.get('/', async () => ({ ok: true }))
+
+  await fastify.ready()
+  t.assert.ok(fastify)
+
+  await fastify.inject({
+    method: 'OPTIONS',
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'https://example.com'
+    }
+  })
+
+  await fastify.inject({ method: 'GET', url: '/' })
+
+  const hasOptionsLog = logs.some(l => l.req && l.req.method === 'OPTIONS')
+  const hasGetLog = logs.some(l => l.req && l.req.method === 'GET')
+
+  t.assert.strictEqual(hasOptionsLog, false)
+  t.assert.strictEqual(hasGetLog, true)
+
+  await fastify.close()
+})
