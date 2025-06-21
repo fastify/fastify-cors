@@ -529,3 +529,62 @@ test('Silences preflight logs when logLevel is "silent"', async t => {
 
   await fastify.close()
 })
+test('delegator + logLevel:"silent" → OPTIONS logs are suppressed', async t => {
+  t.plan(3)
+
+  const logs = []
+  const app = Fastify({
+    logger: {
+      level: 'info',
+      stream: { write: l => { try { logs.push(JSON.parse(l)) } catch {} } }
+    }
+  })
+
+  await app.register(cors, {
+    delegator: () => ({ origin: '*' }),
+    logLevel: 'silent'
+  })
+
+  app.get('/', () => ({ ok: true }))
+  await app.ready()
+  t.assert.ok(app)
+
+  await app.inject({
+    method: 'OPTIONS',
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'https://example.com'
+    }
+  })
+
+  await app.inject({ method: 'GET', url: '/' })
+
+  const hasOptionsLog = logs.some(l => l.req?.method === 'OPTIONS')
+  const hasGetLog = logs.some(l => l.req?.method === 'GET')
+
+  t.assert.strictEqual(hasOptionsLog, false)
+  t.assert.strictEqual(hasGetLog, true)
+
+  await app.close()
+})
+test('delegator + hideOptionsRoute:false → OPTIONS route is visible', async t => {
+  t.plan(2)
+
+  const app = Fastify()
+
+  app.addHook('onRoute', route => {
+    if (route.method === 'OPTIONS' && route.url === '*') {
+      t.assert.strictEqual(route.schema.hide, false)
+    }
+  })
+
+  await app.register(cors, {
+    delegator: () => ({ origin: '*' }),
+    hideOptionsRoute: false
+  })
+
+  await app.ready()
+  t.assert.ok(app)
+  await app.close()
+})
