@@ -17,8 +17,7 @@ const defaultOptions = {
   allowedHeaders: null,
   maxAge: null,
   preflight: true,
-  strictPreflight: true,
-  logLevel: null
+  strictPreflight: true
 }
 
 const validHooks = [

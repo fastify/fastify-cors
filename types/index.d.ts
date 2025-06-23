@@ -1,6 +1,6 @@
 /// <reference types="node" />
 
-import { FastifyInstance, FastifyPluginCallback, FastifyRequest } from 'fastify'
+import { FastifyInstance, FastifyPluginCallback, FastifyRequest, LogLevel } from 'fastify'
 
 type OriginCallback = (err: Error | null, origin: ValueOrArray<OriginType>) => void
 type OriginType = string | boolean | RegExp
@@ -107,7 +107,7 @@ declare namespace fastifyCors {
      * Useful for reducing noise in application logs.
      * Default: inherits Fastify's global log level.
       */
-    logLevel?: import('fastify').LogLevel;
+    logLevel?: LogLevel;
   }
 
   export interface FastifyCorsOptionsDelegateCallback { (req: FastifyRequest, cb: (error: Error | null, corsOptions?: FastifyCorsOptions) => void): void }
