@@ -60,7 +60,7 @@
   ],
   "devDependencies": {
     "@fastify/pre-commit": "^2.1.0",
-    "@types/node": "^22.0.0",
+    "@types/node": "^24.0.8",
     "c8": "^10.1.2",
     "cors": "^2.8.5",
     "eslint": "^9.17.0",
