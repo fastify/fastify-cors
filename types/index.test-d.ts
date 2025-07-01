@@ -165,7 +165,8 @@ appHttp2.register(fastifyCors, {
   preflightContinue: false,
   optionsSuccessStatus: 200,
   preflight: false,
-  strictPreflight: false
+  strictPreflight: false,
+  logLevel: 'silent'
 })
 
 appHttp2.register(fastifyCors, {
