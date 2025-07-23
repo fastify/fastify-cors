@@ -87,7 +87,7 @@ declare namespace fastifyCors {
      */
     optionsSuccessStatus?: number;
     /**
-     * Pass the CORS preflight response to the route handler (default: false).
+     * Pass the CORS preflight response to the route handler (default: true).
      */
     preflight?: boolean;
     /**
