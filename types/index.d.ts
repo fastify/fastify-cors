@@ -1,6 +1,6 @@
 /// <reference types="node" />
 
-import { FastifyInstance, FastifyPluginCallback, FastifyRequest } from 'fastify'
+import { FastifyInstance, FastifyPluginCallback, FastifyRequest, LogLevel } from 'fastify'
 
 type OriginCallback = (err: Error | null, origin: ValueOrArray<OriginType>) => void
 type OriginType = string | boolean | RegExp
@@ -87,7 +87,7 @@ declare namespace fastifyCors {
      */
     optionsSuccessStatus?: number;
     /**
-     * Pass the CORS preflight response to the route handler (default: false).
+     * Pass the CORS preflight response to the route handler (default: true).
      */
     preflight?: boolean;
     /**
@@ -99,6 +99,15 @@ declare namespace fastifyCors {
      * Hide options route from the documentation built using fastify-swagger (default: true).
      */
     hideOptionsRoute?: boolean;
+
+    /**
+     * Sets the Fastify log level specifically for the internal OPTIONS route
+     * used to handle CORS preflight requests. For example, setting this to `'silent'`
+     * will prevent these requests from being logged.
+     * Useful for reducing noise in application logs.
+     * Default: inherits Fastify's global log level.
+      */
+    logLevel?: LogLevel;
   }
 
   export interface FastifyCorsOptionsDelegateCallback { (req: FastifyRequest, cb: (error: Error | null, corsOptions?: FastifyCorsOptions) => void): void }

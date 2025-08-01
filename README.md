@@ -19,9 +19,8 @@ npm i @fastify/cors
 | `^10.x`        | `^5.x`          |
 | `^8.x`         | `^4.x`          |
 | `^7.x`         | `^3.x`          |
-| `^3.x`         | `^2.x`          |
-| `^1.x`         | `^1.x`          |
-
+| `>=3.x <7.x`   | `^2.x`          |
+| `>=1.x <3.x`   | `^1.x`          |
 
 Please note that if a Fastify version is out of support, then so are the corresponding versions of this plugin
 in the table above.
@@ -76,6 +75,10 @@ You can use it as is without passing any option or you can configure it as expla
 * `preflight`: Disables preflight by passing `false`. Default: `true`.
 * `strictPreflight`: Enforces strict requirements for the CORS preflight request headers (**Access-Control-Request-Method** and **Origin**) as defined by the [W3C CORS specification](https://www.w3.org/TR/2020/SPSD-cors-20200602/#resource-preflight-requests). Preflight requests without the required headers result in 400 errors when set to `true`. Default: `true`.
 * `hideOptionsRoute`: Hides the options route from documentation built using [@fastify/swagger](https://github.com/fastify/fastify-swagger). Default: `true`.
+* `logLevel`: Sets the Fastify log level **only** for the internal CORS pre-flight `OPTIONS *` route.  
+  Pass `'silent'` to suppress these requests in your logs, or any valid Fastify
+  log level (`'trace'`, `'debug'`, `'info'`, `'warn'`, `'error'`, `'fatal'`).  
+  Default: inherits Fastify’s global log level.
 
 #### :warning: DoS attacks
 
