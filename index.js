@@ -157,7 +157,7 @@ function normalizeCorsOptions (opts, dynamic) {
 }
 
 function addCorsHeadersHandler (fastify, globalOptions, req, reply, next) {
-  const options = { ...globalOptions, ...(req.routeOptions.config?.cors }
+  const options = { ...globalOptions, ...req.routeOptions.config?.cors }
 
   if ((typeof options.origin !== 'string' && options.origin !== false) || options.dynamic) {
     // Always set Vary header for non-static origin option
