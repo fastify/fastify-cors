@@ -129,7 +129,7 @@ fastify.get('/cors-enabled', (_req, reply) => {
   reply.send('CORS headers')
 })
 
-fastify.get('/cors-disabled', { cors: false }, (_req, reply) => {
+fastify.get('/cors-disabled', { config: { cors: false } }, (_req, reply) => {
   reply.send('No CORS headers')
 })
 
