@@ -118,7 +118,7 @@ fastify.listen({ port: 3000 })
 
 ### Route-Level CORS Overrides
 
-You can override or disable CORS on a per-route basis using the `config.cors` option:.
+You can override or disable CORS on a per-route basis using the `config.cors` option:
 
 ```js
 const fastify = require('fastify')()
