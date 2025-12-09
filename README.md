@@ -116,20 +116,34 @@ fastify.register(async function (fastify) {
 fastify.listen({ port: 3000 })
 ```
 
-### Disabling CORS for a specific route
+### Route-Level CORS Overrides
 
-CORS can be disabled at the route level by setting the `cors` option to `false`.
+It is possible to override the CORS plugin options provided during registration on a per-route basis using the `config.cors` option.
 
 ```js
 const fastify = require('fastify')()
 
-fastify.register(require('@fastify/cors'), { origin: '*' })
+fastify.register(require('@fastify/cors'), { origin: 'https://example.com' })
 
 fastify.get('/cors-enabled', (_req, reply) => {
-  reply.send('CORS headers')
+  reply.send('CORS headers applied')
 })
 
-fastify.get('/cors-disabled', { config: { cors: false } }, (_req, reply) => {
+fastify.get('/cors-allow-all', {
+  config: {
+    cors: {
+      origin: '*', // Allow all origins for this route
+    },
+  },
+}, (_req, reply) => {
+  reply.send('Custom CORS headers applied')
+})
+
+fastify.get('/cors-disabled', {
+  config: {
+    cors: false, // Disable CORS for this route
+  },
+}, (_req, reply) => {
   reply.send('No CORS headers')
 })
 

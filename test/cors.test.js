@@ -1050,3 +1050,75 @@ test('Should allow routes to disable CORS individually', async t => {
   t.assert.strictEqual(res.statusCode, 200)
   t.assert.strictEqual(res.headers['access-control-allow-origin'], undefined)
 })
+
+test('Should support route-level config', async t => {
+  t.plan(9)
+
+  const fastify = Fastify()
+  fastify.register(cors, {
+    origin: 'https://default-example.com'
+  })
+
+  // Route with default CORS (inherits plugin config)
+  fastify.get('/cors-enabled', (_req, reply) => {
+    reply.send('CORS headers applied')
+  })
+
+  // Route with custom CORS origin
+  fastify.get('/cors-allow-all', {
+    config: {
+      cors: {
+        origin: '*'
+      }
+    }
+  }, (_req, reply) => {
+    reply.send('Custom CORS headers applied')
+  })
+
+  // Route with CORS disabled
+  fastify.get('/cors-disabled', {
+    config: {
+      cors: false
+    }
+  }, (_req, reply) => {
+    reply.send('No CORS headers')
+  })
+
+  await fastify.ready()
+
+  // Default CORS
+  const resDefault = await fastify.inject({
+    method: 'GET',
+    url: '/cors-enabled',
+    headers: {
+      origin: 'https://default-example.com'
+    }
+  })
+  t.assert.ok(resDefault)
+  t.assert.strictEqual(resDefault.statusCode, 200)
+  t.assert.strictEqual(resDefault.headers['access-control-allow-origin'], 'https://default-example.com')
+
+  // Custom CORS
+  const resCustom = await fastify.inject({
+    method: 'GET',
+    url: '/cors-allow-all',
+    headers: {
+      origin: 'https://example.com'
+    }
+  })
+  t.assert.ok(resCustom)
+  t.assert.strictEqual(resCustom.statusCode, 200)
+  t.assert.strictEqual(resCustom.headers['access-control-allow-origin'], '*')
+
+  // CORS disabled
+  const resDisabled = await fastify.inject({
+    method: 'GET',
+    url: '/cors-disabled',
+    headers: {
+      origin: 'https://example.com'
+    }
+  })
+  t.assert.ok(resDisabled)
+  t.assert.strictEqual(resDisabled.statusCode, 200)
+  t.assert.strictEqual(resDisabled.headers['access-control-allow-origin'], undefined)
+})
