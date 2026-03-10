@@ -11,6 +11,8 @@
 npm i @fastify/cors
 ```
 
+TypeScript note: `@fastify/cors` does not add Fastify decorators, so registering it preserves the existing instance, request, and reply shapes.
+
 ### Compatibility
 
 | Plugin version | Fastify version |

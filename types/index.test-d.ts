@@ -11,7 +11,7 @@ import fastifyCors, {
 
 const app = fastify()
 
-app.register(fastifyCors)
+expectType<typeof app>(app.register(fastifyCors))
 
 app.register(fastifyCors, {
   origin: true,
