@@ -1,5 +1,5 @@
 import fastify, { FastifyRequest } from 'fastify'
-import { expectType } from 'tsd'
+import { expect } from 'tstyche'
 import fastifyCors, {
   AsyncOriginFunction,
   FastifyCorsOptions,
@@ -240,7 +240,10 @@ appHttp2.register(fastifyCors, {
 })
 
 appHttp2.register(fastifyCors, {
-  origin: (origin: string | undefined, cb: (err: Error | null, allow: boolean) => void) => {
+  origin: (
+    origin: string | undefined,
+    cb: (err: Error | null, allow: boolean) => void
+  ) => {
     if (origin === undefined || /localhost/.test(origin)) {
       cb(null, true)
       return
@@ -259,39 +262,47 @@ appHttp2.register(fastifyCors, {
   strictPreflight: false
 })
 
-appHttp2.register(fastifyCors, (): FastifyCorsOptionsDelegate => (_req, cb) => {
-  cb(null, {
-    origin: [/\*/, /something/],
-    allowedHeaders: ['authorization', 'content-type'],
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    credentials: true,
-    exposedHeaders: ['authorization'],
-    maxAge: 13000,
-    cacheControl: 13000,
-    preflightContinue: false,
-    optionsSuccessStatus: 200,
-    preflight: false,
-    strictPreflight: false
-  })
-})
+appHttp2.register(
+  fastifyCors,
+  (): FastifyCorsOptionsDelegate => (_req, cb) => {
+    cb(null, {
+      origin: [/\*/, /something/],
+      allowedHeaders: ['authorization', 'content-type'],
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      credentials: true,
+      exposedHeaders: ['authorization'],
+      maxAge: 13000,
+      cacheControl: 13000,
+      preflightContinue: false,
+      optionsSuccessStatus: 200,
+      preflight: false,
+      strictPreflight: false
+    })
+  }
+)
 
-appHttp2.register(fastifyCors, (): FastifyCorsOptionsDelegatePromise => () => {
-  return Promise.resolve({
-    origin: [/\*/, /something/],
-    allowedHeaders: ['authorization', 'content-type'],
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    credentials: true,
-    exposedHeaders: ['authorization'],
-    maxAge: 13000,
-    cacheControl: 13000,
-    preflightContinue: false,
-    optionsSuccessStatus: 200,
-    preflight: false,
-    strictPreflight: false
-  })
-})
+appHttp2.register(
+  fastifyCors,
+  (): FastifyCorsOptionsDelegatePromise => () => {
+    return Promise.resolve({
+      origin: [/\*/, /something/],
+      allowedHeaders: ['authorization', 'content-type'],
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      credentials: true,
+      exposedHeaders: ['authorization'],
+      maxAge: 13000,
+      cacheControl: 13000,
+      preflightContinue: false,
+      optionsSuccessStatus: 200,
+      preflight: false,
+      strictPreflight: false
+    })
+  }
+)
 
-const delegate: FastifyPluginOptionsDelegate<FastifyCorsOptionsDelegatePromise> = () => async () => {
+const delegate: FastifyPluginOptionsDelegate<
+  FastifyCorsOptionsDelegatePromise
+> = () => async () => {
   return {
     origin: [/\*/, /something/],
     allowedHeaders: ['authorization', 'content-type'],
@@ -372,17 +383,19 @@ appHttp2.register(fastifyCors, delegate)
 appHttp2.register(fastifyCors, {
   hook: 'preParsing',
   origin: function (origin, cb) {
-    expectType<string | undefined>(origin)
+    expect(origin).type.toBe<string | undefined>()
     cb(null, false)
-  },
+  }
 })
 
-const asyncOriginFn: AsyncOriginFunction = async function (origin): Promise<boolean> {
-  expectType<string | undefined>(origin)
+const asyncOriginFn: AsyncOriginFunction = async function (
+  origin
+): Promise<boolean> {
+  expect(origin).type.toBe<string | undefined>()
   return false
 }
 
 appHttp2.register(fastifyCors, {
   hook: 'preParsing',
-  origin: asyncOriginFn,
+  origin: asyncOriginFn
 })
