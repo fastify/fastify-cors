@@ -46,7 +46,7 @@ await fastify.listen({ port: 3000 })
 You can use it as is without passing any option or you can configure it as explained below.
 ### Options
 * `origin`: Configures the **Access-Control-Allow-Origin** CORS header. The value of origin can be:
-  - `Boolean`: Set to `true` to reflect the [request origin](http://tools.ietf.org/html/draft-abarth-origin-09), or `false` to disable CORS.
+  - `Boolean`: Set to `true` to reflect the [request origin](https://datatracker.ietf.org/doc/html/draft-abarth-origin-09), or `false` to disable CORS.
   - `String`: Set to a specific origin (e.g., `"http://example.com"`). The special `*` value (default) allows any origin.
   - `RegExp`: Set to a regular expression pattern to test the request origin. If it matches, the request origin is reflected (e.g., `/example\.com$/` returns the origin only if it ends with `example.com`).
   - `Array`: Set to an array of valid origins, each being a `String` or `RegExp` (e.g., `["http://example1.com", /\.example2\.com$/]`).
