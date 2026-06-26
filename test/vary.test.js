@@ -13,12 +13,11 @@ test('Should set * even if we set a specific field', async t => {
       return '*'
     },
     header () {
-      t.fail('Should not be here')
+      throw new Error('Should not be here')
     }
   }
 
-  addOriginToVary(replyMock)
-  t.assert.ok(true) // equalivant to tap t.pass()
+  t.assert.doesNotThrow(() => addOriginToVary(replyMock))
 })
 
 test('Should set * even if we set a specific field', t => {
@@ -39,7 +38,7 @@ test('Should set * even if we set a specific field', t => {
 })
 
 test('Should set * when field contains a *', t => {
-  t.plan(3)
+  t.plan(2)
 
   const addOriginToVary = createAddFieldnameToVary('Origin')
   const replyMock = {
@@ -53,11 +52,10 @@ test('Should set * when field contains a *', t => {
   }
 
   addOriginToVary(replyMock)
-  t.assert.ok(true) // equalivant to tap t.pass()
 })
 
 test('Should concat vary values', t => {
-  t.plan(3)
+  t.plan(2)
 
   const addOriginToVary = createAddFieldnameToVary('Origin')
   const replyMock = {
@@ -71,11 +69,10 @@ test('Should concat vary values', t => {
   }
 
   addOriginToVary(replyMock)
-  t.assert.ok(true) // equalivant to tap t.pass()
 })
 
 test('Should concat vary values ignoring consecutive commas', t => {
-  t.plan(3)
+  t.plan(2)
 
   const addOriginToVary = createAddFieldnameToVary('Origin')
   const replyMock = {
@@ -89,11 +86,10 @@ test('Should concat vary values ignoring consecutive commas', t => {
   }
 
   addOriginToVary(replyMock)
-  t.assert.ok(true) // equalivant to tap t.pass()
 })
 
 test('Should concat vary values ignoring whitespace', t => {
-  t.plan(3)
+  t.plan(2)
 
   const addOriginToVary = createAddFieldnameToVary('Origin')
   const replyMock = {
@@ -107,7 +103,6 @@ test('Should concat vary values ignoring whitespace', t => {
   }
 
   addOriginToVary(replyMock)
-  t.assert.ok(true) // equalivant to tap t.pass()
 })
 
 test('Should set the field as value for vary if no vary is defined', t => {
@@ -190,13 +185,14 @@ test('Should ignore the header as value for vary if it is already in vary', t =>
       return 'Origin'
     },
     header () {
-      t.fail('Should not be here')
+      throw new Error('Should not be here')
     }
   }
-  addOriginToVary(replyMock)
-  addOriginToVary(replyMock)
 
-  t.assert.ok(true) // equalivant to tap t.pass()
+  t.assert.doesNotThrow(() => {
+    addOriginToVary(replyMock)
+    addOriginToVary(replyMock)
+  })
 })
 
 test('parse', t => {
