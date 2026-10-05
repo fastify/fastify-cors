@@ -639,6 +639,32 @@ test('Dynamic origin resolution (errored - promises)', async t => {
   t.assert.strictEqual(res.statusCode, 500)
 })
 
+test('Should support wildcard arrays from dynamic origin resolvers', async t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+  await fastify.register(cors, {
+    origin: async () => ['*']
+  })
+
+  fastify.get('/', (_req, reply) => {
+    reply.send('ok')
+  })
+
+  const res = await fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: {
+      origin: 'https://client.example'
+    }
+  })
+
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  t.assert.strictEqual(res.headers['access-control-allow-origin'], '*')
+  t.assert.strictEqual(res.headers.vary, 'Origin')
+})
+
 test('Should reply 404 without cors headers when origin is false', async t => {
   t.plan(8)
 

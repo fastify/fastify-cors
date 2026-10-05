@@ -277,6 +277,10 @@ function resolveOriginWrapper (fastify, origin) {
 }
 
 function getAccessControlAllowOriginHeader (reqOrigin, originOption) {
+  if (Array.isArray(originOption) && originOption.indexOf('*') !== -1) {
+    return '*'
+  }
+
   if (typeof originOption === 'string') {
     // fixed or any origin ('*')
     return originOption
