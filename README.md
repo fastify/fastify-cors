@@ -48,8 +48,8 @@ You can use it as is without passing any option or you can configure it as expla
 * `origin`: Configures the **Access-Control-Allow-Origin** CORS header. The value of origin can be:
   - `Boolean`: Set to `true` to reflect the [request origin](https://datatracker.ietf.org/doc/html/draft-abarth-origin-09), or `false` to disable CORS.
   - `String`: Set to a specific origin (e.g., `"http://example.com"`). The special `*` value (default) allows any origin.
-  - `RegExp`: Set to a regular expression pattern to test the request origin. If it matches, the request origin is reflected (e.g., `/example\.com$/` returns the origin only if it ends with `example.com`).
-  - `Array`: Set to an array of valid origins, each being a `String` or `RegExp` (e.g., `["http://example1.com", /\.example2\.com$/]`).
+  - `RegExp`: Set to a regular expression pattern to test the request origin. If it matches, the request origin is reflected (e.g., `/^https:\/\/([a-z0-9-]+\.)*example\.com$/` reflects `https://example.com` and its subdomains). The pattern is applied as-is with `RegExp.prototype.test` and is not anchored for you: anchor it with `^` and `$` and include the scheme, otherwise origins such as `https://example.com.attacker.com` or `https://evilexample.com` may match.
+  - `Array`: Set to an array of valid origins, each being a `String` or `RegExp` (e.g., `["http://example1.com", /^https:\/\/([a-z0-9-]+\.)+example2\.com$/]`).
   - `Function`: Set to a function with custom logic. The function takes the request origin as the first parameter and a callback as the second (signature `err [Error | null], origin`). *Async-await* and promises are supported. The Fastify instance is bound to the function call and can be accessed via `this`. For example:
   ```js
   origin: (origin, cb) => {
