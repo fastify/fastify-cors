@@ -36,30 +36,25 @@ function parse (header) {
   } else if (header.indexOf(',') === -1) {
     result.push(header)
   } else {
-    const il = header.length
-    let i = 0
-    let pos = 0
-    let char
+    const len = header.length
+    let start = 0
 
     // tokenize the header
-    for (i; i < il; ++i) {
-      char = header[i]
-      // when we have whitespace set the pos to the next position
-      if (char === ' ') {
-        pos = i + 1
-      // `,` is the separator of vary-values
-      } else if (char === ',') {
-        // if pos and current position are not the same we have a valid token
-        if (pos !== i) {
-          result.push(header.slice(pos, i))
+    for (let i = 0; i <= len; ++i) {
+      if (i === len || header.charCodeAt(i) === 44) {
+        let tokenStart = start
+        let tokenEnd = i
+        while (tokenStart < tokenEnd && (header.charCodeAt(tokenStart) === 32 || header.charCodeAt(tokenStart) === 9)) {
+          tokenStart++
         }
-        // reset the positions
-        pos = i + 1
+        while (tokenEnd > tokenStart && (header.charCodeAt(tokenEnd - 1) === 32 || header.charCodeAt(tokenEnd - 1) === 9)) {
+          tokenEnd--
+        }
+        if (tokenStart < tokenEnd) {
+          result.push(header.slice(tokenStart, tokenEnd))
+        }
+        start = i + 1
       }
-    }
-
-    if (pos !== i) {
-      result.push(header.slice(pos, i))
     }
   }
 
