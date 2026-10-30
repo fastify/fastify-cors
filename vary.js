@@ -44,22 +44,23 @@ function parse (header) {
     // tokenize the header
     for (i; i < il; ++i) {
       char = header[i]
-      // when we have whitespace set the pos to the next position
-      if (char === ' ') {
-        pos = i + 1
       // `,` is the separator of vary-values
-      } else if (char === ',') {
-        // if pos and current position are not the same we have a valid token
-        if (pos !== i) {
-          result.push(header.slice(pos, i))
+      if (char === ',') {
+        // optional whitespace around the comma is not part of the value
+        const token = header.slice(pos, i).trim()
+        // if the token is not empty we have a valid value
+        if (token !== '') {
+          result.push(token)
         }
         // reset the positions
         pos = i + 1
       }
     }
 
-    if (pos !== i) {
-      result.push(header.slice(pos, i))
+    // the last value has no trailing comma
+    const token = header.slice(pos, i).trim()
+    if (token !== '') {
+      result.push(token)
     }
   }
 
