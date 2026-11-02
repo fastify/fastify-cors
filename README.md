@@ -152,7 +152,7 @@ fastify.listen({ port: 3000 })
 
 ### Custom Fastify hook name
 
-By default, `@fastify/cors` adds an `onRequest` hook for validation and header injection. This can be customized by passing `hook` in the options. Valid values are `onRequest`, `preParsing`, `preValidation`, `preHandler`, `preSerialization`, and `onSend`.
+By default, `@fastify/cors` adds an `onRequest` hook for validation and header injection. This can be customized by passing `hook` in the options. Valid values are `onRequest`, `preParsing`, `preValidation`, `preHandler`, and `preSerialization`.
 
 ```js
 import Fastify from 'fastify'

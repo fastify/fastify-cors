@@ -268,46 +268,38 @@ test('Should set hook preHandler if hook option is set to preHandler', async (t)
   t.assert.notStrictEqual(res.headers.vary, 'Origin')
 })
 
-test('Should set hook onSend if hook option is set to onSend', async (t) => {
-  t.plan(11)
+test('Should error on onSend hook option', async (t) => {
+  t.plan(3)
+
+  const fastify = Fastify()
+  fastify.get('/', () => 'ok')
+
+  await t.assert.rejects(
+    async () => fastify.register(cors, { hook: 'onSend' }),
+    (err) => {
+      t.assert.strictEqual(err.name, 'TypeError')
+      t.assert.strictEqual(err.message, '@fastify/cors: Invalid hook option provided.')
+      return true
+    }
+  )
+})
+
+test('Should error on onSend hook option with delegator', async (t) => {
+  t.plan(3)
 
   const fastify = Fastify()
 
-  fastify.register(cors, {
-    hook: 'onSend'
-  })
-
-  fastify.addHook('onResponse', (request, _reply, done) => {
-    t.assert.strictEqual(request[kFastifyContext].onError, null)
-    t.assert.strictEqual(request[kFastifyContext].onRequest, null)
-    t.assert.strictEqual(request[kFastifyContext].onSend.length, 1)
-    t.assert.strictEqual(request[kFastifyContext].preHandler, null)
-    t.assert.strictEqual(request[kFastifyContext].preParsing, null)
-    t.assert.strictEqual(request[kFastifyContext].preSerialization, null)
-    t.assert.strictEqual(request[kFastifyContext].preValidation, null)
-    done()
-  })
-
-  fastify.get('/', (_req, reply) => {
-    reply.send('ok')
-  })
-
-  await fastify.ready()
-
-  const res = await fastify.inject({
-    method: 'GET',
-    url: '/'
-  })
-  delete res.headers.date
-  t.assert.strictEqual(res.statusCode, 200)
-  t.assert.strictEqual(res.payload, 'ok')
-  const actualHeader = {
-    'access-control-allow-origin': res.headers['access-control-allow-origin']
-  }
-  t.assert.deepStrictEqual(actualHeader, {
-    'access-control-allow-origin': '*'
-  })
-  t.assert.notStrictEqual(res.headers.vary, 'Origin')
+  await t.assert.rejects(
+    async () => fastify.register(cors, {
+      hook: 'onSend',
+      delegator: (_req, cb) => cb(null, { origin: '*' })
+    }),
+    (err) => {
+      t.assert.strictEqual(err.name, 'TypeError')
+      t.assert.strictEqual(err.message, '@fastify/cors: Invalid hook option provided.')
+      return true
+    }
+  )
 })
 
 test('Should set hook preSerialization if hook option is set to preSerialization', async (t) => {
