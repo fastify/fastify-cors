@@ -38,28 +38,30 @@ function parse (header) {
   } else {
     const il = header.length
     let i = 0
-    let pos = 0
+    let start = -1
+    let end = -1
     let char
 
     // tokenize the header
     for (i; i < il; ++i) {
       char = header[i]
-      // when we have whitespace set the pos to the next position
-      if (char === ' ') {
-        pos = i + 1
-      // `,` is the separator of vary-values
-      } else if (char === ',') {
-        // if pos and current position are not the same we have a valid token
-        if (pos !== i) {
-          result.push(header.slice(pos, i))
+      if (char === ',') {
+        if (start !== -1) {
+          result.push(header.slice(start, end))
+          start = -1
         }
-        // reset the positions
-        pos = i + 1
+      } else if (char === ' ' || char === '\t') {
+        // whitespace: do not advance end if we were already in a token
+      } else {
+        if (start === -1) {
+          start = i
+        }
+        end = i + 1
       }
     }
 
-    if (pos !== i) {
-      result.push(header.slice(pos, i))
+    if (start !== -1) {
+      result.push(header.slice(start, end))
     }
   }
 
