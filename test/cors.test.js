@@ -1148,3 +1148,37 @@ test('Should support route-level config', async t => {
   t.assert.strictEqual(resDisabled.statusCode, 200)
   t.assert.strictEqual(resDisabled.headers['access-control-allow-origin'], undefined)
 })
+
+test('Should omit Access-Control-Max-Age for route-level config with explicitly undefined maxAge', async t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+  fastify.register(cors, {
+    origin: '*'
+  })
+
+  fastify.options('/cors-undefined-max-age', {
+    config: {
+      cors: {
+        maxAge: undefined
+      }
+    }
+  }, (_req, reply) => {
+    reply.send('ok')
+  })
+
+  await fastify.ready()
+
+  const res = await fastify.inject({
+    method: 'OPTIONS',
+    url: '/cors-undefined-max-age',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.headers['access-control-allow-origin'], '*')
+  t.assert.strictEqual(res.headers['access-control-max-age'], undefined)
+})
