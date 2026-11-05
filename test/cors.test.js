@@ -1077,6 +1077,90 @@ test('Should allow routes to disable CORS individually', async t => {
   t.assert.strictEqual(res.headers['access-control-allow-origin'], undefined)
 })
 
+test('Should not run origin function or add vary header when route disables CORS (callback origin)', async t => {
+  t.plan(7)
+
+  let originCalled = false
+  const fastify = Fastify()
+  fastify.register(cors, {
+    origin: (_origin, cb) => {
+      originCalled = true
+      cb(new Error('Not allowed'), false)
+    }
+  })
+
+  fastify.get('/cors-disabled', { config: { cors: false } }, (_req, reply) => {
+    reply.send('ok')
+  })
+
+  fastify.get('/cors-enabled', (_req, reply) => {
+    reply.send('ok')
+  })
+
+  // Route with CORS disabled should succeed without calling origin
+  const resDisabled = await fastify.inject({
+    method: 'GET',
+    url: '/cors-disabled',
+    headers: { origin: 'example.com' }
+  })
+  t.assert.ok(resDisabled)
+  t.assert.strictEqual(resDisabled.statusCode, 200)
+  t.assert.strictEqual(resDisabled.payload, 'ok')
+  t.assert.strictEqual(resDisabled.headers.vary, undefined)
+  t.assert.strictEqual(resDisabled.headers['access-control-allow-origin'], undefined)
+  t.assert.strictEqual(originCalled, false)
+
+  // Route with CORS enabled should fail when origin rejects
+  const resEnabled = await fastify.inject({
+    method: 'GET',
+    url: '/cors-enabled',
+    headers: { origin: 'example.com' }
+  })
+  t.assert.strictEqual(resEnabled.statusCode, 500)
+})
+
+test('Should not run origin function or add vary header when route disables CORS (promise origin)', async t => {
+  t.plan(7)
+
+  let originCalled = false
+  const fastify = Fastify()
+  fastify.register(cors, {
+    origin: async (_origin) => {
+      originCalled = true
+      throw new Error('Not allowed')
+    }
+  })
+
+  fastify.get('/cors-disabled', { config: { cors: false } }, (_req, reply) => {
+    reply.send('ok')
+  })
+
+  fastify.get('/cors-enabled', (_req, reply) => {
+    reply.send('ok')
+  })
+
+  // Route with CORS disabled should succeed without calling origin
+  const resDisabled = await fastify.inject({
+    method: 'GET',
+    url: '/cors-disabled',
+    headers: { origin: 'example.com' }
+  })
+  t.assert.ok(resDisabled)
+  t.assert.strictEqual(resDisabled.statusCode, 200)
+  t.assert.strictEqual(resDisabled.payload, 'ok')
+  t.assert.strictEqual(resDisabled.headers.vary, undefined)
+  t.assert.strictEqual(resDisabled.headers['access-control-allow-origin'], undefined)
+  t.assert.strictEqual(originCalled, false)
+
+  // Route with CORS enabled should fail when origin rejects
+  const resEnabled = await fastify.inject({
+    method: 'GET',
+    url: '/cors-enabled',
+    headers: { origin: 'example.com' }
+  })
+  t.assert.strictEqual(resEnabled.statusCode, 500)
+})
+
 test('Should support route-level config', async t => {
   t.plan(9)
 
