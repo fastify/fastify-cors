@@ -25,21 +25,20 @@ const validHooks = [
   'preParsing',
   'preValidation',
   'preHandler',
-  'preSerialization',
-  'onSend'
+  'preSerialization'
 ]
 
 const hookWithPayload = [
   'preSerialization',
-  'preParsing',
-  'onSend'
+  'preParsing'
 ]
 
 function validateHook (value, next) {
   if (validHooks.indexOf(value) !== -1) {
-    return
+    return true
   }
   next(new TypeError('@fastify/cors: Invalid hook option provided.'))
+  return false
 }
 
 function fastifyCors (fastify, opts, next) {
@@ -52,10 +51,10 @@ function fastifyCors (fastify, opts, next) {
     handleCorsOptionsDelegator(opts, fastify, { hook: defaultOptions.hook }, next)
   } else if (opts.delegator) {
     const { delegator, ...options } = opts
-    handleCorsOptionsDelegator(delegator, fastify, options, next)
+    if (!handleCorsOptionsDelegator(delegator, fastify, options, next)) return
   } else {
     const corsOptions = normalizeCorsOptions(opts)
-    validateHook(corsOptions.hook, next)
+    if (!validateHook(corsOptions.hook, next)) return
     if (hookWithPayload.indexOf(corsOptions.hook) !== -1) {
       fastify.addHook(corsOptions.hook, function handleCors (req, reply, _payload, next) {
         addCorsHeadersHandler(fastify, corsOptions, req, reply, next)
@@ -91,7 +90,7 @@ function fastifyCors (fastify, opts, next) {
 
 function handleCorsOptionsDelegator (optionsResolver, fastify, opts, next) {
   const hook = opts?.hook || defaultOptions.hook
-  validateHook(hook, next)
+  if (!validateHook(hook, next)) return false
   if (optionsResolver.length === 2) {
     if (hookWithPayload.indexOf(hook) !== -1) {
       fastify.addHook(hook, function handleCors (req, reply, _payload, next) {
@@ -125,6 +124,7 @@ function handleCorsOptionsDelegator (optionsResolver, fastify, opts, next) {
       })
     }
   }
+  return true
 }
 
 function handleCorsOptionsCallbackDelegator (optionsResolver, fastify, req, reply, next) {

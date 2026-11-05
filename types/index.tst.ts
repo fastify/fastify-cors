@@ -333,7 +333,7 @@ appHttp2.register(fastifyCors, {
 appHttp2.register(fastifyCors, {
   hook: 'preSerialization'
 })
-appHttp2.register(fastifyCors, {
+expect(appHttp2.register).type.not.toBeCallableWith(fastifyCors, {
   hook: 'onSend'
 })
 
