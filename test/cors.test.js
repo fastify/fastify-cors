@@ -934,6 +934,32 @@ test('Should always add vary header to `Origin` for reflected origin (vary is ar
   )
 })
 
+test('Should collapse vary header to * when pre-existing vary contains * with whitespace before comma', async t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+
+  fastify.addHook('onRequest', async (_req, reply) => {
+    reply.header('Vary', '* , foo')
+  })
+
+  fastify.register(cors, { origin: true })
+
+  fastify.get('/', (_req, reply) => {
+    reply.send('ok')
+  })
+
+  const res = await fastify.inject({
+    method: 'GET',
+    url: '/'
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  t.assert.strictEqual(res.headers.vary, '*')
+})
+
 test('Allow only request from with specific headers', async t => {
   t.plan(8)
 
