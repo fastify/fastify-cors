@@ -588,3 +588,73 @@ test('delegator + hideOptionsRoute:false → OPTIONS route is visible', async t 
   t.assert.ok(app)
   await app.close()
 })
+
+test('Should reply to preflight requests when preflight is explicitly undefined', async t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+  await fastify.register(cors, { preflight: undefined })
+
+  const res = await fastify.inject({
+    method: 'OPTIONS',
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  })
+  t.assert.ok(res)
+  delete res.headers.date
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.payload, '')
+  const actualHeaders = {
+    'access-control-allow-origin': res.headers['access-control-allow-origin'],
+    'access-control-allow-methods': res.headers['access-control-allow-methods'],
+    vary: res.headers.vary,
+    'content-length': res.headers['content-length']
+  }
+  t.assert.deepStrictEqual(actualHeaders, {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET,HEAD,POST',
+    vary: 'Access-Control-Request-Headers',
+    'content-length': '0'
+  })
+})
+
+test('Should use the default methods when methods is explicitly undefined', async t => {
+  t.plan(3)
+
+  const fastify = Fastify()
+  await fastify.register(cors, { methods: undefined })
+
+  const res = await fastify.inject({
+    method: 'OPTIONS',
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.headers['access-control-allow-methods'], 'GET,HEAD,POST')
+})
+
+test('Should omit Access-Control-Max-Age when maxAge is explicitly undefined', async t => {
+  t.plan(3)
+
+  const fastify = Fastify()
+  await fastify.register(cors, { maxAge: undefined })
+
+  const res = await fastify.inject({
+    method: 'OPTIONS',
+    url: '/',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'example.com'
+    }
+  })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.headers['access-control-max-age'], undefined)
+})
