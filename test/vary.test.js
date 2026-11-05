@@ -213,8 +213,25 @@ test('Should ignore the header as value for vary if it is already in vary with w
   })
 })
 
+test('Should set * as value for vary if vary contains * with whitespace before comma', t => {
+  t.plan(2)
+
+  const addOriginToVary = createAddFieldnameToVary('Origin')
+  const replyMock = {
+    getHeader () {
+      return '* , foo'
+    },
+    header (name, value) {
+      t.assert.deepStrictEqual(name, 'Vary')
+      t.assert.deepStrictEqual(value, '*')
+    }
+  }
+
+  addOriginToVary(replyMock)
+})
+
 test('parse', t => {
-  t.plan(22)
+  t.plan(23)
   t.assert.deepStrictEqual(parse(''), [])
   t.assert.deepStrictEqual(parse('a'), ['a'])
   t.assert.deepStrictEqual(parse('a,b'), ['a', 'b'])
@@ -236,6 +253,7 @@ test('parse', t => {
   t.assert.deepStrictEqual(parse('a  ,  b'), ['a', 'b'])
   t.assert.deepStrictEqual(parse('a\t,\tb'), ['a', 'b'])
   t.assert.deepStrictEqual(parse('Origin , Accept-Encoding'), ['origin', 'accept-encoding'])
+  t.assert.deepStrictEqual(parse('* , foo'), ['*', 'foo'])
 
   // one for the cache
   t.assert.deepStrictEqual(parse('A,b,c'), ['a', 'b', 'c'])
