@@ -157,6 +157,11 @@ function normalizeCorsOptions (opts, dynamic) {
 }
 
 function addCorsHeadersHandler (fastify, globalOptions, req, reply, next) {
+  // Allow routes to disable CORS individually
+  if (req.routeOptions.config?.cors === false) {
+    return next()
+  }
+
   const options = { ...globalOptions, ...req.routeOptions.config?.cors }
 
   if ((typeof options.origin !== 'string' && options.origin !== false) || options.dynamic) {
@@ -174,11 +179,6 @@ function addCorsHeadersHandler (fastify, globalOptions, req, reply, next) {
 
     // Disable CORS and preflight if false
     if (resolvedOriginOption === false) {
-      return next()
-    }
-
-    // Allow routes to disable CORS individually
-    if (req.routeOptions.config?.cors === false) {
       return next()
     }
 
