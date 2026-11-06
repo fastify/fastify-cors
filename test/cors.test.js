@@ -1353,7 +1353,7 @@ test('Should support route-level config on OPTIONS preflight requests', async t 
   t.assert.strictEqual(resArray.headers['access-control-allow-origin'], 'https://array-origin.com')
 })
 
-test('Should use findRoute routeOptions config when available on preflight', async t => {
+test('Should resolve route-level config on parameterized preflight routes', async t => {
   t.plan(3)
 
   const fastify = Fastify()
@@ -1361,39 +1361,122 @@ test('Should use findRoute routeOptions config when available on preflight', asy
     origin: ['https://default-example.com']
   })
 
-  fastify.get('/from-find-route', (_req, reply) => {
-    reply.send('ok')
-  })
-
-  const origFindRoute = fastify.findRoute.bind(fastify)
-  fastify.findRoute = (options) => {
-    const res = origFindRoute(options)
-    if (options.url === '/from-find-route') {
-      return {
-        ...res,
-        routeOptions: {
-          config: {
-            cors: {
-              origin: 'https://findroute-origin.com'
-            }
-          }
-        }
+  fastify.get('/users/:id', {
+    config: {
+      cors: {
+        origin: 'https://route-origin.com'
       }
     }
-    return res
-  }
+  }, (_req, reply) => {
+    reply.send('ok')
+  })
 
   await fastify.ready()
 
   const res = await fastify.inject({
     method: 'OPTIONS',
-    url: '/from-find-route',
+    url: '/users/123',
     headers: {
       'access-control-request-method': 'GET',
-      origin: 'https://findroute-origin.com'
+      origin: 'https://route-origin.com'
     }
   })
   t.assert.ok(res)
   t.assert.strictEqual(res.statusCode, 204)
-  t.assert.strictEqual(res.headers['access-control-allow-origin'], 'https://findroute-origin.com')
+  t.assert.strictEqual(res.headers['access-control-allow-origin'], 'https://route-origin.com')
+})
+
+test('Should not add Vary for a route that disables CORS with an array origin', async t => {
+  t.plan(3)
+
+  const fastify = Fastify()
+  await fastify.register(cors, {
+    origin: ['https://default-example.com']
+  })
+
+  fastify.get('/no-cors', {
+    config: {
+      cors: false
+    }
+  }, (_req, reply) => {
+    reply.send('ok')
+  })
+
+  await fastify.ready()
+
+  const res = await fastify.inject({
+    method: 'GET',
+    url: '/no-cors',
+    headers: {
+      origin: 'https://default-example.com'
+    }
+  })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.headers.vary, undefined)
+})
+
+test('Should normalize a route-level origin array the same way as global options', async t => {
+  t.plan(3)
+
+  const fastify = Fastify()
+  await fastify.register(cors, {
+    origin: ['https://default-example.com']
+  })
+
+  fastify.get('/wildcard-origin', {
+    config: {
+      cors: {
+        origin: ['*']
+      }
+    }
+  }, (_req, reply) => {
+    reply.send('ok')
+  })
+
+  await fastify.ready()
+
+  const res = await fastify.inject({
+    method: 'GET',
+    url: '/wildcard-origin',
+    headers: {
+      origin: 'https://any.example'
+    }
+  })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.headers['access-control-allow-origin'], '*')
+})
+
+test('Should resolve route-level config on a wildcard preflight route', async t => {
+  t.plan(3)
+
+  const fastify = Fastify()
+  await fastify.register(cors, {
+    origin: ['https://default-example.com']
+  })
+
+  fastify.get('/assets/*', {
+    config: {
+      cors: {
+        origin: 'https://assets-origin.com'
+      }
+    }
+  }, (_req, reply) => {
+    reply.send('ok')
+  })
+
+  await fastify.ready()
+
+  const res = await fastify.inject({
+    method: 'OPTIONS',
+    url: '/assets/css/site.css',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'https://assets-origin.com'
+    }
+  })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.headers['access-control-allow-origin'], 'https://assets-origin.com')
 })
