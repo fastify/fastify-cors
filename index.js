@@ -44,13 +44,21 @@ function validateHook (value, next) {
 function fastifyCors (fastify, opts, next) {
   fastify.decorateRequest('corsPreflightEnabled', false)
 
-  const routeCorsMap = new Map()
+  const routeCors = { exact: new Map(), patterns: [] }
 
   fastify.addHook('onRoute', function onRoute (routeOptions) {
     if (routeOptions.config?.cors !== undefined) {
       const methods = Array.isArray(routeOptions.method) ? routeOptions.method : [routeOptions.method]
       for (const method of methods) {
-        routeCorsMap.set(`${method}::${routeOptions.url}`, routeOptions.config.cors)
+        const normalizedMethod = method.toUpperCase()
+        routeCors.exact.set(`${normalizedMethod}::${routeOptions.url}`, routeOptions.config.cors)
+        if (isParameterizedRoute(routeOptions.url)) {
+          routeCors.patterns.push({
+            method: normalizedMethod,
+            pattern: compileRoutePattern(routeOptions.url),
+            cors: routeOptions.config.cors
+          })
+        }
       }
     }
   })
@@ -59,20 +67,20 @@ function fastifyCors (fastify, opts, next) {
   let logLevel
 
   if (typeof opts === 'function') {
-    handleCorsOptionsDelegator(opts, fastify, { hook: defaultOptions.hook }, routeCorsMap, next)
+    handleCorsOptionsDelegator(opts, fastify, { hook: defaultOptions.hook }, routeCors, next)
   } else if (opts.delegator) {
     const { delegator, ...options } = opts
-    if (!handleCorsOptionsDelegator(delegator, fastify, options, routeCorsMap, next)) return
+    if (!handleCorsOptionsDelegator(delegator, fastify, options, routeCors, next)) return
   } else {
     const corsOptions = normalizeCorsOptions(opts)
     if (!validateHook(corsOptions.hook, next)) return
     if (hookWithPayload.indexOf(corsOptions.hook) !== -1) {
       fastify.addHook(corsOptions.hook, function handleCors (req, reply, _payload, next) {
-        addCorsHeadersHandler(fastify, corsOptions, req, reply, routeCorsMap, next)
+        addCorsHeadersHandler(fastify, corsOptions, req, reply, routeCors, next)
       })
     } else {
       fastify.addHook(corsOptions.hook, function handleCors (req, reply, next) {
-        addCorsHeadersHandler(fastify, corsOptions, req, reply, routeCorsMap, next)
+        addCorsHeadersHandler(fastify, corsOptions, req, reply, routeCors, next)
       })
     }
   }
@@ -99,17 +107,17 @@ function fastifyCors (fastify, opts, next) {
   next()
 }
 
-function handleCorsOptionsDelegator (optionsResolver, fastify, opts, routeCorsMap, next) {
+function handleCorsOptionsDelegator (optionsResolver, fastify, opts, routeCors, next) {
   const hook = opts?.hook || defaultOptions.hook
   if (!validateHook(hook, next)) return false
   if (optionsResolver.length === 2) {
     if (hookWithPayload.indexOf(hook) !== -1) {
       fastify.addHook(hook, function handleCors (req, reply, _payload, next) {
-        handleCorsOptionsCallbackDelegator(optionsResolver, fastify, req, reply, routeCorsMap, next)
+        handleCorsOptionsCallbackDelegator(optionsResolver, fastify, req, reply, routeCors, next)
       })
     } else {
       fastify.addHook(hook, function handleCors (req, reply, next) {
-        handleCorsOptionsCallbackDelegator(optionsResolver, fastify, req, reply, routeCorsMap, next)
+        handleCorsOptionsCallbackDelegator(optionsResolver, fastify, req, reply, routeCors, next)
       })
     }
   } else {
@@ -118,7 +126,7 @@ function handleCorsOptionsDelegator (optionsResolver, fastify, opts, routeCorsMa
       fastify.addHook(hook, function handleCors (req, reply, _payload, next) {
         const ret = optionsResolver(req)
         if (ret && typeof ret.then === 'function') {
-          ret.then(options => addCorsHeadersHandler(fastify, normalizeCorsOptions(options, true), req, reply, routeCorsMap, next)).catch(next)
+          ret.then(options => addCorsHeadersHandler(fastify, normalizeCorsOptions(options, true), req, reply, routeCors, next)).catch(next)
           return
         }
         next(new Error('Invalid CORS origin option'))
@@ -128,7 +136,7 @@ function handleCorsOptionsDelegator (optionsResolver, fastify, opts, routeCorsMa
       fastify.addHook(hook, function handleCors (req, reply, next) {
         const ret = optionsResolver(req)
         if (ret && typeof ret.then === 'function') {
-          ret.then(options => addCorsHeadersHandler(fastify, normalizeCorsOptions(options, true), req, reply, routeCorsMap, next)).catch(next)
+          ret.then(options => addCorsHeadersHandler(fastify, normalizeCorsOptions(options, true), req, reply, routeCors, next)).catch(next)
           return
         }
         next(new Error('Invalid CORS origin option'))
@@ -138,12 +146,12 @@ function handleCorsOptionsDelegator (optionsResolver, fastify, opts, routeCorsMa
   return true
 }
 
-function handleCorsOptionsCallbackDelegator (optionsResolver, fastify, req, reply, routeCorsMap, next) {
+function handleCorsOptionsCallbackDelegator (optionsResolver, fastify, req, reply, routeCors, next) {
   optionsResolver(req, (err, options) => {
     if (err) {
       next(err)
     } else {
-      addCorsHeadersHandler(fastify, normalizeCorsOptions(options, true), req, reply, routeCorsMap, next)
+      addCorsHeadersHandler(fastify, normalizeCorsOptions(options, true), req, reply, routeCors, next)
     }
   })
 }
@@ -167,7 +175,39 @@ function normalizeCorsOptions (opts, dynamic) {
   return corsOptions
 }
 
-function getRouteCorsConfig (fastify, req, routeCorsMap) {
+/**
+ * Whether a route pattern carries at least one path parameter or wildcard, and
+ * so needs to be matched rather than looked up by its literal text.
+ */
+function isParameterizedRoute (url) {
+  return url.includes(':') || url.includes('*')
+}
+
+/**
+ * Turn a Fastify route pattern into a matcher for concrete request paths.
+ *
+ * `:param` matches one segment, `*` matches the rest of the path, and the
+ * trailing slash is insignificant. `fastify.findRoute` cannot be used for this
+ * because it exposes only the handler and the params, not the route config.
+ */
+function compileRoutePattern (url) {
+  const source = url
+    .replace(/\/+$/, '')
+    .split('/')
+    .map((segment) => {
+      if (segment === '*') {
+        return '.*'
+      }
+      if (segment.startsWith(':')) {
+        return '[^/]+'
+      }
+      return segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    })
+    .join('/')
+  return new RegExp(`^${source}/?$`)
+}
+
+function getRouteCorsConfig (fastify, req, routeCors) {
   if (req.routeOptions.config?.cors !== undefined) {
     return req.routeOptions.config.cors
   }
@@ -175,27 +215,35 @@ function getRouteCorsConfig (fastify, req, routeCorsMap) {
   if (req.raw.method === 'OPTIONS') {
     const reqMethod = req.headers['access-control-request-method']
     if (reqMethod) {
+      const method = reqMethod.toUpperCase()
       const url = req.raw.url.split('?')[0]
-      if (typeof fastify.findRoute === 'function') {
-        const found = fastify.findRoute({
-          method: reqMethod.toUpperCase(),
-          url,
-          cloneRouteConfig: true
-        })
-        if (found?.routeOptions?.config?.cors !== undefined) {
-          return found.routeOptions.config.cors
+      const exact = routeCors.exact.get(`${method}::${url}`)
+      if (exact !== undefined) {
+        return exact
+      }
+      for (const entry of routeCors.patterns) {
+        if (entry.method === method && entry.pattern.test(url)) {
+          return entry.cors
         }
       }
-      return routeCorsMap?.get(`${reqMethod.toUpperCase()}::${url}`)
     }
   }
 
   return undefined
 }
 
-function addCorsHeadersHandler (fastify, globalOptions, req, reply, routeCorsMap, next) {
-  const routeCorsConfig = getRouteCorsConfig(fastify, req, routeCorsMap)
-  const options = { ...globalOptions, ...routeCorsConfig }
+function addCorsHeadersHandler (fastify, globalOptions, req, reply, routeCors, next) {
+  const routeCorsConfig = getRouteCorsConfig(fastify, req, routeCors)
+
+  // A route that opts out has nothing to merge, and it must not inherit the
+  // global Vary handling either.
+  if (routeCorsConfig === false) {
+    return next()
+  }
+
+  const options = routeCorsConfig === undefined
+    ? { ...globalOptions }
+    : normalizeCorsOptions({ ...globalOptions, ...routeCorsConfig })
 
   if ((typeof options.origin !== 'string' && options.origin !== false) || options.dynamic) {
     // Always set Vary header for non-static origin option
@@ -212,11 +260,6 @@ function addCorsHeadersHandler (fastify, globalOptions, req, reply, routeCorsMap
 
     // Disable CORS and preflight if false
     if (resolvedOriginOption === false) {
-      return next()
-    }
-
-    // Allow routes to disable CORS individually
-    if (routeCorsConfig === false) {
       return next()
     }
 
