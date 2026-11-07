@@ -1148,3 +1148,28 @@ test('Should support route-level config', async t => {
   t.assert.strictEqual(resDisabled.statusCode, 200)
   t.assert.strictEqual(resDisabled.headers['access-control-allow-origin'], undefined)
 })
+
+test('Should skip origin function and Vary header when route disables CORS (#428)', async t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+  fastify.register(cors, {
+    origin: (_origin, cb) => {
+      cb(new Error('Not allowed'), false)
+    }
+  })
+
+  fastify.get('/cors-disabled', { config: { cors: false } }, (_req, reply) => {
+    reply.send('ok')
+  })
+
+  const res = await fastify.inject({
+    method: 'GET',
+    url: '/cors-disabled',
+    headers: { origin: 'example.com' }
+  })
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  t.assert.strictEqual(res.headers['access-control-allow-origin'], undefined)
+  t.assert.strictEqual(res.headers.vary, undefined)
+})
