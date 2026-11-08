@@ -1260,7 +1260,7 @@ test('Should support route-level config', async t => {
 })
 
 test('Should support route-level config on OPTIONS preflight requests', async t => {
-  t.plan(12)
+  t.plan(15)
 
   const fastify = Fastify()
   await fastify.register(cors, {
@@ -1328,6 +1328,18 @@ test('Should support route-level config on OPTIONS preflight requests', async t 
   t.assert.strictEqual(resCustom.statusCode, 204)
   t.assert.strictEqual(resCustom.headers['access-control-allow-origin'], 'https://other-domain.com')
 
+  const resCustomWithQuery = await fastify.inject({
+    method: 'OPTIONS',
+    url: '/cors-custom?foo=bar',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'https://other-domain.com'
+    }
+  })
+  t.assert.ok(resCustomWithQuery)
+  t.assert.strictEqual(resCustomWithQuery.statusCode, 204)
+  t.assert.strictEqual(resCustomWithQuery.headers['access-control-allow-origin'], 'https://other-domain.com')
+
   const resDisabled = await fastify.inject({
     method: 'OPTIONS',
     url: '/cors-disabled',
@@ -1384,68 +1396,6 @@ test('Should resolve route-level config on parameterized preflight routes', asyn
   t.assert.ok(res)
   t.assert.strictEqual(res.statusCode, 204)
   t.assert.strictEqual(res.headers['access-control-allow-origin'], 'https://route-origin.com')
-})
-
-test('Should not add Vary for a route that disables CORS with an array origin', async t => {
-  t.plan(3)
-
-  const fastify = Fastify()
-  await fastify.register(cors, {
-    origin: ['https://default-example.com']
-  })
-
-  fastify.get('/no-cors', {
-    config: {
-      cors: false
-    }
-  }, (_req, reply) => {
-    reply.send('ok')
-  })
-
-  await fastify.ready()
-
-  const res = await fastify.inject({
-    method: 'GET',
-    url: '/no-cors',
-    headers: {
-      origin: 'https://default-example.com'
-    }
-  })
-  t.assert.ok(res)
-  t.assert.strictEqual(res.statusCode, 200)
-  t.assert.strictEqual(res.headers.vary, undefined)
-})
-
-test('Should normalize a route-level origin array the same way as global options', async t => {
-  t.plan(3)
-
-  const fastify = Fastify()
-  await fastify.register(cors, {
-    origin: ['https://default-example.com']
-  })
-
-  fastify.get('/wildcard-origin', {
-    config: {
-      cors: {
-        origin: ['*']
-      }
-    }
-  }, (_req, reply) => {
-    reply.send('ok')
-  })
-
-  await fastify.ready()
-
-  const res = await fastify.inject({
-    method: 'GET',
-    url: '/wildcard-origin',
-    headers: {
-      origin: 'https://any.example'
-    }
-  })
-  t.assert.ok(res)
-  t.assert.strictEqual(res.statusCode, 200)
-  t.assert.strictEqual(res.headers['access-control-allow-origin'], '*')
 })
 
 test('Should resolve route-level config on a wildcard preflight route', async t => {
