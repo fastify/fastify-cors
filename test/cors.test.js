@@ -1430,3 +1430,137 @@ test('Should resolve route-level config on a wildcard preflight route', async t 
   t.assert.strictEqual(res.statusCode, 204)
   t.assert.strictEqual(res.headers['access-control-allow-origin'], 'https://assets-origin.com')
 })
+
+test('Should pick the pattern whose parameter names the router captured', async t => {
+  t.plan(3)
+
+  const fastify = Fastify()
+  await fastify.register(cors, {
+    origin: 'https://default-example.com'
+  })
+
+  fastify.get('/files/:name/*', {
+    config: {
+      cors: {
+        origin: 'https://wildcard-tail-origin.com'
+      }
+    }
+  }, (_req, reply) => {
+    reply.send('wildcard-tail')
+  })
+
+  fastify.get('/files/:name/:ext', {
+    config: {
+      cors: {
+        origin: 'https://two-params-origin.com'
+      }
+    }
+  }, (_req, reply) => {
+    reply.send('two')
+  })
+
+  await fastify.ready()
+
+  const direct = await fastify.inject({
+    method: 'GET',
+    url: '/files/report/pdf',
+    headers: {
+      origin: 'https://two-params-origin.com'
+    }
+  })
+  t.assert.strictEqual(direct.body, 'two')
+
+  const res = await fastify.inject({
+    method: 'OPTIONS',
+    url: '/files/report/pdf',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'https://two-params-origin.com'
+    }
+  })
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.headers['access-control-allow-origin'], 'https://two-params-origin.com')
+})
+
+test('Should keep the Vary header for a dynamic origin when a route adds its own options', async t => {
+  t.plan(3)
+
+  const fastify = Fastify()
+  await fastify.register(cors, {
+    delegator: async (req) => req.headers.origin
+  })
+
+  fastify.get('/dynamic', {
+    config: {
+      cors: {
+        credentials: true
+      }
+    }
+  }, (_req, reply) => {
+    reply.send('ok')
+  })
+
+  await fastify.ready()
+
+  const res = await fastify.inject({
+    method: 'GET',
+    url: '/dynamic',
+    headers: {
+      origin: 'https://dynamic-origin.com'
+    }
+  })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.headers.vary, 'Origin')
+})
+
+test('Should match the route the router picks when a wildcard and a parameter route overlap', async t => {
+  t.plan(3)
+
+  const fastify = Fastify()
+  await fastify.register(cors, {
+    origin: 'https://default-example.com'
+  })
+
+  fastify.get('/assets/*', {
+    config: {
+      cors: {
+        origin: 'https://wildcard-origin.com'
+      }
+    }
+  }, (_req, reply) => {
+    reply.send('wildcard')
+  })
+
+  fastify.get('/assets/:id', {
+    config: {
+      cors: {
+        origin: 'https://parameter-origin.com'
+      }
+    }
+  }, (_req, reply) => {
+    reply.send('parameter')
+  })
+
+  await fastify.ready()
+
+  const direct = await fastify.inject({
+    method: 'GET',
+    url: '/assets/123',
+    headers: {
+      origin: 'https://parameter-origin.com'
+    }
+  })
+  t.assert.strictEqual(direct.body, 'parameter')
+
+  const res = await fastify.inject({
+    method: 'OPTIONS',
+    url: '/assets/123',
+    headers: {
+      'access-control-request-method': 'GET',
+      origin: 'https://parameter-origin.com'
+    }
+  })
+  t.assert.strictEqual(res.statusCode, 204)
+  t.assert.strictEqual(res.headers['access-control-allow-origin'], 'https://parameter-origin.com')
+})

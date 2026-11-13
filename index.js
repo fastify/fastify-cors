@@ -56,6 +56,7 @@ function fastifyCors (fastify, opts, next) {
           routeCors.patterns.push({
             method: normalizedMethod,
             pattern: compileRoutePattern(routeOptions.url),
+            paramNames: routeParamNames(routeOptions.url),
             cors: routeOptions.config.cors
           })
         }
@@ -184,11 +185,26 @@ function isParameterizedRoute (url) {
 }
 
 /**
+ * Collect the parameter names a route pattern declares, sorted and joined so
+ * two patterns capturing the same names compare equal.
+ */
+function routeParamNames (url) {
+  const names = []
+  for (const segment of url.split('/')) {
+    if (segment === '*') {
+      names.push('*')
+    } else if (segment.startsWith(':')) {
+      names.push(segment.slice(1))
+    }
+  }
+  return names.sort().join(',')
+}
+
+/**
  * Turn a Fastify route pattern into a matcher for concrete request paths.
  *
  * `:param` matches one segment, `*` matches the rest of the path, and the
- * trailing slash is insignificant. `fastify.findRoute` cannot be used for this
- * because it exposes only the handler and the params, not the route config.
+ * trailing slash is insignificant.
  */
 function compileRoutePattern (url) {
   const source = url
@@ -221,8 +237,15 @@ function getRouteCorsConfig (fastify, req, routeCors) {
       if (exact !== undefined) {
         return exact
       }
+
+      const routerParams = findRouteParams(fastify, method, url)
       for (const entry of routeCors.patterns) {
-        if (entry.method === method && entry.pattern.test(url)) {
+        if (entry.method !== method || !entry.pattern.test(url)) continue
+        // Two patterns can both match the path. Only the one whose parameter
+        // names the router actually captured describes the route that will
+        // serve the real request, so a wildcard cannot shadow a parameter
+        // route that was registered later.
+        if (routerParams === undefined || entry.paramNames === routerParams) {
           return entry.cors
         }
       }
@@ -230,6 +253,20 @@ function getRouteCorsConfig (fastify, req, routeCors) {
   }
 
   return undefined
+}
+
+/**
+ * Ask the router which route it resolves the path to and return the parameter
+ * names it captured. `findRoute` exposes only the handler, the params and the
+ * search params, so the parameter names are what identifies the route.
+ *
+ * @returns {string|undefined} the parameter names joined into a key, or
+ * `undefined` when the router resolves the path to no route
+ */
+function findRouteParams (fastify, method, url) {
+  const found = fastify.findRoute({ method, url })
+  if (!found) return undefined
+  return Object.keys(found.params).sort().join(',')
 }
 
 function addCorsHeadersHandler (fastify, globalOptions, req, reply, routeCors, next) {
@@ -243,7 +280,7 @@ function addCorsHeadersHandler (fastify, globalOptions, req, reply, routeCors, n
 
   const options = routeCorsConfig === undefined
     ? { ...globalOptions }
-    : normalizeCorsOptions({ ...globalOptions, ...routeCorsConfig })
+    : normalizeCorsOptions({ ...globalOptions, ...routeCorsConfig }, globalOptions.dynamic)
 
   if ((typeof options.origin !== 'string' && options.origin !== false) || options.dynamic) {
     // Always set Vary header for non-static origin option
