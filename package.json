@@ -1,6 +1,6 @@
 {
   "name": "@fastify/cors",
-  "version": "11.4.2",
+  "version": "11.4.3",
   "description": "Fastify CORS",
   "main": "index.js",
   "type": "commonjs",
