@@ -1187,6 +1187,35 @@ test('Should not run origin function or add vary header when route disables CORS
   t.assert.strictEqual(resEnabled.statusCode, 500)
 })
 
+test('Should not resolve the origin option on preflight requests to routes with CORS disabled', async t => {
+  t.plan(5)
+
+  const fastify = Fastify()
+  fastify.register(cors, {
+    origin: (_origin, cb) => {
+      cb(new Error('Not allowed'), false)
+    }
+  })
+
+  fastify.options('/cors-disabled', { config: { cors: false } }, (_req, reply) => {
+    reply.send('ok')
+  })
+
+  const res = await fastify.inject({
+    method: 'OPTIONS',
+    url: '/cors-disabled',
+    headers: {
+      origin: 'example.com',
+      'access-control-request-method': 'GET'
+    }
+  })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 200)
+  t.assert.strictEqual(res.payload, 'ok')
+  t.assert.strictEqual(res.headers['access-control-allow-origin'], undefined)
+  t.assert.strictEqual(res.headers.vary, undefined)
+})
+
 test('Should support route-level config', async t => {
   t.plan(9)
 
