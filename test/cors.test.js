@@ -1292,3 +1292,30 @@ test('Should omit Access-Control-Max-Age for route-level config with explicitly 
   t.assert.strictEqual(res.headers['access-control-allow-origin'], '*')
   t.assert.strictEqual(res.headers['access-control-max-age'], undefined)
 })
+
+test('Should respond 200 for route-level config with cors set to null', async t => {
+  t.plan(2)
+
+  const fastify = Fastify()
+  fastify.register(cors, {
+    origin: '*'
+  })
+
+  fastify.get('/cors-null', {
+    config: {
+      cors: null
+    }
+  }, (_req, reply) => {
+    reply.send('ok')
+  })
+
+  await fastify.ready()
+
+  const res = await fastify.inject({
+    method: 'GET',
+    url: '/cors-null',
+    headers: { origin: 'example.com' }
+  })
+  t.assert.ok(res)
+  t.assert.strictEqual(res.statusCode, 200)
+})

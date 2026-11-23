@@ -41,7 +41,7 @@ const hookWithPayload = [
  * @param {Record<string, any> | undefined} source
  */
 function assignDefined (target, source) {
-  if (source === undefined) {
+  if (source == null) {
     return target
   }
   for (const key of Object.keys(source)) {
