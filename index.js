@@ -33,6 +33,26 @@ const hookWithPayload = [
   'preParsing'
 ]
 
+/**
+ * Copies the own enumerable properties of `source` onto `target`, skipping any
+ * whose value is explicitly `undefined`, so an option that is not provided
+ * falls back to its default instead of overriding it.
+ * @param {Record<string, any>} target
+ * @param {Record<string, any> | undefined} source
+ */
+function assignDefined (target, source) {
+  if (source == null) {
+    return target
+  }
+  for (const key of Object.keys(source)) {
+    // an explicit undefined origin is kept so a misconfigured origin still fails loudly instead of becoming '*'
+    if (source[key] !== undefined || key === 'origin') {
+      target[key] = source[key]
+    }
+  }
+  return target
+}
+
 function validateHook (value, next) {
   if (validHooks.indexOf(value) !== -1) {
     return true
@@ -141,7 +161,7 @@ function handleCorsOptionsCallbackDelegator (optionsResolver, fastify, req, repl
  * @param {import('./types').FastifyCorsOptions} opts
  */
 function normalizeCorsOptions (opts, dynamic) {
-  const corsOptions = { ...defaultOptions, ...opts }
+  const corsOptions = assignDefined({ ...defaultOptions }, opts)
   if (Array.isArray(opts.origin) && opts.origin.indexOf('*') !== -1) {
     corsOptions.origin = '*'
   }
@@ -162,7 +182,7 @@ function addCorsHeadersHandler (fastify, globalOptions, req, reply, next) {
     return next()
   }
 
-  const options = { ...globalOptions, ...req.routeOptions.config?.cors }
+  const options = assignDefined({ ...globalOptions }, req.routeOptions.config?.cors)
 
   if ((typeof options.origin !== 'string' && options.origin !== false) || options.dynamic) {
     // Always set Vary header for non-static origin option
