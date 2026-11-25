@@ -1319,3 +1319,41 @@ test('Should respond 200 for route-level config with cors set to null', async t 
   t.assert.ok(res)
   t.assert.strictEqual(res.statusCode, 200)
 })
+
+test('Should keep failing when origin is explicitly undefined in the plugin options', async t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+  await fastify.register(cors, { origin: undefined })
+  fastify.get('/', (_req, reply) => reply.send('ok'))
+
+  const res = await fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: { origin: 'example.com' }
+  })
+  t.assert.strictEqual(res.statusCode, 500)
+  t.assert.strictEqual(res.json().message, 'Invalid CORS origin option')
+  t.assert.notStrictEqual(res.headers['access-control-allow-origin'], '*')
+  t.assert.strictEqual(res.headers['access-control-allow-origin'], undefined)
+})
+
+test('Should keep failing when origin is explicitly undefined in the route-level config', async t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+  await fastify.register(cors, { origin: '*' })
+  fastify.get('/', {
+    config: { cors: { origin: undefined } }
+  }, (_req, reply) => reply.send('ok'))
+
+  const res = await fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: { origin: 'example.com' }
+  })
+  t.assert.strictEqual(res.statusCode, 500)
+  t.assert.strictEqual(res.json().message, 'Invalid CORS origin option')
+  t.assert.notStrictEqual(res.headers['access-control-allow-origin'], '*')
+  t.assert.strictEqual(res.headers['access-control-allow-origin'], undefined)
+})

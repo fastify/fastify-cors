@@ -45,7 +45,8 @@ function assignDefined (target, source) {
     return target
   }
   for (const key of Object.keys(source)) {
-    if (source[key] !== undefined) {
+    // an explicit undefined origin is kept so a misconfigured origin still fails loudly instead of becoming '*'
+    if (source[key] !== undefined || key === 'origin') {
       target[key] = source[key]
     }
   }
